@@ -16,7 +16,7 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Input pins show their state with a label
 - [ ] Gates change the state of wires.
 - [ ] Output pins displays the states of wires
-### Drawing diagrams thorugh drag and drop
+### Drawing diagrams through drag and drop
 - [ ] Clicking side menu adds component to the canvas
 - [ ] dragging the component follows the grid lines.
 - [ ] Wires will draw intersections if one is drawn over the other.
