@@ -6,6 +6,7 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Drawing grid lines on the main canvas.
 - [ ] Making the grid resizable. 
 ### Drawing diagrams from expressions 
+- [x] Added labels to the inputs
 - [ ] Adjust formulae so that the components are placed onto the grid.
 - [ ] Adjust formulae for odd shaped graphs
 - [ ] Repeated inputs within expressions are not drawn
