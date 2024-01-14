@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Security.RightsManagement;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,8 +27,6 @@ namespace _2BNOR_2B
         int pixelsPerSquare = 15;
         double canvasWidth, canvasHeight;
 
-
-
         public diagram()
         {
 
@@ -44,14 +43,20 @@ namespace _2BNOR_2B
             int elementID = 0;
             int elementType;
             string elementName = "";
+            string inputsAdded = "";
             //add an output pin to the tree as this the root node of the tree.
             foreach (char c in postfixExpression)
             {
                 if (char.IsLetter(c) && char.IsUpper(c))
                 {
                     //create an input pin
-                    //fix the label generation 
-                    nodeToAdd = new element(elementID, c.ToString());
+                    nodeToAdd = new element(elementID, c);
+                    //marking the node if it is a unique one. 
+                    if (inputsAdded.Contains(c) == false)
+                    {
+                        nodeToAdd.setUniqueness(true);
+                        inputsAdded += c;
+                    }
                     nodeStack.Push(nodeToAdd);
                 }
                 else if (c == '!')
@@ -60,6 +65,7 @@ namespace _2BNOR_2B
                     //create a logic gate
                     elementType = Array.IndexOf(booleanOperators, c);
                     nodeToAdd = new element("not_gate", elementID, elementType, null, rightChild);
+                    nodeToAdd.setUniqueness(true);
                     rightChild.parent = nodeToAdd;
                     nodeStack.Push(nodeToAdd);
                 }
@@ -71,6 +77,7 @@ namespace _2BNOR_2B
                     elementType = Array.IndexOf(booleanOperators, c);
                     elementName = names[elementType];
                     nodeToAdd = new element(elementName, elementID, elementType, leftChild, rightChild);
+                    nodeToAdd.setUniqueness(true);
                     leftChild.parent = nodeToAdd;
                     rightChild.parent = nodeToAdd;
                     nodeStack.Push(nodeToAdd);
@@ -145,7 +152,7 @@ namespace _2BNOR_2B
             }
             return translateNode(x, heightOfTree); 
         }
-
+        
         private void drawWire(Canvas c, logicGate logicGate, logicGate child, bool isLeftChild)
         {
             wire w = new wire();
@@ -187,52 +194,20 @@ namespace _2BNOR_2B
         //on the canvas. 
         /*
           Current cases that do not work: 
-          
-            Expressions with repeated inputs (A.B)^A
             Expressions with NOT gate (not offset properly, need to also offset all children)
-
-            --nodes
-            if the node is an input: 
-                find label
-                if label has been drawn 
-                    do not draw the gate
-                else 
-                    draw the gate 
-
-            --wires
-            
-
         */
-        
-
         private void drawNode(Canvas c, element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
-            string inputsDrawn = "";
-            double x;
-            double y; 
-            if (currentNode.getElementType() == 6)
+            logicGate logicGate;
+            double x, y; 
+            if (currentNode.getUniqueness())
             {
-                if (!inputsDrawn.Contains(currentNode.getLabel()))
-                {
-                    logicGate gate = new logicGate(currentNode); 
-                    currentNode.setLogicGate(gate);
-                    x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
-                    y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
-                    Canvas.SetTop(gate, y); 
-                    Canvas.SetLeft(gate, x);
-                    c.Children.Add(gate); 
-                    inputsDrawn += currentNode.getLabel();
-                }   
-            }
-            else
-            {
-                logicGate gate = new logicGate(currentNode);
-                currentNode.setLogicGate(gate);
                 x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
                 y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
-                Canvas.SetTop(gate, y);
-                Canvas.SetLeft(gate, x);
-                c.Children.Add(gate);
+                logicGate = new logicGate(currentNode); 
+                Canvas.SetLeft(logicGate, x);
+                Canvas.SetTop(logicGate, y);
+                c.Children.Add(logicGate);
             }
         }
 
@@ -246,7 +221,6 @@ namespace _2BNOR_2B
             double x;
             double y;
             element currentNode;
-            logicGate logicGate; 
             while (q.Count != 0)
             {
                 sizeOfQ = q.Count;
@@ -254,19 +228,8 @@ namespace _2BNOR_2B
                 {
                     currentNode = q.Peek();
                     drawNode(c, currentNode, heightOfTree, depthWithinTree, positionWithinLayer);
-                    q.Dequeue(); 
+                    q.Dequeue();
                     positionWithinLayer++;
-                    ////The coords of the node that the traversal is currently on. 
-                    //y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
-                    //x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
-
-                    //logicGate = new logicGate(currentNode);
-                    //currentNode.setLogicGate(logicGate);    
-                    //Canvas.SetTop(logicGate, y);
-                    //Canvas.SetLeft(logicGate, x);
-                    //c.Children.Add(logicGate);
-                    //q.Dequeue();
-                    //positionWithinLayer++;
                     if (currentNode.leftChild != null)
                     {
                         q.Enqueue(currentNode.leftChild);
@@ -292,7 +255,7 @@ namespace _2BNOR_2B
             inOrder(rootNode);
             MessageBox.Show(infixExpression); 
             drawNodes(c, rootNode, heightOfTree);
-            drawWires(c, rootNode); 
+            //drawWires(c, rootNode); 
         }
 
         private void inOrder(element root)
@@ -658,61 +621,50 @@ namespace _2BNOR_2B
         private void drawTableWithSteps(Canvas c, string[] headers, int[,] outputMap)
         {
             Label cell;
-            Thickness border = new Thickness(2); 
+            Thickness border = new Thickness(2);
+            FontFamily font = new FontFamily("Consolas"); 
             double x = 20;
             double y = 20;
-            double cellWidth=0;
-            int index = 0; 
-            foreach (string h in headers)
+            double cellWidth = 30;
+            for (int i = 0; i < headers.Length; i++)
             {
-                cell = new Label();
-                cellWidth = 28;
-                if (h.Length > 1)
+                //Checking for inputs of the table
+                if (headers[i].Length != 1)
                 {
-                    //cellWidth = headers[headers.Length - 1].Length * 10;
-                    cellWidth = (headers[index].Length * 10) + 5;
+                    cellWidth = (headers[i].Length * 10) + 5;
                 }
-                cell.Width = cellWidth; 
+                cell = new Label();
+                cell.HorizontalContentAlignment = HorizontalAlignment.Center;
+                cell.Width = cellWidth;
                 cell.BorderBrush = Brushes.LightGray;
-                cell.BorderThickness = border;
+                cell.BorderThickness = border; 
                 cell.Background = Brushes.White;
-                cell.FontFamily = new FontFamily("Consolas");
+                cell.FontFamily = font;
                 cell.FontSize = 14;
-                cell.Content = h;
+                cell.Content = headers[i];
                 Canvas.SetTop(cell, y);
                 Canvas.SetLeft(cell, x);
                 c.Children.Add(cell);
-                x += cell.Width;
-                index++;
-            }
-            x = 20;
-            y = 50; 
-            for (int i = 0; i < headers.Length; i++)
-            {
+                y += 30;
                 for (int j = 0; j < outputMap.GetLength(0); j++)
                 {
                     cell = new Label();
-                    cellWidth = 28;
-                    if (headers[i].Length != 1)
-                    {
-                        cellWidth = (headers[i].Length * 10) + 5;
-                    }
-                    cell.Width = cellWidth; 
+                    cell.HorizontalContentAlignment = HorizontalAlignment.Center;
+                    cell.Width = cellWidth;
                     cell.BorderBrush = Brushes.LightGray;
-                    cell.BorderThickness = border;
+                    cell.BorderThickness = border; 
                     cell.Background = Brushes.White;
-                    cell.FontFamily = new FontFamily("Consolas");
+                    cell.FontFamily = font;
                     cell.FontSize = 14;
-                    cell.Content = outputMap[j, i]; 
+                    cell.Content = outputMap[j, i];
                     Canvas.SetTop(cell, y);
                     Canvas.SetLeft(cell, x);
-                    c.Children.Add(cell); 
-                    y+= 30;
+                    c.Children.Add(cell);
+                    y += 30;
                 }
-                x += cellWidth;
-                y = 50; 
+                x += cell.Width;
+                y = 20;
             }
-
         }
 
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)

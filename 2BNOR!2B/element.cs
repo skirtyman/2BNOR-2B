@@ -16,8 +16,9 @@ namespace _2BNOR_2B
         public element parent; 
         private logicGate logicGate;
         private int state;
-        private string label;
-        private string elementName; 
+        private char label;
+        private string elementName;
+        private bool unique = false; 
 
         public element()
         {
@@ -31,12 +32,12 @@ namespace _2BNOR_2B
             this.elementID = elementID;
             elementType = 7;
             state = 0;
-            label = "Q";
+            label = 'Q';
             elementName = "output_pin";
         }
 
         //constructor for creating input pins 
-        public element(int elementID, string label)
+        public element(int elementID, char label)
         {
             //6 = inputpin
             this.elementID = elementID;
@@ -57,7 +58,7 @@ namespace _2BNOR_2B
             this.rightChild = rightChild;
             this.elementType = elementType;
             this.elementName = elementName;
-            label = " "; 
+            label = ' '; 
         }
 
         public int getElementID()
@@ -70,7 +71,7 @@ namespace _2BNOR_2B
             return elementType;
         }
 
-        public string getLabel()
+        public char getLabel()
         {
             return label; 
         }
@@ -89,5 +90,16 @@ namespace _2BNOR_2B
         {
             return logicGate; 
         }
+
+        public bool getUniqueness()
+        {
+            return unique; 
+        }
+
+        public void setUniqueness(bool unique)
+        {
+            this.unique = unique;
+        }
+
     }
 }

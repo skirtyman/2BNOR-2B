@@ -6,7 +6,11 @@
              xmlns:local="clr-namespace:_2BNOR_2B"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="450">
-    <Grid>
-        <Image Width="450" Height="450" x:Name="elementImage"/>
-    </Grid>
+
+    <StackPanel Orientation="Horizontal" Name="elementPanel">
+        <Grid x:Name="annoyingName">
+            <Image Width="450" Height="450" x:Name="elementImage"/>
+        </Grid>
+    </StackPanel>
+    
 </UserControl>

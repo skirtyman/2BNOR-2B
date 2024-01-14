@@ -28,6 +28,10 @@ namespace _2BNOR_2B
             InitializeComponent();
             this.gate = gate;
             setImage();
+            if (gate.leftChild == null &&  gate.rightChild == null)
+            {
+                setLabel(); 
+            }
         }
 
         public Point getInputPoint1()
@@ -49,7 +53,7 @@ namespace _2BNOR_2B
 
         public Point getOutputPoint()
         {
-            return new Point(Canvas.GetLeft(this) + elementImage.Width, Canvas.GetTop(this) + elementImage.Height / 2); 
+            return new Point(Canvas.GetLeft(this) + elementImage.Width, Canvas.GetTop(this) + elementImage.Height / 2);
         }
 
         public element getGate()
@@ -73,6 +77,23 @@ namespace _2BNOR_2B
             elementImage.Height = bitmap.Height / 5;
             elementImage.Width = bitmap.Width / 5;
             elementImage.Source = bitmap; 
+        }
+
+        private void setLabel()
+        {
+            Label l = new Label();
+            l.BorderThickness = new Thickness(2);
+            l.BorderBrush = Brushes.LightGray; 
+            l.Width = elementImage.Width - (elementImage.Width - 30);
+
+            //Do not need to adjust height as this doesn't matter. 
+            l.Height = elementImage.Height;
+            l.HorizontalAlignment = HorizontalAlignment.Center;
+            l.VerticalAlignment = VerticalAlignment.Center;
+            l.FontFamily = new FontFamily("Consolas");
+            l.FontSize = 24;
+            l.Content = gate.getLabel(); 
+            elementPanel.Children.Insert(0, l); 
         }
     }
 }
