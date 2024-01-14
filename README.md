@@ -9,7 +9,7 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [x] Added labels to the inputs
 - [ ] Adjust formulae so that the components are placed onto the grid.
 - [ ] Adjust formulae for odd shaped graphs
-- [ ] Repeated inputs within expressions are not drawn
+- [x] Repeated inputs within expressions are not drawn
 - [ ] Wires are stored within the node objects (useful for repositioning nodes)
 - [ ] Add outputs to the drawn diagrams.
 ### making compnents interactive
