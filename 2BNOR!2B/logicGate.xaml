@@ -8,7 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="450">
 
     <StackPanel Orientation="Horizontal" Name="elementPanel">
-        <Grid x:Name="annoyingName">
+        <Grid x:Name="componentGrid">
             <Image Width="450" Height="450" x:Name="elementImage"/>
         </Grid>
     </StackPanel>

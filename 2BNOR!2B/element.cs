@@ -9,8 +9,6 @@ namespace _2BNOR_2B
     public class element
     {
         private int elementID;
-        //0 - 5 = AND to NOR, 6 = input pin, 7 = output pin
-        private int elementType;
         public element leftChild;
         public element rightChild;
         public element parent; 
@@ -30,7 +28,6 @@ namespace _2BNOR_2B
         {
             //7 = outputpin
             this.elementID = elementID;
-            elementType = 7;
             state = 0;
             label = 'Q';
             elementName = "output_pin";
@@ -42,7 +39,6 @@ namespace _2BNOR_2B
             //6 = inputpin
             this.elementID = elementID;
             this.label = label;
-            elementType = 6;
             leftChild = null;
             rightChild = null;
             state = 0;
@@ -51,12 +47,11 @@ namespace _2BNOR_2B
         }
 
         //constructor for logic gates
-        public element(string elementName, int elementID, int elementType, element leftChild, element rightChild)
+        public element(string elementName, int elementID, element leftChild, element rightChild)
         {
             this.elementID = elementID;
             this.leftChild = leftChild;
             this.rightChild = rightChild;
-            this.elementType = elementType;
             this.elementName = elementName;
             label = ' '; 
         }
@@ -64,11 +59,6 @@ namespace _2BNOR_2B
         public int getElementID()
         {
             return elementID;
-        }
-
-        public int getElementType()
-        {
-            return elementType;
         }
 
         public char getLabel()

@@ -22,6 +22,7 @@ namespace _2BNOR_2B
     public partial class logicGate : UserControl
     {
         private element gate;
+        private double labelWidth; 
 
         public logicGate(element gate)
         {
@@ -41,7 +42,7 @@ namespace _2BNOR_2B
 
         public Point getInputPoint2()
         {
-            if (gate.getElementType() == 3)
+            if (gate.leftChild == null)
             {
                 return new Point(Canvas.GetLeft(this), Canvas.GetTop(this));
             }
@@ -53,7 +54,7 @@ namespace _2BNOR_2B
 
         public Point getOutputPoint()
         {
-            return new Point(Canvas.GetLeft(this) + elementImage.Width, Canvas.GetTop(this) + elementImage.Height / 2);
+            return new Point(Canvas.GetLeft(this) + elementImage.Width + labelWidth - 5, Canvas.GetTop(this) + elementImage.Height / 2);
         }
 
         public element getGate()
@@ -85,7 +86,7 @@ namespace _2BNOR_2B
             l.BorderThickness = new Thickness(2);
             l.BorderBrush = Brushes.LightGray; 
             l.Width = elementImage.Width - (elementImage.Width - 30);
-
+            labelWidth = l.Width;
             //Do not need to adjust height as this doesn't matter. 
             l.Height = elementImage.Height;
             l.HorizontalAlignment = HorizontalAlignment.Center;

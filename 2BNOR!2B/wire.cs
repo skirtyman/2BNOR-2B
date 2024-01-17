@@ -59,7 +59,7 @@ namespace _2BNOR_2B
             for (int i = 0; i < points.Count - 1; i++)
             {
                 l = new Line();
-                l.StrokeThickness = 1;
+                l.StrokeThickness = 2;
                 l.Stroke = color;
                 l.X1 = points[i].X;
                 l.Y1 = points[i].Y;

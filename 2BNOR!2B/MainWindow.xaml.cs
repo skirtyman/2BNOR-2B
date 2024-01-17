@@ -75,17 +75,6 @@ namespace _2BNOR_2B
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
         {
-            displayWindow displayWindow = new displayWindow();
-            StepsForTablesDialog stepsDialog = new StepsForTablesDialog(); 
-            bool isSteps = false;
-
-            if (stepsDialog.ShowDialog() == true)
-            {
-                isSteps = stepsDialog.result; 
-            }
-            displayWindow.Show();
-            Canvas c = displayWindow.getCanvas();
-            d.drawTableFromExpression(c, isSteps);
         }
 
         private void componentSidePanel_AddBuiltinCircuit(object sender, RoutedEventArgs e)
