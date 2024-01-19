@@ -52,6 +52,12 @@ namespace _2BNOR_2B
             }
         }
 
+        //Returns the point that is drawn too, for connecting the input and root node together. 
+        public Point getInputForOutput()
+        {
+            return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + elementImage.Height / 2 - 1);
+        }
+
         public Point getOutputPoint()
         {
             return new Point(Canvas.GetLeft(this) + elementImage.Width + labelWidth - 5, Canvas.GetTop(this) + elementImage.Height / 2);
@@ -93,8 +99,16 @@ namespace _2BNOR_2B
             l.VerticalAlignment = VerticalAlignment.Center;
             l.FontFamily = new FontFamily("Consolas");
             l.FontSize = 24;
-            l.Content = gate.getLabel(); 
-            elementPanel.Children.Insert(0, l); 
+            l.Content = gate.getLabel();
+            //If gate is an output then the label must be prepended to the stack panel for correct formatting. 
+            if (gate.getElementName() == "output_pin")
+            {
+                elementPanel.Children.Add(l);
+            }
+            else
+            {
+                elementPanel.Children.Insert(0, l);
+            }
         }
     }
 }

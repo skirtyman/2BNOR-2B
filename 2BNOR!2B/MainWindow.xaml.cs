@@ -70,6 +70,7 @@ namespace _2BNOR_2B
             {
                 expression = expressionInputDialog.result;
             }
+            statusBox_mainWindow.Text = "Status: Set expression to " + expression;
             d.drawDiagram(MainWindowCanvas, expression);
         }
 

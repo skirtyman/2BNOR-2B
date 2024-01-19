@@ -21,6 +21,7 @@ namespace _2BNOR_2B
         private string infixExpression = ""; 
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
+        private element outputNode; 
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
         private element[] elements; 
         private wire[] wires;
@@ -262,14 +263,14 @@ namespace _2BNOR_2B
 
         private double translateNode(double startX, int heightOfTree)
         {
-            double maxX = calculateXposition(heightOfTree); 
+            double maxX = calculateXposition(heightOfTree);
             //initial offset of 50 pixels for a better placed diagram. 
-            return startX-maxX+50; 
+            return startX - maxX + 50;
         }
 
         private double calculateNodeXposition(element node, int heightOfTree, int depthWithinTree)
         {
-            double x; 
+            double x;
             if ((node.leftChild == null) && (node.rightChild == null))
             {
                 x = calculateXposition(heightOfTree);
@@ -278,9 +279,8 @@ namespace _2BNOR_2B
             {
                 x = calculateXposition(depthWithinTree);
             }
-            return translateNode(x, heightOfTree); 
+            return translateNode(x, heightOfTree);
         }
-
 
         private void drawWiresForLeftChildren(Canvas c, element root)
         {
@@ -405,6 +405,32 @@ namespace _2BNOR_2B
             }
         }
 
+        //Small function for drawing the wire that connects the input to the root node of the binary tree. 
+        private void drawOutputWire(Canvas c)
+        {
+            wire w = new wire();
+            w.setStart(outputNode.getLogicGate().getInputForOutput());
+            w.setEnd(rootNode.getLogicGate().getOutputPoint());
+            w.draw(c, Brushes.Black);
+        }
+
+        //Method that draws the output pin for the diagram. 
+        private void drawOutput(Canvas c, int heightOfTree)
+        {
+            //Creating an element to represent the output. Unique elementID of -1. 
+            //Limitation of program can only draw single input gates. 
+            outputNode = new element(-1);
+            logicGate logicGate = new logicGate(outputNode);
+            outputNode.setLogicGate(logicGate);
+            //The position of the output node is the same y-position as the root node and a small shift from the root node. 
+            double x = translateNode(calculateXposition(0), heightOfTree) + (pixelsPerSquare * 10);
+            double y = calculateNodeYposition(heightOfTree, 0, 0);
+            Canvas.SetTop(logicGate, y);
+            Canvas.SetLeft(logicGate, x);
+            c.Children.Add(logicGate);
+            drawOutputWire(c);
+        }
+
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
         public void drawDiagram(Canvas c, string inputExpression)
         {
@@ -413,7 +439,8 @@ namespace _2BNOR_2B
             generateBinaryTreeFromExpression(inputExpression);
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(c, rootNode, heightOfTree);
-            drawWires(c, rootNode, inputExpression); 
+            drawWires(c, rootNode, inputExpression);
+            drawOutput(c, heightOfTree); 
         }
 
         #endregion 
