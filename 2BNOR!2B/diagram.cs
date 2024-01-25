@@ -448,7 +448,7 @@ namespace _2BNOR_2B
         #region Truth table generation
 
         //Gives the result of the fully evaluated expression. 
-        private int evaluateBooleanExpression(int[] binaryCombination, string inputExpression)
+        private int evaluateBooleanExpression(string binaryCombination, string inputExpression)
         {
             //Removing compound gates so that the expression can be evaluated properly.
             string flattenedExpression = removeCompoundGates(inputExpression);
@@ -510,7 +510,7 @@ namespace _2BNOR_2B
             return result;
         }
 
-        private string subsituteIntoExpression(int[] binaryCombination, string inputExpression)
+        private string subsituteIntoExpression(string binaryCombination, string inputExpression)
         {
             string binaryDigit;
             foreach (char c in inputExpression)
@@ -531,28 +531,6 @@ namespace _2BNOR_2B
         private string ConvertIntintoBinaryString(int n, string booleanExpression)
         {
             return Convert.ToString(n, 2).PadLeft(getNumberOfInputs(booleanExpression), '0');
-        }
-
-        //function that takes a 2d array and returns the first dimension of a defined row.
-        private int[] getRowOfTable(int[,] map, int row)
-        {
-            int[] rowArray = new int[map.GetLength(0)];
-            for (int i = 0; i < map.GetLength(1); i++)
-            {
-                rowArray[i] = map[row, i];
-            }
-            return rowArray;
-        }
-
-        //function that takes a 2d array and returns the first dimension of a defined column. 
-        private int[] getColumnOfTable(int[,] outputMap, int column)
-        {
-            int[] columnArray = new int[outputMap.GetLength(1)];
-            for (int j = 0; j < outputMap.GetLength(0); j++)
-            {
-                columnArray[j] = outputMap[j, column];
-            }
-            return columnArray;
         }
 
         //counts the number of unique inputs within a boolean expression
@@ -587,53 +565,49 @@ namespace _2BNOR_2B
             return numberOfOperators;
         }
 
-        private int[,] generateInputMap(string inputExpression)
+        private string[] generateInputMap(string inputExpression)
         {
             int numberOfInputs = getNumberOfInputs(inputExpression);
             // 2^n is the number of possible binary combinations hence number of rows within table. 
             int numberOfRows = (int)Math.Pow(2, numberOfInputs);
-            //binary string representation of the integer. Each character forms a cell in the truth table. 
-            string inputBinaryCombination;
             //the input map of the truth table. Stores the input columns of the truth table. 
-            int[,] inputMap = new int[numberOfRows, numberOfInputs];
+            string[] inputMap = new string[numberOfRows];
             for (int i = 0; i < numberOfRows; i++)
             {
-                inputBinaryCombination = ConvertIntintoBinaryString(i, inputExpression);
-                //adding the correct binary digit into the respective column. 
-                for (int j = 0; j < inputBinaryCombination.Length; j++)
-                {
-                    int binaryDigit = inputBinaryCombination[j] - 48;
-                    inputMap[i, j] = binaryDigit;
-                }
+                inputMap[i] = ConvertIntintoBinaryString(i, inputExpression);
             }
             return inputMap;
         }
 
-        private int[,] generateOutputMap(string inputExpression)
+        private string[] generateOutputMap(string inputExpression)
         {
             string[] headers = generateTruthTableHeadersWithSteps(inputExpression);
-            int[,] inputMap = generateInputMap(inputExpression);
+            string[] inputMap = generateInputMap(inputExpression);
             int numberOfRows = (int)Math.Pow(2, getNumberOfInputs(inputExpression));
             //Number of columns within the table is always the number of inputs and number of operators. 
             int numberOfColumns = getNumberOfInputs(inputExpression) + getNumberOfOperators(inputExpression);
-            int[] inputCombination;
-            string header;
+            string inputCombination;
             //array that handles only the output portion of the truth, this can be put together with the input map to form a complete table
-            int[,] outputMap = new int[numberOfRows, numberOfColumns];
+            string[] outputMap = new string[inputMap.Length];
             //inputmap looks like [[0,0,0],[0,0,1]] etc
+            //inputmap looks like ["000", "001"]
             //so subsitute each row into each column header and evaluate and that is the cell commpleted for the output map7
-            for (int j = 0; j < numberOfColumns; j++)
+            for (int i = 0; i < numberOfRows; i++)
             {
-                header = headers[j];
-                for (int i = 0; i < numberOfRows; i++)
-                {
-                    //find the corresponding input combination. 
-                    inputCombination = getRowOfTable(inputMap, i);
-                    //substitute input combination into header and evaluate. Fill the corresponding cell with result
-                    outputMap[i, j] = evaluateBooleanExpression(inputCombination, header) - 48;
-                }
+                inputCombination = inputMap[i];
+                outputMap[i] += getOutputRow(headers, inputCombination);
             }
             return outputMap;
+        }
+
+        private string getOutputRow(string[] headers, string inputCombination)
+        {
+            string outputRow = "";
+            foreach (string header in headers)
+            {
+                outputRow += evaluateBooleanExpression(inputCombination, header) - 48;
+            }
+            return outputRow;
         }
 
         private string[] generateTruthTableHeadersWithSteps(string inputExpression)
@@ -688,11 +662,11 @@ namespace _2BNOR_2B
             return headers;
         }
 
-        private void drawTruthTable(Canvas c, string[] headers, int[,] outputMap)
+        private void drawTruthTable(Canvas c, string[] headers, string[] outputMap)
         {
             Label cell;
             Thickness border = new Thickness(2);
-            FontFamily font = new FontFamily("Consolas"); 
+            FontFamily font = new FontFamily("Consolas");
             double x = 20;
             double y = 20;
             double cellWidth = 30;
@@ -707,7 +681,7 @@ namespace _2BNOR_2B
                 cell.HorizontalContentAlignment = HorizontalAlignment.Center;
                 cell.Width = cellWidth;
                 cell.BorderBrush = Brushes.LightGray;
-                cell.BorderThickness = border; 
+                cell.BorderThickness = border;
                 cell.Background = Brushes.White;
                 cell.FontFamily = font;
                 cell.FontSize = 14;
@@ -722,11 +696,11 @@ namespace _2BNOR_2B
                     cell.HorizontalContentAlignment = HorizontalAlignment.Center;
                     cell.Width = cellWidth;
                     cell.BorderBrush = Brushes.LightGray;
-                    cell.BorderThickness = border; 
+                    cell.BorderThickness = border;
                     cell.Background = Brushes.White;
                     cell.FontFamily = font;
                     cell.FontSize = 14;
-                    cell.Content = outputMap[j, i];
+                    cell.Content = outputMap[j];
                     Canvas.SetTop(cell, y);
                     Canvas.SetLeft(cell, x);
                     c.Children.Add(cell);
@@ -741,7 +715,7 @@ namespace _2BNOR_2B
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
             string[] headers = generateTruthTableHeadersWithSteps(inputExpression);
-            int[,] outputMap = generateOutputMap(inputExpression);
+            string[] outputMap = generateOutputMap(inputExpression);
             int numberOfInputs = getNumberOfInputs(inputExpression);
             if (isSteps)
             {
@@ -749,9 +723,10 @@ namespace _2BNOR_2B
             }
             else
             {
-                MessageBox.Show("Not yet buster!"); 
+                MessageBox.Show("Not yet buster!");
             }
         }
         #endregion
+
     }
 }
