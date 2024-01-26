@@ -728,5 +728,122 @@ namespace _2BNOR_2B
         }
         #endregion
 
+        #region Minimisation
+
+        //Utilty function that temporarily removes the dashes from a binary pattern so that it can be compared. 
+        static int convertMinterms(string minterm)
+        {
+            return Convert.ToInt32(minterm.Replace('-', '0'), 2);
+        }
+
+        //Returns true if the minterms only differ by 1 bit. 
+        static bool checkMintermDifference(string m1, string m2)
+        {
+            int minterm1 = convertMinterms(m1);
+            int minterm2 = convertMinterms(m2);
+            int diff = minterm1 ^ minterm2;
+            return (diff != 0 && ((diff & (diff - 1)) == 0));
+        }
+
+        static bool checkDashesAlign(string m1, string m2)
+        {
+            if (m1.Length != m2.Length)
+            {
+                throw new Exception("Incorrect length");
+            }
+            else
+            {
+                for (int i = 0; i < m1.Length; i++)
+                {
+                    if (m1[i] != '-' && m2[i] == '-')
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        static string mergeMinterms(string m1, string m2)
+        {
+            string mergedMinterm = "";
+            if (m1.Length != m2.Length)
+            {
+                throw new Exception("Incorrect length");
+            }
+            else
+            {
+                for (int i = 0; i < m1.Length; i++)
+                {
+                    //If a bit differs between the two minterms then it is replaced with a dash. 
+                    //Otherwise digit remains the same. 
+                    if (m1[i] != m2[i])
+                    {
+                        mergedMinterm += '-';
+                    }
+                    else
+                    {
+                        mergedMinterm += m1[i];
+                    }
+                }
+                return mergedMinterm;
+            }
+        }
+
+        //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. 
+        //The function carries out a recursive merging process where a merge can take place if dashes align and 1 bit differs between the two minterms. 
+        //Any term that cannot be merged is a prime implicant and can be added to the return list. 
+        static List<string> getPrimeImplicants(List<string> mintermList)
+        {
+            //Stores the prime implicants that are within the list of minterms.
+            List<string> primeImplicants = new List<string>();
+            //Array used to track the merged terms and hence find the prime implicants. 
+            bool[] merges = new bool[mintermList.Count];
+            //If this is zero then the prime implicants have been found. 
+            int numberOfMerges = 0;
+            string mergedMinterm;
+            string m1;
+            string m2;
+            for (int i = 0; i < mintermList.Count; i++)
+            {
+                for (int c = i + 1; c < mintermList.Count; c++)
+                {
+                    m1 = mintermList[i];
+                    m2 = mintermList[c];
+                    //Merge can only be done if the dashes align and one bit differs between the minterms. 
+                    if (checkDashesAlign(m1, m2) && checkMintermDifference(m1, m2))
+                    {
+                        //merge minterms
+                        mergedMinterm = mergeMinterms(m1, m2);
+                        //add result to list. 
+                        primeImplicants.Add(mergedMinterm);
+                        numberOfMerges++;
+                        //The terms that have been merged at least once are set to true so that they are filtered. 
+                        merges[i] = true;
+                        merges[c] = true;
+                    }
+                }
+            }
+            //Filtering the merged terms for the prime implicants and removing any repeats. 
+            for (int j = 0; j < mintermList.Count; j++)
+            {
+                if (!merges[j] && !primeImplicants.Contains(mintermList[j]))
+                {
+                    primeImplicants.Add(mintermList[j]);
+                }
+            }
+            //No more implicants can be merged from the current list so all of the prime implicants have been found. 
+            if (numberOfMerges == 0)
+            {
+                return primeImplicants;
+            }
+            else
+            {
+                //If merges have been made then recursive because more implicants can be found. 
+                return getPrimeImplicants(primeImplicants);
+            }
+        }
+        #endregion
+
     }
 }
