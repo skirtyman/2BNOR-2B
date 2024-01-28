@@ -26,8 +26,8 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] carrying out traversal on drawn diagram to produce a boolean expression
 - [ ] Generating truth tables from drawn diagrams (find the expression and then produce table)
 - [ ] Scroll view for generated tables that are too large.
-- [ ] Minimising expressions and diagrams (Quine-Mclusky and Karnaugh maps)
+- [x] Minimising expressions and diagrams (Quine-Mclusky and Karnaugh maps)
 - [ ] Help pages detailing how the program works with markdown formatting.
 - [ ] Saving drawn diagrams in custom XML format. `Serialisation`
 - [ ] Exporting a trimmed version of the canvas with diagrams (optional truth table included).
-- [ ] Loading in the cuustom XML format. `Deserialisation`
+- [ ] Loading in the custom XML format. `Deserialisation`
