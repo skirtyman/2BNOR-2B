@@ -22,7 +22,11 @@ namespace _2BNOR_2B
     public partial class logicGate : UserControl
     {
         private element gate;
-        private double labelWidth; 
+        private double labelWidth;
+        //Store the wires connected to the logic gate so that they can moved when the logic gate is dragged. 
+        private wire leftChildWire;
+        private wire rightChildWire;
+        private wire parentWire; 
 
         public logicGate(element gate)
         {
@@ -33,6 +37,31 @@ namespace _2BNOR_2B
             {
                 setLabel(); 
             }
+        }
+
+        public void setLeftChildWire(wire w)
+        {
+            leftChildWire = w;
+        }
+        
+        public void setRightChildWire(wire w)
+        {
+            rightChildWire = w;
+        }
+
+        public void setParentWire(wire w)
+        {  
+            parentWire = w; 
+        }
+
+        public void updateWires(Canvas c)
+        {
+            leftChildWire.setEnd(getInputPoint1());
+            rightChildWire.setEnd(getInputPoint2());
+            parentWire.setEnd(getOutputPoint());
+            leftChildWire.draw(c, Brushes.Black);
+            rightChildWire.draw(c, Brushes.Black); 
+            parentWire.draw(c, Brushes.Black);
         }
 
         public Point getInputPoint1()

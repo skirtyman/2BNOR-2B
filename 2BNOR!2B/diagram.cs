@@ -298,6 +298,8 @@ namespace _2BNOR_2B
             logicGate leftchildLogicGate = root.leftChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint1());
+            rootLogicGate.setLeftChildWire(w);
+            leftchildLogicGate.setLeftChildWire(w); 
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
             {
@@ -312,13 +314,15 @@ namespace _2BNOR_2B
             w.draw(c, Brushes.Black);
         }
 
-        private void drawWiresForRightChildren(Canvas c,  element root)
+        private void drawWiresForRightChildren(Canvas c, element root)
         {
             wire w = new wire();
             logicGate rootLogicGate = root.getLogicGate();
             logicGate rightchildLogicGate = root.rightChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint2());
+            rootLogicGate.setRightChildWire(w); 
+            rightchildLogicGate.setRightChildWire(w);
             if (rightchildLogicGate != null)
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
@@ -416,12 +420,14 @@ namespace _2BNOR_2B
         }
 
         //Small function for drawing the wire that connects the input to the root node of the binary tree. 
-        private void drawOutputWire(Canvas c)
+        private wire drawOutputWire(Canvas c)
         {
             wire w = new wire();
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
             w.draw(c, Brushes.Black);
+            rootNode.getLogicGate().setParentWire(w);
+            return w;
         }
 
         //Method that draws the output pin for the diagram. 
@@ -439,7 +445,7 @@ namespace _2BNOR_2B
             Canvas.SetLeft(logicGate, x);
             logicGate.PreviewMouseDown += dragHandler; 
             c.Children.Add(logicGate);
-            drawOutputWire(c);
+            logicGate.setLeftChildWire(drawOutputWire(c));
         }
 
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
@@ -672,20 +678,19 @@ namespace _2BNOR_2B
             return headers;
         }
 
-        private void drawTruthTable(Canvas c, string[] headers, string[] outputMap)
+        private void drawTruthTableHeaders(Canvas c, string[] headers)
         {
             Label cell;
             Thickness border = new Thickness(2);
             FontFamily font = new FontFamily("Consolas");
+            double cellWidth = 30; 
             double x = 20;
-            double y = 20;
-            double cellWidth = 30;
-            for (int i = 0; i < headers.Length; i++)
+            foreach(string header in headers)
             {
                 //Checking for inputs of the table
-                if (headers[i].Length != 1)
+                if (header.Length != 1)
                 {
-                    cellWidth = (headers[i].Length * 10) + 5;
+                    cellWidth = (header.Length * 10) + 5;
                 }
                 cell = new Label();
                 cell.HorizontalContentAlignment = HorizontalAlignment.Center;
@@ -695,13 +700,31 @@ namespace _2BNOR_2B
                 cell.Background = Brushes.White;
                 cell.FontFamily = font;
                 cell.FontSize = 14;
-                cell.Content = headers[i];
-                Canvas.SetTop(cell, y);
+                cell.Content = header;
+                Canvas.SetTop(cell, 20);
                 Canvas.SetLeft(cell, x);
                 c.Children.Add(cell);
-                y += 30;
-                for (int j = 0; j < outputMap.GetLength(0); j++)
+                x += cellWidth;
+            }
+        }
+
+        private void drawTruthTable(Canvas c, string[] headers, string[] outputMap)
+        {
+            Label cell;
+            Thickness border = new Thickness(2);
+            FontFamily font = new FontFamily("Consolas"); 
+            double cellWidth = 30;
+            double x = 20;
+            double y = 50;
+            foreach(string row in outputMap)
+            {
+                for(int i = 0; i < headers.Length; i++)
                 {
+                    //Checking for inputs of the table
+                    if (headers[i].Length != 1)
+                    {
+                        cellWidth = (headers[i].Length * 10) + 5;
+                    }
                     cell = new Label();
                     cell.HorizontalContentAlignment = HorizontalAlignment.Center;
                     cell.Width = cellWidth;
@@ -710,15 +733,18 @@ namespace _2BNOR_2B
                     cell.Background = Brushes.White;
                     cell.FontFamily = font;
                     cell.FontSize = 14;
-                    cell.Content = outputMap[j];
+                    cell.Content = row[i];
                     Canvas.SetTop(cell, y);
                     Canvas.SetLeft(cell, x);
                     c.Children.Add(cell);
-                    y += 30;
+                    x += cellWidth;
                 }
-                x += cell.Width;
-                y = 20;
+                cellWidth = 30;
+                x = 20; 
+                y += 30; 
             }
+
+
         }
 
         //Links class to UI, used to draw the truth tables to the canvas. 
@@ -729,11 +755,13 @@ namespace _2BNOR_2B
             int numberOfInputs = getNumberOfInputs(inputExpression);
             if (isSteps)
             {
-                drawTruthTable(c, headers, outputMap);
+                //drawTruthTable(c, headers, outputMap);
+                drawTruthTableHeaders(c, headers);
+                drawTruthTable(c, headers, outputMap); 
             }
             else
             {
-                MessageBox.Show("Not yet buster!");
+                throw new NotImplementedException("Not yet buster!");
             }
         }
         #endregion

@@ -10,7 +10,7 @@ using System.Windows.Shapes;
 
 namespace _2BNOR_2B
 {
-    class wire
+    public class wire
     {
         private int state;
         //This is the element that provides the signal to the wire 
@@ -54,6 +54,7 @@ namespace _2BNOR_2B
 
         public void draw(Canvas c, Brush color)
         {
+            points.Clear(); 
             points = calculatePoints();
             Line l;
             for (int i = 0; i < points.Count - 1; i++)

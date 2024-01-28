@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace _2BNOR_2B
     public partial class MainWindow : Window
     {
         private diagram d;
-        private UIElement dragObject = null;
+        private logicGate dragObject = null;
         private Point offset; 
 
         public MainWindow()
@@ -129,12 +130,13 @@ namespace _2BNOR_2B
                 Point position = e.GetPosition(s);
                 Canvas.SetTop(dragObject, position.Y - offset.Y);
                 Canvas.SetLeft(dragObject, position.X - offset.X);
+                dragObject.updateWires(MainWindowCanvas); 
             }
         }
 
         public void c_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            dragObject = (UIElement)sender;
+            dragObject = (logicGate)sender;
             offset = e.GetPosition(MainWindowCanvas);
             offset.Y -= Canvas.GetTop(dragObject);
             offset.X -= Canvas.GetLeft(dragObject);
