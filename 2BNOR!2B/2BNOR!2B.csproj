@@ -166,5 +166,8 @@
   <ItemGroup>
     <Resource Include="images\output_pin.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\cross.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

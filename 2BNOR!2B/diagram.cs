@@ -20,6 +20,7 @@ namespace _2BNOR_2B
     {
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
         private char[] booleanOperators = { '.', '^', '+', '!' };
+        private string[] gateNames = { "and_gate", "xor_gate", "or_gate" };
         private string infixExpression = ""; 
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
@@ -197,10 +198,30 @@ namespace _2BNOR_2B
             return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
         }
 
+        private string inorderTraversal(element root)
+        {
+            if (root.leftChild != null)
+            {
+                inorderTraversal(root.leftChild);
+            }
+            //write method to convert names into symbols 
+            //add to infix expression
+
+            if (root.rightChild != null)
+            {
+                inorderTraversal(root.rightChild); 
+            }
+        }
+
+        public string getInfixExpression()
+        {
+            inorderTraversal(rootNode);
+            return infixExpression; 
+        }
+
         private void generateBinaryTreeFromExpression(string inputExpression)
         {
-            string postfixExpression = ConvertInfixtoPostfix(inputExpression);
-            string[] names = { "and_gate", "xor_gate", "or_gate" };
+            string postfixExpression = ConvertInfixtoPostfix(inputExpression);   
             Stack<element> nodeStack = new Stack<element>();
             elements = new element[inputExpression.Length+1];
             element nodeToAdd;
@@ -242,7 +263,7 @@ namespace _2BNOR_2B
                     rightChild = nodeStack.Pop();
                     leftChild = nodeStack.Pop();
                     //create a logic gate
-                    elementName = names[Array.IndexOf(booleanOperators, c)];
+                    elementName = gateNames[Array.IndexOf(booleanOperators, c)];
                     nodeToAdd = new element(elementName, elementID, leftChild, rightChild);
                     nodeToAdd.setUniqueness(true);
                     leftChild.parent = nodeToAdd;

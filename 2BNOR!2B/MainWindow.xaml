@@ -20,19 +20,19 @@
                 <MenuItem Header="_Save" />
                 <MenuItem Header="_Export" />
                 <Separator/>
-                <MenuItem Header="Exit" />
+                <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
             </MenuItem>
             <MenuItem Header="_Truth tables">
                 <MenuItem Header="Generate From Diagram" Click="MenuItem_GenerateTableFromDiagram"/>
                 <MenuItem Header="Generate From Expression" Click="MenuItem_GenerateTableFromExpression"/>
             </MenuItem>
             <MenuItem Header="_Boolean expressions">
-                <MenuItem Header="Find Expression"/>
                 <MenuItem Header="Create Diagram" Click="MenuItem_GenerateDiagramFromExpression"/>
+                <MenuItem Header="Find Expression"/>
             </MenuItem>
             <MenuItem Header="_Diagram Minimisation">
-                <MenuItem Header="Minimise Expression" Click="MenuItem_MinimiseExpression"/>
                 <MenuItem Header="Minmise Diagram"/>
+                <MenuItem Header="Minimise Expression" Click="MenuItem_MinimiseExpression"/>
             </MenuItem>
             <MenuItem Header="_Help" Click="MenuItem_OpenHelpWindow"/>
             <TextBlock x:Name="statusBox_mainWindow">

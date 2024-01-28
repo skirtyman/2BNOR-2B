@@ -34,13 +34,30 @@ namespace _2BNOR_2B
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
         {
+            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
+            StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
+            displayWindow displayWindow = new displayWindow();
+            string expression = d.getInfixExpression();
+            bool isSteps = false;
+            if (stepsDialog.ShowDialog() == true)
+            {
+                isSteps = stepsDialog.result;
+                displayWindow.setStatusForTables(expression);
+                displayWindow.Show();
+                Canvas c = displayWindow.getCanvas();
+                d.drawTruthTable(c, expression, isSteps);
+            }
+
         }
 
         private void componentSidePanel_AddBuiltinCircuit(object sender, RoutedEventArgs e)
         {
             //show the built in circuit dialog
             BuiltInCircuitDialog builtIntCircuitDialog = new BuiltInCircuitDialog();
-            builtIntCircuitDialog.Show();
+            if (builtIntCircuitDialog.ShowDialog() == true)
+            {
+
+            }
         }
 
         //Debug button to remove items from the canvas. 
@@ -80,15 +97,15 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
+                if (stepsDialog.ShowDialog() == true)
+                {
+                    isSteps = stepsDialog.result;
+                    displayWindow.setStatusForTables(expression);
+                    displayWindow.Show();
+                    Canvas c = displayWindow.getCanvas();
+                    d.drawTruthTable(c, expression, isSteps);
+                }
             }
-            if (stepsDialog.ShowDialog() == true)
-            {
-                isSteps = stepsDialog.result;
-            }
-            displayWindow.setStatusForTables(expression);
-            displayWindow.Show();
-            Canvas c = displayWindow.getCanvas();
-            d.drawTruthTable(c, expression, isSteps);
         }
 
         private void MenuItem_GenerateDiagramFromExpression(object sender, RoutedEventArgs e)
@@ -98,9 +115,9 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
+                statusBox_mainWindow.Text = "Status: Drew expression " + expression;
+                d.drawDiagram(MainWindowCanvas, expression); 
             }
-            statusBox_mainWindow.Text = "Status: Set expression to " + expression;
-            d.drawDiagram(MainWindowCanvas, expression);
         }
 
         private void MenuItem_MinimiseExpression(object sender, RoutedEventArgs e)
@@ -110,8 +127,13 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
+                MessageBox.Show(d.minimiseExpression(expression)); 
             }
-            MessageBox.Show(d.minimiseExpression(expression));
+        }
+
+        private void MenuItem_CloseApp(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
 
         #endregion

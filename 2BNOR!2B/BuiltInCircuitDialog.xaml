@@ -26,7 +26,7 @@
                 </Button.Content>
             </Button>
             
-            <Button>
+            <Button IsCancel="True">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/images/cancel.png"/>

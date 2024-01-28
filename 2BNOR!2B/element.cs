@@ -26,7 +26,6 @@ namespace _2BNOR_2B
         //constructor for creating output pins 
         public element(int elementID)
         {
-            //7 = outputpin
             this.elementID = elementID;
             state = 0;
             label = 'Q';
@@ -36,7 +35,6 @@ namespace _2BNOR_2B
         //constructor for creating input pins 
         public element(int elementID, char label)
         {
-            //6 = inputpin
             this.elementID = elementID;
             this.label = label;
             leftChild = null;

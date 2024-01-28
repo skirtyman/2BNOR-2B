@@ -21,8 +21,17 @@
             <Button IsDefault="True" Click="btnDialogNo_Click">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal" MaxWidth="40">
-                        <Image Source="/images/cancel.png"/>
+                        <Image Source="/images/cross.png"/>
                         <TextBlock Text=" No " FontFamily="Consolas"/>
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+
+            <Button Margin ="10,0" HorizontalAlignment="Center" IsCancel="True">
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/images/cancel.png"/>
+                        <TextBlock Text=" Cancel " FontFamily="Consolas"/>
                     </StackPanel>
                 </Button.Content>
             </Button>
