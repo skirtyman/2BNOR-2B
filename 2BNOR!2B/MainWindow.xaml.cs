@@ -78,6 +78,17 @@ namespace _2BNOR_2B
         {
         }
 
+        private void MenuItem_MinimiseExpression(object sender, RoutedEventArgs e)
+        {
+            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
+            string expression = "";
+            if (expressionInputDialog.ShowDialog() == true)
+            {
+                expression = expressionInputDialog.result;
+            }
+            MessageBox.Show(d.minimiseExpression(expression)); 
+        }
+
         private void componentSidePanel_AddBuiltinCircuit(object sender, RoutedEventArgs e)
         {
             //show the built in circuit dialog

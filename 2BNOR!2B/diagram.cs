@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Security.RightsManagement;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -36,6 +37,9 @@ namespace _2BNOR_2B
         {
 
         }
+
+        //(A.((!C.D)+(B.C)))+!(D.A)
+
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
         private string ConvertInfixtoPostfix(string infixExpression)
@@ -589,7 +593,6 @@ namespace _2BNOR_2B
             string inputCombination;
             //array that handles only the output portion of the truth, this can be put together with the input map to form a complete table
             string[] outputMap = new string[inputMap.Length];
-            //inputmap looks like [[0,0,0],[0,0,1]] etc
             //inputmap looks like ["000", "001"]
             //so subsitute each row into each column header and evaluate and that is the cell commpleted for the output map7
             for (int i = 0; i < numberOfRows; i++)
@@ -730,23 +733,118 @@ namespace _2BNOR_2B
 
         #region Minimisation
 
-        //Utilty function that temporarily removes the dashes from a binary pattern so that it can be compared. 
-        static int convertMinterms(string minterm)
+        //Produces the final minimised expression from the essential prime implicants.
+        private string convertEPIsToExpression(List<string> essentialPrimeImplicants)
         {
-            return Convert.ToInt32(minterm.Replace('-', '0'), 2);
+            //Converting each implicant into input form. Ie (-100 becomes B!C!D)
+            essentialPrimeImplicants = essentialPrimeImplicants.ConvertAll(new Converter<string, string>(convertImplicantToExpression));
+            //Each implicant is separated by OR gates. 
+            string expression = string.Join(" + ", essentialPrimeImplicants);
+            return expression;
         }
 
-        //Returns true if the minterms only differ by 1 bit. 
-        static bool checkMintermDifference(string m1, string m2)
+        //Replaces the binary form into the input form so that a complete boolean expression can be created. 
+        private string convertImplicantToExpression(string epi)
         {
-            int minterm1 = convertMinterms(m1);
-            int minterm2 = convertMinterms(m2);
-            int diff = minterm1 ^ minterm2;
-            return (diff != 0 && ((diff & (diff - 1)) == 0));
+            //Removing regex characters to make conversion easier (due to "\d" being two characters long). 
+            epi = epi.Replace(@"\d", "-");
+            string tmp = "";
+            char input;
+            for (int i = 0; i < epi.Length; i++)
+            {
+                if (epi[i] == '1')
+                {
+                    //Each prime implicant in final expression is always sequential.
+                    input = (char)(i + 65);
+                    tmp += input;
+                }
+                //If 0 in implicant then the input is the complement (Ie, NOT gate). 
+                else if (epi[i] == '0')
+                {
+                    input = (char)(i + 65);
+                    tmp += "!" + input;
+                }
+            }
+            return tmp;
         }
 
-        static bool checkDashesAlign(string m1, string m2)
+        //Evaluates the minterms to the prime implicants. This forms the basis of the prime implicant chart.
+        private void setRegexPatterns(Dictionary<string, string> regex, List<string> minterms)
         {
+            Match res;
+            foreach (string regexPattern in regex.Keys.ToList())
+            {
+                foreach (string minterm in minterms)
+                {
+                    res = Regex.Match(minterm, regexPattern);
+                    if (res.Success)
+                    {
+                        regex[regexPattern] += "1";
+                    }
+                    else
+                    {
+                        regex[regexPattern] += "0";
+                    }
+                }
+            }
+        }
+
+        //Replaces the dashes within the prime implicants with "\d", this allows the prime implicants to form regex pattern. 
+        //Replacing "\d" indicating it doesnt matter which digit is present in this position. 
+        private void convertImplicantsIntoRegex(Dictionary<string, string> regex, List<string> primeImplicants)
+        {
+            string tmp = "";
+            string value = "";
+            foreach (string primeImplicant in primeImplicants)
+            {
+                foreach (char c in primeImplicant)
+                {
+                    if (c == '-')
+                    {
+                        tmp += @"\d";
+                    }
+                    else
+                    {
+                        tmp += c;
+                    }
+                }
+                //Adding to the dictionary, value is empty because the keys are not evaluated yet. 
+                regex.Add(tmp, value);
+                tmp = "";
+            }
+        }
+
+        //Carries out the merge between minterms, replacing bits that do not matter with a dash. 
+        private string mergeMinterms(string m1, string m2)
+        {
+            string mergedMinterm = "";
+            //If the minterms are not the same length then a merge cannot occur. 
+            if (m1.Length != m2.Length)
+            {
+                throw new Exception("Incorrect length");
+            }
+            else
+            {
+                for (int i = 0; i < m1.Length; i++)
+                {
+                    //If a bit differs between the two minterms then it is replaced with a dash. Otherwise digit remains the same indicating it doesn't matter. 
+                    if (m1[i] != m2[i])
+                    {
+                        mergedMinterm += '-';
+                    }
+                    else
+                    {
+                        mergedMinterm += m1[i];
+                    }
+                }
+                return mergedMinterm;
+            }
+        }
+        
+        //For a merge to happen, the dashes within the minterms must align within both minterms. 
+        private bool checkDashesAlign(string m1, string m2)
+        {
+            //If the lengths of the minterms are not the same then the comparison cannot be done. 
             if (m1.Length != m2.Length)
             {
                 throw new Exception("Incorrect length");
@@ -764,36 +862,97 @@ namespace _2BNOR_2B
             }
         }
 
-        static string mergeMinterms(string m1, string m2)
+        //Returns true if the minterms only differ by 1 bit. 
+        private bool checkMintermDifference(string m1, string m2)
         {
-            string mergedMinterm = "";
-            if (m1.Length != m2.Length)
-            {
-                throw new Exception("Incorrect length");
-            }
-            else
-            {
-                for (int i = 0; i < m1.Length; i++)
-                {
-                    //If a bit differs between the two minterms then it is replaced with a dash. 
-                    //Otherwise digit remains the same. 
-                    if (m1[i] != m2[i])
-                    {
-                        mergedMinterm += '-';
-                    }
-                    else
-                    {
-                        mergedMinterm += m1[i];
-                    }
-                }
-                return mergedMinterm;
-            }
+            int minterm1 = removeDashes(m1);
+            int minterm2 = removeDashes(m2);
+            int res = minterm1 ^ minterm2;
+            return (res != 0 && ((res & (res - 1)) == 0));
         }
 
-        //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. 
-        //The function carries out a recursive merging process where a merge can take place if dashes align and 1 bit differs between the two minterms. 
+        //Utilty function that temporarily removes the dashes from a binary pattern so that it can be compared. 
+        private int removeDashes(string minterm)
+        {
+            return Convert.ToInt32(minterm.Replace('-', '0'), 2);
+        }
+
+        private List<string> getMinterms(string expression)
+        {
+            List<string> minterms = new List<string>();
+            string[] inputMap = generateInputMap(expression);
+            foreach (string input in inputMap)
+            {
+                //A minterm has been found if input results in the expresion evaluating to true. 
+                if (evaluateBooleanExpression(input, expression) - 48 == 1)
+                {
+                    minterms.Add(input);
+                }
+            }
+            return minterms;
+        }
+
+        //Counts the number of 1's within each place value of the values in the dictionary.
+        //Frequency table is used to find the essential prime implicants. 
+        private int[] getFrequencyTable(Dictionary<string, string> regex, List<string> minterms)
+        {
+            int[] sums = new int[minterms.Count];
+            foreach (string s in regex.Values.ToList())
+            {
+                for (int i = 0; i < s.Length; i++)
+                {
+                    if (s[i] == '1')
+                    {
+                        sums[i]++;
+                    }
+                }
+            }
+            return sums;
+        }
+
+        //Finds the prime implicant that is essential within the key list. Ie The bit set that results in a frequency of 1.
+        private string getEssentialPrimeImplicant(Dictionary<string, string> regex, int pos)
+        {
+            string[] essentialPrimes = regex.Values.ToArray();
+            string[] keys = regex.Keys.ToArray();
+            string prime;
+            for (int i = 0; i < essentialPrimes.Length; i++)
+            {
+                prime = essentialPrimes[i];
+                //When the bit has been found that results in a frequency of 1 then the essential prime implicant has been found. 
+                if (prime[pos] == '1')
+                {
+                    return keys[i];
+                }
+            }
+            throw new Exception("Item could be found");
+        }
+
+        private List<string> getEssentialPrimeImplicants(Dictionary<string, string> regex, List<string> minterms)
+        {
+            //Calculating the number of 1's within each column of the values in the dictionary. 
+            int[] bitFrequencyTable = getFrequencyTable(regex, minterms);
+            List<string> essentialPrimeImplicants = new List<string>();
+            string epi = ""; 
+            for (int i = 0; i < bitFrequencyTable.Length; i++)
+            {
+                //If the total number of bits in one column of the values is 1, then only one prime implicant covers that minterm and hence it is an essential prime implicant. 
+                if (bitFrequencyTable[i] == 1)
+                {
+                    epi = getEssentialPrimeImplicant(regex, i);
+                    //Removing repeats to avoid cases such as "A+A" which can be further simplified. 
+                    if (!essentialPrimeImplicants.Contains(epi))
+                    {
+                        essentialPrimeImplicants.Add(epi);
+                    }
+                }
+            }
+            return essentialPrimeImplicants;
+        }
+
+        //The following function carries out a recursive merging process where a merge can take place if dashes align and 1 bit differs between the two minterms. 
         //Any term that cannot be merged is a prime implicant and can be added to the return list. 
-        static List<string> getPrimeImplicants(List<string> mintermList)
+        private List<string> getPrimeImplicants(List<string> mintermList)
         {
             //Stores the prime implicants that are within the list of minterms.
             List<string> primeImplicants = new List<string>();
@@ -839,11 +998,25 @@ namespace _2BNOR_2B
             }
             else
             {
-                //If merges have been made then recursive because more implicants can be found. 
+                //If merges have been made then recursive because more prime implicants could be found. 
                 return getPrimeImplicants(primeImplicants);
             }
         }
-        #endregion
 
+        //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. Returns the minised expression by finding prime and essential prime implicants from merged minterms. 
+        public string minimiseExpression(string expression)
+        {
+            //Finding prime implicants to get essential prime implicants. 
+            List<string> minterms = getMinterms(expression);
+            List<string> primeImplicants = getPrimeImplicants(minterms);
+            //Creating the prime-implicant chart which is used to find the essential prime implicants. 
+            Dictionary<string, string> PIchart = new Dictionary<string, string>();
+            convertImplicantsIntoRegex(PIchart, primeImplicants);
+            setRegexPatterns(PIchart, minterms);
+            List<string> PIs = getEssentialPrimeImplicants(PIchart, minterms);
+            string minimisedExpression = convertEPIsToExpression(PIs);
+            return minimisedExpression;
+        }
+        #endregion
     }
 }

@@ -31,7 +31,7 @@
                 <MenuItem Header="Create Diagram" Click="MenuItem_GenerateDiagramFromExpression"/>
             </MenuItem>
             <MenuItem Header="_Diagram Minimisation">
-                <MenuItem Header="Minimise Expression"/>
+                <MenuItem Header="Minimise Expression" Click="MenuItem_MinimiseExpression"/>
                 <MenuItem Header="Minmise Diagram"/>
             </MenuItem>
             <MenuItem Header="_Help" Click="MenuItem_OpenHelpWindow"/>
