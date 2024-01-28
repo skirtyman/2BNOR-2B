@@ -10,7 +10,7 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Adjust formulae so that the components are placed onto the grid.
 - [ ] Adjust formulae for odd shaped graphs
 - [x] Repeated inputs within expressions are not drawn
-- [ ] Wires are stored within the node objects (useful for repositioning nodes)
+- [x] Wires are stored within the node objects (useful for repositioning nodes)
 - [x] Add outputs to the drawn diagrams.
 ### making compnents interactive
 - [ ] wires change colours based off of input node states. 
