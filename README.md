@@ -21,6 +21,6 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Exporting a trimmed version of the canvas with diagrams (optional truth table included).
 - [ ] Loading in the custom XML format. `Deserialisation`
 - [ ] Increase size and readability of the dialogs
-- [ ] Fix the NOT gate connections
+- [x] Fix the NOT gate connections
 - [ ] NAND and NOR diagram creation
 - [ ] LATEX implementation to represent expressions
