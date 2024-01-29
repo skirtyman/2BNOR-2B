@@ -2,12 +2,8 @@
 
 Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f.svg)](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f)
 ---
-## Features
-- [ ] Drawing grid lines on the main canvas.
-- [ ] Making the grid resizable. 
 ### Drawing diagrams from expressions 
 - [x] Added labels to the inputs
-- [ ] Adjust formulae so that the components are placed onto the grid.
 - [ ] Adjust formulae for odd shaped graphs
 - [x] Repeated inputs within expressions are not drawn
 - [x] Wires are stored within the node objects (useful for repositioning nodes)
@@ -21,7 +17,6 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Clicking side menu adds component to the canvas
 - [x] dragging the component follows the grid lines.
 - [ ] Wires will draw intersections if one is drawn over the other.
-- [ ] Drawn wires will follow the grid lines. 
 ### Other features
 - [ ] carrying out traversal on drawn diagram to produce a boolean expression
 - [ ] Generating truth tables from drawn diagrams (find the expression and then produce table)
@@ -31,3 +26,4 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 - [ ] Saving drawn diagrams in custom XML format. `Serialisation`
 - [ ] Exporting a trimmed version of the canvas with diagrams (optional truth table included).
 - [ ] Loading in the custom XML format. `Deserialisation`
+- [ ] Increase size and readability of the dialogs
