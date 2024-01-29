@@ -215,6 +215,8 @@ namespace _2BNOR_2B
 
         public string getInfixExpression()
         {
+            //Get the last item of the headers list and this will give a bracketed version of the expression.  
+            string[] headers = generateTruthTableHeadersWithSteps("Expression");
             inorderTraversal(rootNode);
             return infixExpression; 
         }
