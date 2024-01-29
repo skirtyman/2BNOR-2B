@@ -198,7 +198,7 @@ namespace _2BNOR_2B
             return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
         }
 
-        private string inorderTraversal(element root)
+        private void inorderTraversal(element root)
         {
             if (root.leftChild != null)
             {
@@ -209,7 +209,7 @@ namespace _2BNOR_2B
 
             if (root.rightChild != null)
             {
-                inorderTraversal(root.rightChild); 
+                inorderTraversal(root.rightChild);
             }
         }
 
@@ -218,7 +218,7 @@ namespace _2BNOR_2B
             //Get the last item of the headers list and this will give a bracketed version of the expression.  
             string[] headers = generateTruthTableHeadersWithSteps("Expression");
             inorderTraversal(rootNode);
-            return infixExpression; 
+            return infixExpression;
         }
 
         private void generateBinaryTreeFromExpression(string inputExpression)
