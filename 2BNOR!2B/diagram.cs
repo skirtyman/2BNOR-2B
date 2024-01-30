@@ -315,8 +315,6 @@ namespace _2BNOR_2B
             logicGate leftchildLogicGate = root.leftChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint1());
-            rootLogicGate.setLeftChildWire(w);
-            leftchildLogicGate.setLeftChildWire(w); 
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
             {
@@ -338,8 +336,6 @@ namespace _2BNOR_2B
             logicGate rightchildLogicGate = root.rightChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint2());
-            rootLogicGate.setRightChildWire(w); 
-            rightchildLogicGate.setRightChildWire(w);
             if (rightchildLogicGate != null)
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
@@ -442,7 +438,6 @@ namespace _2BNOR_2B
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
             w.draw(c, Brushes.Black);
-            rootNode.getLogicGate().setParentWire(w);
             return w;
         }
 
@@ -460,7 +455,6 @@ namespace _2BNOR_2B
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x); 
             c.Children.Add(logicGate);
-            logicGate.setLeftChildWire(drawOutputWire(c));
         }
 
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
@@ -472,7 +466,8 @@ namespace _2BNOR_2B
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(c, rootNode, heightOfTree);
             drawWires(c, rootNode, inputExpression);
-            drawOutput(c, heightOfTree); 
+            drawOutput(c, heightOfTree);
+            drawOutputWire(c); 
         }
 
         #endregion 
@@ -806,7 +801,7 @@ namespace _2BNOR_2B
                 {
                     //Each prime implicant in final expression is always sequential.
                     input = (char)(i + 65);
-                    tmp += input;
+                    tmp += input + ".";
                 }
                 //If 0 in implicant then the input is the complement (Ie, NOT gate). 
                 else if (epi[i] == '0')

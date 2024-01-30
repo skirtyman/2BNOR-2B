@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,9 @@ namespace _2BNOR_2B
     public partial class MainWindow : Window
     {
         private diagram d;
+        //Everything can be created from the expression, hence this is the only thing that needs to be saved. 
+        private string saveString = ""; 
+
 
         public MainWindow()
         {
@@ -113,7 +118,8 @@ namespace _2BNOR_2B
             {
                 expression = expressionInputDialog.result;
                 statusBox_mainWindow.Text = "Status: Drew expression " + expression;
-                d.drawDiagram(MainWindowCanvas, expression); 
+                d.drawDiagram(MainWindowCanvas, expression);
+                saveString = expression;
             }
         }
 
@@ -125,6 +131,67 @@ namespace _2BNOR_2B
             {
                 expression = expressionInputDialog.result;
                 MessageBox.Show(d.minimiseExpression(expression)); 
+            }
+        }
+
+        private void MenuItem_SaveDiagram(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
+            saveFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            saveFileDialog.ShowDialog();
+            File.WriteAllText(saveFileDialog.FileName, saveString); 
+        }
+        
+        private void MenuItem_LoadDiagram(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
+            openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            openFileDialog.ShowDialog();
+            saveString = File.ReadAllText(openFileDialog.FileName);
+            d.drawDiagram(MainWindowCanvas, saveString); 
+        }
+
+        private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PNG (*.png)|*.png";
+            sfd.DefaultExt = ".png";
+            if (sfd.ShowDialog() != true)
+            {
+                return;
+            }
+
+
+            Rect bounds = VisualTreeHelper.GetDescendantBounds(MainWindowCanvas);
+            double dpi = 96d;
+
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, dpi, dpi, PixelFormats.Default);
+
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen())
+            {
+                VisualBrush vb = new VisualBrush(MainWindowCanvas);
+                dc.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+            }
+
+            rtb.Render(dv);
+
+            BitmapEncoder pngEncoder = new PngBitmapEncoder();
+            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+
+                pngEncoder.Save(ms);
+                ms.Close();
+                File.WriteAllBytes(sfd.FileName, ms.ToArray());
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

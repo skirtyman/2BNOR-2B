@@ -16,9 +16,9 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" />
-                <MenuItem Header="_Save" />
-                <MenuItem Header="_Export" />
+                <MenuItem Header="_Open Diagram" Click="MenuItem_LoadDiagram"/>
+                <MenuItem Header="_Save Diagram" Click="MenuItem_SaveDiagram"/>
+                <MenuItem Header="_Export" Click="MenuItem_ExportDiagram" />
                 <Separator/>
                 <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
             </MenuItem>
