@@ -108,6 +108,12 @@ namespace _2BNOR_2B
             }
         }
 
+        private void MenuItem_GenerateExpressionFromDiagram(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(d.getInfixExpression()); 
+        }
+
+
         private void MenuItem_GenerateDiagramFromExpression(object sender, RoutedEventArgs e)
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();

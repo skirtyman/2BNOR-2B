@@ -28,7 +28,7 @@
             </MenuItem>
             <MenuItem Header="_Boolean expressions">
                 <MenuItem Header="Create Diagram" Click="MenuItem_GenerateDiagramFromExpression"/>
-                <MenuItem Header="Find Expression"/>
+                <MenuItem Header="Find Expression" Click="MenuItem_GenerateExpressionFromDiagram"/>
             </MenuItem>
             <MenuItem Header="_Diagram Minimisation">
                 <MenuItem Header="Minmise Diagram"/>

@@ -20,8 +20,9 @@ namespace _2BNOR_2B
     {
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
         private char[] booleanOperators = { '.', '^', '+', '!' };
-        private string[] gateNames = { "and_gate", "xor_gate", "or_gate" };
-        private string infixExpression = ""; 
+        private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate"};
+        private string infixExpression = "";
+        private string postfixExpression = ""; 
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode; 
@@ -198,15 +199,31 @@ namespace _2BNOR_2B
             return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
         }
 
-        private string inorderTraversal(element root)
+        private string convertNameToSymbol(element node)
+        {
+            string symbol = ""; 
+            if (char.IsLetter(node.getLabel()))
+            {
+                symbol += node.getLabel(); 
+            }
+            else
+            {
+                string name = node.getElementName();
+                int nameIndex = Array.IndexOf(gateNames, name);
+                symbol += booleanOperators[nameIndex]; 
+            }
+            return symbol;
+        }
+
+        private void inorderTraversal(element root)
         {
             if (root.leftChild != null)
             {
                 inorderTraversal(root.leftChild);
             }
-            //write method to convert names into symbols 
-            //add to infix expression
 
+            infixExpression += convertNameToSymbol(root);
+            
             if (root.rightChild != null)
             {
                 inorderTraversal(root.rightChild); 
@@ -215,8 +232,11 @@ namespace _2BNOR_2B
 
         public string getInfixExpression()
         {
+            infixExpression = ""; 
             inorderTraversal(rootNode);
-            return infixExpression; 
+            string[] headers = generateTruthTableHeadersWithSteps(infixExpression);
+            //return infixExpression; 
+            return headers[headers.Length-1]; 
         }
 
         private void generateBinaryTreeFromExpression(string inputExpression)
