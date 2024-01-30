@@ -22,14 +22,11 @@ namespace _2BNOR_2B
     public partial class MainWindow : Window
     {
         private diagram d;
-        private logicGate dragObject = null;
-        private Point offset; 
 
         public MainWindow()
         {
             InitializeComponent();
             d = new diagram();
-            d.setHandler(c_PreviewMouseDown); 
         }
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
@@ -137,38 +134,5 @@ namespace _2BNOR_2B
         }
 
         #endregion
-
-        private void MainWindowCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            if (dragObject == null)
-            {
-                return;
-            }
-            // in order to prevent the object from leaving the window, set the bounds with this condition
-            // uses the canvas actual/current height and width to determine the bounds, even if the window will be resized
-            IInputElement s = (IInputElement)sender;
-            if ((e.GetPosition(s).X < MainWindowCanvas.ActualWidth - 50) && (e.GetPosition(s).Y < MainWindowCanvas.ActualHeight - 50) && (e.GetPosition(s).X > 50 && e.GetPosition(s).Y > 50))
-            {
-                Point position = e.GetPosition(s);
-                Canvas.SetTop(dragObject, position.Y - offset.Y);
-                Canvas.SetLeft(dragObject, position.X - offset.X);
-                dragObject.updateWires(MainWindowCanvas); 
-            }
-        }
-
-        public void c_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            dragObject = (logicGate)sender;
-            offset = e.GetPosition(MainWindowCanvas);
-            offset.Y -= Canvas.GetTop(dragObject);
-            offset.X -= Canvas.GetLeft(dragObject);
-            MainWindowCanvas.CaptureMouse();
-        }
-
-        private void MainWindowCanvas_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            dragObject = null;
-            MainWindowCanvas.ReleaseMouseCapture();
-        }
     }
 }

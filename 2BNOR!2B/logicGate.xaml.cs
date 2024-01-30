@@ -39,31 +39,6 @@ namespace _2BNOR_2B
             }
         }
 
-        public void setLeftChildWire(wire w)
-        {
-            leftChildWire = w;
-        }
-        
-        public void setRightChildWire(wire w)
-        {
-            rightChildWire = w;
-        }
-
-        public void setParentWire(wire w)
-        {  
-            parentWire = w; 
-        }
-
-        public void updateWires(Canvas c)
-        {
-            leftChildWire.setEnd(getInputPoint1());
-            rightChildWire.setEnd(getInputPoint2());
-            parentWire.setEnd(getOutputPoint());
-            leftChildWire.draw(c, Brushes.Black);
-            rightChildWire.draw(c, Brushes.Black); 
-            parentWire.draw(c, Brushes.Black);
-        }
-
         public Point getInputPoint1()
         {
 

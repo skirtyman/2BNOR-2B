@@ -28,7 +28,6 @@ namespace _2BNOR_2B
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
         private element[] elements; 
         private wire[] wires;
-        private MouseButtonEventHandler dragHandler;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
         int elementWidth = 2;
@@ -41,11 +40,6 @@ namespace _2BNOR_2B
 
         }
 
-        //(A.((!C.D)+(B.C)))+!(D.A)
-        public void setHandler(MouseButtonEventHandler handler)
-        {
-            dragHandler = handler;
-        }
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
         private string ConvertInfixtoPostfix(string infixExpression)
@@ -403,7 +397,6 @@ namespace _2BNOR_2B
                 currentNode.setLogicGate(logicGate);
                 Canvas.SetLeft(logicGate, x);
                 Canvas.SetTop(logicGate, y);
-                logicGate.PreviewMouseDown += dragHandler; 
                 c.Children.Add(logicGate);
             }
         }
@@ -465,8 +458,7 @@ namespace _2BNOR_2B
             double x = translateNode(calculateXposition(0), heightOfTree) + (pixelsPerSquare * 10);
             double y = calculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
-            Canvas.SetLeft(logicGate, x);
-            logicGate.PreviewMouseDown += dragHandler; 
+            Canvas.SetLeft(logicGate, x); 
             c.Children.Add(logicGate);
             logicGate.setLeftChildWire(drawOutputWire(c));
         }
