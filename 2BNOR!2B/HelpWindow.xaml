@@ -5,7 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
-        Title="Help Window" MaxHeight="850" MaxWidth="1500" MinWidth="450" MinHeight="450" Topmost="True">
+        Title="Help Window" Height="600" Width="800" Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="helpPages.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -85,13 +94,11 @@
             </ListView>
         </StackPanel>
 
-        <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-            <RichTextBox Background="Bisque" IsReadOnly="True">
-                <FlowDocument>
-
-                </FlowDocument>
-            </RichTextBox>
-        </Border>
+        <FlowDocumentPageViewer Grid.Column="1" BorderThickness="1" Document="{StaticResource doctext}"/>
+        
+        <!--<Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
+            <FlowDocumentPageViewer Document="{StaticResource doctext}"></FlowDocumentPageViewer>
+        </Border>-->
 
     </Grid>
 </Window>
