@@ -16,14 +16,12 @@ diagram interactivity
 - [ ] wires display the state of the child component that is connected to them 
 
 truth tables 
-- [x] add functionality for the program to accept 1s and 0s from the textbox
 - [ ] ?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
 - [ ] produce tables straight from the diagram
 
 minimisation 
 - [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. 
 - [ ] Reformat the brackets with expressions 
-- [x] add functionality for accepting 1s and 0s directly from the input
 - [ ] write a display for the minimisation code. Showing the implicants etc. 
 
 odd jobs 
