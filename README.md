@@ -2,21 +2,39 @@
 
 Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f.svg)](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f)
 ---
-### making compnents interactive
-- [ ] wires change colours based off of input node states. 
-- [ ] Gates change the state of wires.
-- [ ] Output pins displays the states of wires
-- [ ] carrying out traversal on drawn diagram to produce a boolean expression
-- [ ] Generating truth tables from drawn diagrams (find the expression and then produce table)
-- [ ] Scroll view for generated tables that are too large.
-- [ ] Minimising expressions, filling the expression so that minterms are covered. 
-- [ ] Help pages detailing how the program works with markdown formatting.
-- [ ] Saving drawn diagrams in custom XML format. `Serialisation`
-- [ ] Exporting a trimmed version of the canvas with diagrams (optional truth table included).
-- [ ] Loading in the custom XML format. `Deserialisation`
-- [ ] Increase size and readability of the dialogs
-- [ ] NAND and NOR diagram creation
-- [ ] LATEX implementation to represent expressions
-- [ ] Redraw vertical overlapping wires. Calculate an offset of the points which the wires can be moved.
-- [ ] Add circles to the joins of wires.
-- [ ] Add circlur bridges to different wires that intersect. 
+### Todo
+diagram drawing 
+- [ ] offset of the vertical wires for the repeated input case
+- [ ] draw circles in connected wires 
+- [ ] draw circular brigdes for wires. 
+- [ ] make the inputs smaller and square. 
+- [ ] redo sprite for the output pin 
+- [ ] diagrams can be created only with NAND and NOR, (ask for this with a dialog)
+
+diagram interactivity
+- [ ] inputs and outputs display the state that they are currently storing 
+- [ ] wires display the state of the child component that is connected to them 
+
+truth tables 
+- [ ]add functionality for the program to accept 1s and 0s from the textbox
+- [ ]?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
+- [ ]produce tables straight from the diagram
+
+minimisation 
+- [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. 
+- [ ] Reformat the brackets with expressions 
+- [ ] add functionality for accepting 1s and 0s directly from the input
+- [ ] write a display for the minimisation code. Showing the implicants etc. 
+
+odd jobs 
+- [ ] write the help pages for the program 
+- [ ] redesign the main window for a more appealing side panel (key with the gates) 
+- [ ] display expression with LATEX, could render expressions as user is typing. 
+- [ ] Exporting drawn diagrams and truth tables. (option for both with a dialog), must crop properly
+- [ ] Increase size and readability of the dialogs. 
+- [ ] Customisation menu (year group selection) to change visuals for the type of user. 
+- [ ] Add a scroll viewer so that much larger tables and diagrams can be viewed more easily. 
+- [ ] ?functionality for diagrams with multiple inputs. 
+- [ ] Inputs do not have to be sequential within entered expressions. 
+- [ ] Add a application picture for the application. 
+
