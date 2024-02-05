@@ -20,16 +20,17 @@ namespace _2BNOR_2B
     {
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
         private char[] booleanOperators = { '.', '^', '+', '!' };
-        private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate"};
+        private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
         private string infixExpression = "";
-        private string postfixExpression = ""; 
+        private string postfixExpression = "";
+        private string inputStates = "";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
-        private element[] elements; 
+        private element[] elements;
         private wire[] wires;
-        private Canvas c; 
+        private Canvas c;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
         int elementWidth = 2;
@@ -39,13 +40,13 @@ namespace _2BNOR_2B
 
         public diagram(Canvas c)
         {
-            this.c = c; 
+            this.c = c;
         }
 
         public void setExpression(string expression)
         {
             this.infixExpression = expression;
-            generateBinaryTreeFromExpression(expression); 
+            generateBinaryTreeFromExpression(expression);
         }
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
@@ -200,16 +201,16 @@ namespace _2BNOR_2B
 
         private string convertNameToSymbol(element node)
         {
-            string symbol = ""; 
+            string symbol = "";
             if (char.IsLetter(node.getLabel()))
             {
-                symbol += node.getLabel(); 
+                symbol += node.getLabel();
             }
             else
             {
                 string name = node.getElementName();
                 int nameIndex = Array.IndexOf(gateNames, name);
-                symbol += booleanOperators[nameIndex]; 
+                symbol += booleanOperators[nameIndex];
             }
             return symbol;
         }
@@ -222,7 +223,7 @@ namespace _2BNOR_2B
             }
 
             infixExpression += convertNameToSymbol(root);
-            
+
             if (root.rightChild != null)
             {
                 inorderTraversal(root.rightChild);
@@ -232,14 +233,14 @@ namespace _2BNOR_2B
         public string getInfixExpression()
         {
             inorderTraversal(rootNode);
-            return infixExpression; 
+            return infixExpression;
         }
 
         private void generateBinaryTreeFromExpression(string inputExpression)
         {
-            string postfixExpression = ConvertInfixtoPostfix(inputExpression);   
+            string postfixExpression = ConvertInfixtoPostfix(inputExpression);
             Stack<element> nodeStack = new Stack<element>();
-            elements = new element[inputExpression.Length+1];
+            elements = new element[inputExpression.Length + 1];
             element nodeToAdd;
             element leftChild;
             element rightChild;
@@ -291,7 +292,7 @@ namespace _2BNOR_2B
                     leftChild.parent = nodeToAdd;
                     rightChild.parent = nodeToAdd;
                 }
-                nodeStack.Push(nodeToAdd); 
+                nodeStack.Push(nodeToAdd);
                 elements[elementID] = nodeToAdd;
                 elementID++;
             }
@@ -336,11 +337,11 @@ namespace _2BNOR_2B
 
         public Rect getBoundsOfDiagram()
         {
-            int heightOfTree = getHeightOfTree(rootNode); 
+            int heightOfTree = getHeightOfTree(rootNode);
             double maxWidth = Math.Pow(2, heightOfTree);
             double maxY = (calculateNodeYposition(heightOfTree, heightOfTree, 0) * maxWidth) + 50;
             double maxX = calculateNodeXposition(rootNode, heightOfTree, 0) + 50;
-            return new Rect(new Size(maxX, maxY)); 
+            return new Rect(new Size(maxX, maxY));
         }
 
         private wire drawWiresForLeftChildren(element root)
@@ -348,7 +349,7 @@ namespace _2BNOR_2B
             wire w = new wire(c);
             logicGate rootLogicGate = root.getLogicGate();
             logicGate leftchildLogicGate = root.leftChild.getLogicGate();
-            element input; 
+            element input;
             w.setStart(rootLogicGate.getInputPoint1());
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
@@ -363,15 +364,15 @@ namespace _2BNOR_2B
             }
             w.setGate(leftchildLogicGate);
             w.draw();
-            return w; 
+            return w;
         }
 
         private wire drawWiresForRightChildren(element root)
         {
-            wire w = new wire(c); 
+            wire w = new wire(c);
             logicGate rootLogicGate = root.getLogicGate();
             logicGate rightchildLogicGate = root.rightChild.getLogicGate();
-            element input; 
+            element input;
             w.setStart(rootLogicGate.getInputPoint2());
             if (rightchildLogicGate != null)
             {
@@ -384,7 +385,7 @@ namespace _2BNOR_2B
             }
             w.setGate(rightchildLogicGate);
             w.draw();
-            return w; 
+            return w;
         }
 
         private void drawWires(element root, string inputExpression)
@@ -392,12 +393,12 @@ namespace _2BNOR_2B
             Queue<element> q = new Queue<element>();
             wires = new wire[getNumberOfNodes(root)];
             element tmp;
-            int i = 0;  
+            int i = 0;
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
             while (q.Count != 0)
             {
-                tmp = q.Dequeue();  
+                tmp = q.Dequeue();
                 if (tmp.leftChild != null)
                 {
                     wires[i] = drawWiresForLeftChildren(tmp);
@@ -411,6 +412,30 @@ namespace _2BNOR_2B
                     q.Enqueue(tmp.rightChild);
                 }
             }
+        }
+
+        private void getInputStates(element root)
+        {
+            if (root.leftChild == null && root.rightChild == null)
+            {
+                inputStates += root.getState();
+            }
+
+            if (root.leftChild != null)
+            {
+                getInputStates(root.leftChild);
+            }
+
+            if (root.rightChild != null)
+            {
+                getInputStates(root.rightChild);
+            }
+        }
+
+
+        private void updateWires()
+        {
+
         }
 
         //Store the wires with in the diagram. Store the deepest node wihtin the wire object.

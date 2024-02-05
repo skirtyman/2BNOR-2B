@@ -48,6 +48,11 @@ namespace _2BNOR_2B
             inputGate = logicGate; 
         }
 
+        public void setColour(Brush colour)
+        {
+            this.colour = colour;
+        }
+
         private List<Point> calculatePoints()
         {
             points.Add(inputPoint);
