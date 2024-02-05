@@ -62,9 +62,6 @@
       <DependentUpon>BuiltInCircuitDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="diagram.cs" />
-    <Compile Include="DiagramMinimisationWindow.xaml.cs">
-      <DependentUpon>DiagramMinimisationWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="displayWindow.xaml.cs">
       <DependentUpon>displayWindow.xaml</DependentUpon>
     </Compile>
@@ -87,11 +84,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DiagramMinimisationWindow.xaml">
+    <Page Include="displayWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="displayWindow.xaml">
+    <Page Include="helpPages.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

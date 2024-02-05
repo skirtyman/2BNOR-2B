@@ -16,13 +16,13 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" />
-                <MenuItem Header="_Save" />
-                <MenuItem Header="_Export" />
-                <Separator/>
-                <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
-            </MenuItem>
-            <MenuItem Header="_Truth tables">
+                <MenuItem Header="_Open Diagram" Click="MenuItem_LoadDiagram"/>
+                    <MenuItem Header="_Save Diagram" Click="MenuItem_SaveDiagram"/>
+                    <MenuItem Header="_Export" Click="MenuItem_ExportDiagram" />
+                    <Separator/>
+                    <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
+                </MenuItem>
+                <MenuItem Header="_Truth tables">
                 <MenuItem Header="Generate From Diagram" Click="MenuItem_GenerateTableFromDiagram"/>
                 <MenuItem Header="Generate From Expression" Click="MenuItem_GenerateTableFromExpression"/>
             </MenuItem>
@@ -47,9 +47,7 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" BorderThickness="1" BorderBrush="Gray" Margin="5">
-                <Canvas x:Name="MainWindowCanvas" Background="Bisque"
-                        PreviewMouseMove="MainWindowCanvas_PreviewMouseMove"
-                        PreviewMouseUp="MainWindowCanvas_PreviewMouseUp"/>
+                <Canvas x:Name="MainWindowCanvas" Background="Bisque"/>
             </Border>
 
             <ScrollViewer Grid.Column="1" HorizontalAlignment="Right" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">

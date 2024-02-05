@@ -17,16 +17,20 @@ namespace _2BNOR_2B
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
+        private logicGate inputGate; 
+        private Brush colour = Brushes.Black; 
+        private Canvas c; 
         
-        public wire()
+        public wire(Canvas c)
         {
-
+            this.c = c; 
         }
         
-        public wire(Point inputPoint, Point outputPoint)
+        public wire(Point inputPoint, Point outputPoint, Canvas c)
         {
             this.inputPoint = inputPoint;
             this.outputPoint = outputPoint;
+            this.c = c;
         }
 
         public void setStart(Point inputPoint)
@@ -37,6 +41,11 @@ namespace _2BNOR_2B
         public void setEnd(Point outputPoint)
         {
             this.outputPoint = outputPoint;
+        }
+
+        public void setGate(logicGate logicGate)
+        {
+            inputGate = logicGate; 
         }
 
         private List<Point> calculatePoints()
@@ -52,7 +61,7 @@ namespace _2BNOR_2B
             return points;
         }
 
-        public void draw(Canvas c, Brush color)
+        public void draw()
         {
             points.Clear(); 
             points = calculatePoints();
@@ -61,7 +70,7 @@ namespace _2BNOR_2B
             {
                 l = new Line();
                 l.StrokeThickness = 2;
-                l.Stroke = color;
+                l.Stroke = colour;
                 l.X1 = points[i].X;
                 l.Y1 = points[i].Y;
                 l.X2 = points[i + 1].X;

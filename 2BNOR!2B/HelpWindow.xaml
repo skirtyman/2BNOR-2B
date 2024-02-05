@@ -6,6 +6,14 @@
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
         Title="Help Window" MaxHeight="850" MaxWidth="1500" MinWidth="450" MinHeight="450" Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="helpPages.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -86,11 +94,7 @@
         </StackPanel>
 
         <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-            <RichTextBox Background="Bisque" IsReadOnly="True">
-                <FlowDocument>
-
-                </FlowDocument>
-            </RichTextBox>
+            <FlowDocumentPageViewer Grid.Column="1" BorderThickness="1" Document="{StaticResource doctext}"/>
         </Border>
 
     </Grid>

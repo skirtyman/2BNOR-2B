@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,14 +24,12 @@ namespace _2BNOR_2B
     public partial class MainWindow : Window
     {
         private diagram d;
-        private logicGate dragObject = null;
-        private Point offset; 
+        private string saveString = ""; 
 
         public MainWindow()
         {
             InitializeComponent();
-            d = new diagram();
-            d.setHandler(c_PreviewMouseDown); 
+            d = new diagram(MainWindowCanvas);
         }
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
@@ -74,12 +74,6 @@ namespace _2BNOR_2B
         }
 
         #region menustrip commands 
-        private void MenuItem_OpenDiagramMinimisationWindow(object sender, RoutedEventArgs e)
-        {
-            //creates an instance of the diagram minimisation window. (click event)
-            DiagramMinimisationWindow diagramMinimisationWindow = new DiagramMinimisationWindow();
-            diagramMinimisationWindow.Show();
-        }
 
         private void MenuItem_OpenHelpWindow(object sender, RoutedEventArgs e)
         {
@@ -122,7 +116,9 @@ namespace _2BNOR_2B
             {
                 expression = expressionInputDialog.result;
                 statusBox_mainWindow.Text = "Status: Drew expression " + expression;
-                d.drawDiagram(MainWindowCanvas, expression); 
+                d.drawDiagram(expression);
+               
+                saveString = expression; 
             }
         }
 
@@ -137,44 +133,73 @@ namespace _2BNOR_2B
             }
         }
 
+        private void MenuItem_SaveDiagram(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
+            saveFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            saveFileDialog.ShowDialog();
+            File.WriteAllText(saveFileDialog.FileName, saveString);
+        }
+
+        private void MenuItem_LoadDiagram(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
+            openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            openFileDialog.ShowDialog();
+            saveString = File.ReadAllText(openFileDialog.FileName);
+            d.drawDiagram(saveString);
+        }
+
+        private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PNG (*.png)|*.png";
+            sfd.DefaultExt = ".png";
+            if (sfd.ShowDialog() != true)
+            {
+                return;
+            }
+
+
+            //Rect bounds = VisualTreeHelper.GetDescendantBounds(MainWindowCanvas);
+            Rect bounds = d.getBoundsOfDiagram(); 
+            double dpi = 96d;
+
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, dpi, dpi, PixelFormats.Default);
+
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen())
+            {
+                VisualBrush vb = new VisualBrush(MainWindowCanvas);
+                dc.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+            }
+
+            rtb.Render(dv);
+
+            BitmapEncoder pngEncoder = new PngBitmapEncoder();
+            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+
+                pngEncoder.Save(ms);
+                ms.Close();
+                File.WriteAllBytes(sfd.FileName, ms.ToArray());
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void MenuItem_CloseApp(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
         #endregion
-
-        private void MainWindowCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            if (dragObject == null)
-            {
-                return;
-            }
-            // in order to prevent the object from leaving the window, set the bounds with this condition
-            // uses the canvas actual/current height and width to determine the bounds, even if the window will be resized
-            IInputElement s = (IInputElement)sender;
-            if ((e.GetPosition(s).X < MainWindowCanvas.ActualWidth - 50) && (e.GetPosition(s).Y < MainWindowCanvas.ActualHeight - 50) && (e.GetPosition(s).X > 50 && e.GetPosition(s).Y > 50))
-            {
-                Point position = e.GetPosition(s);
-                Canvas.SetTop(dragObject, position.Y - offset.Y);
-                Canvas.SetLeft(dragObject, position.X - offset.X);
-                dragObject.updateWires(MainWindowCanvas); 
-            }
-        }
-
-        public void c_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            dragObject = (logicGate)sender;
-            offset = e.GetPosition(MainWindowCanvas);
-            offset.Y -= Canvas.GetTop(dragObject);
-            offset.X -= Canvas.GetLeft(dragObject);
-            MainWindowCanvas.CaptureMouse();
-        }
-
-        private void MainWindowCanvas_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            dragObject = null;
-            MainWindowCanvas.ReleaseMouseCapture();
-        }
     }
 }

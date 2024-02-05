@@ -25,11 +25,11 @@ namespace _2BNOR_2B
         private string postfixExpression = ""; 
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
-        private element outputNode; 
+        private element outputNode;
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
         private element[] elements; 
         private wire[] wires;
-        private MouseButtonEventHandler dragHandler;
+        private Canvas c; 
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
         int elementWidth = 2;
@@ -37,15 +37,15 @@ namespace _2BNOR_2B
         int pixelsPerSquare = 15;
         double canvasWidth, canvasHeight;
 
-        public diagram()
+        public diagram(Canvas c)
         {
-
+            this.c = c; 
         }
 
-        //(A.((!C.D)+(B.C)))+!(D.A)
-        public void setHandler(MouseButtonEventHandler handler)
+        public void setExpression(string expression)
         {
-            dragHandler = handler;
+            this.infixExpression = expression;
+            generateBinaryTreeFromExpression(expression); 
         }
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
@@ -64,9 +64,8 @@ namespace _2BNOR_2B
                 {
                     continue;
                 }
-                //uses the ascii value to filter brackets as ascii of brackets >> letters (operands)
-                //also checking that the token is an operand, operators ascii value > brackets ascii value
-                if ((token >= 65) && (Array.IndexOf(booleanOperators, token) == -1))
+
+                if (char.IsLetter(token) || char.IsNumber(token))
                 {
                     postfixExpression += token;
                 }
@@ -256,10 +255,16 @@ namespace _2BNOR_2B
             foreach (char c in postfixExpression)
             {
                 //If the token is a letter then it must be an input. 
-                if (char.IsLetter(c) && char.IsUpper(c))
+                if ((char.IsLetter(c) && char.IsUpper(c)) || char.IsNumber(c))
                 {
                     //creating an input pin
                     nodeToAdd = new element(elementID, c);
+                    //If the input is a number then the state can already by set. 
+                    if (char.IsNumber(c))
+                    {
+                        nodeToAdd.setState(c - 48);
+                    }
+
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
@@ -332,15 +337,22 @@ namespace _2BNOR_2B
             return translateNode(x, heightOfTree);
         }
 
-        private void drawWiresForLeftChildren(Canvas c, element root)
+        public Rect getBoundsOfDiagram()
         {
-            wire w = new wire();
+            int heightOfTree = getHeightOfTree(rootNode); 
+            double maxWidth = Math.Pow(2, heightOfTree);
+            double maxY = (calculateNodeYposition(heightOfTree, heightOfTree, 0) * maxWidth) + 50;
+            double maxX = calculateNodeXposition(rootNode, heightOfTree, 0) + 50;
+            return new Rect(new Size(maxX, maxY)); 
+        }
+
+        private void drawWiresForLeftChildren(element root)
+        {
+            wire w = new wire(c);
             logicGate rootLogicGate = root.getLogicGate();
             logicGate leftchildLogicGate = root.leftChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint1());
-            rootLogicGate.setLeftChildWire(w);
-            leftchildLogicGate.setLeftChildWire(w); 
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
             {
@@ -352,18 +364,16 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
             }
-            w.draw(c, Brushes.Black);
+            w.draw();
         }
 
-        private void drawWiresForRightChildren(Canvas c, element root)
+        private void drawWiresForRightChildren(element root)
         {
-            wire w = new wire();
+            wire w = new wire(c); 
             logicGate rootLogicGate = root.getLogicGate();
             logicGate rightchildLogicGate = root.rightChild.getLogicGate();
             element input; 
             w.setStart(rootLogicGate.getInputPoint2());
-            rootLogicGate.setRightChildWire(w); 
-            rightchildLogicGate.setRightChildWire(w);
             if (rightchildLogicGate != null)
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
@@ -373,13 +383,15 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
             }
-            w.draw(c, Brushes.Black);
+            w.setGate(rightchildLogicGate);
+            w.draw(); 
         }
 
-        private void drawWires(Canvas c, element root, string inputExpression)
+        private void drawWires(element root, string inputExpression)
         {
             Queue<element> q = new Queue<element>();
-            element tmp; 
+            wires = new wire[getNumberOfNodes(root)-1];
+            element tmp;
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
             while (q.Count != 0)
@@ -387,17 +399,21 @@ namespace _2BNOR_2B
                 tmp = q.Dequeue();  
                 if (tmp.leftChild != null)
                 {
-                    drawWiresForLeftChildren(c, tmp); 
+                    drawWiresForLeftChildren(tmp); 
                     q.Enqueue(tmp.leftChild);
                 }
                 if (tmp.rightChild != null)
                 {
-                    drawWiresForRightChildren(c, tmp); 
+                    drawWiresForRightChildren(tmp); 
                     q.Enqueue(tmp.rightChild);
                 }
             }
         }
 
+        //Store the wires with in the diagram. Store the deepest node wihtin the wire object.
+        //test == check if button can toggle the colour of wire. 
+
+        
         //function that carries out a breadth first traversal on the binary tree. Calculates the position of the nodes and draws them 
         //on the canvas. 
         /*
@@ -406,7 +422,7 @@ namespace _2BNOR_2B
         */
 
         //Adds nodes to the canvas by finding their position and then placing them. This only adds gates to nodes that are either unique inputs or boolean operators. 
-        private void drawNode(Canvas c, element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
+        private void drawNode(element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
             logicGate logicGate;
             //Position of the node within the canvas. 
@@ -421,13 +437,12 @@ namespace _2BNOR_2B
                 currentNode.setLogicGate(logicGate);
                 Canvas.SetLeft(logicGate, x);
                 Canvas.SetTop(logicGate, y);
-                logicGate.PreviewMouseDown += dragHandler; 
                 c.Children.Add(logicGate);
             }
         }
 
         //Breadth first traversal that is used to place all of the nodes within the tree onto the canvas. 
-        private void drawNodes(Canvas c, element root, int heightOfTree)
+        private void drawNodes(element root, int heightOfTree)
         {
             Queue<element> q = new Queue<element>();
             q.Enqueue(root);
@@ -441,7 +456,7 @@ namespace _2BNOR_2B
                 while (sizeOfQ != 0)
                 {
                     currentNode = q.Peek();
-                    drawNode(c, currentNode, heightOfTree, depthWithinTree, positionWithinLayer);
+                    drawNode(currentNode, heightOfTree, depthWithinTree, positionWithinLayer);
                     q.Dequeue();
                     positionWithinLayer++;
                     if (currentNode.leftChild != null)
@@ -461,18 +476,17 @@ namespace _2BNOR_2B
         }
 
         //Small function for drawing the wire that connects the input to the root node of the binary tree. 
-        private wire drawOutputWire(Canvas c)
+        private wire drawOutputWire()
         {
-            wire w = new wire();
+            wire w = new wire(c);
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
-            w.draw(c, Brushes.Black);
-            rootNode.getLogicGate().setParentWire(w);
+            w.draw();
             return w;
         }
 
         //Method that draws the output pin for the diagram. 
-        private void drawOutput(Canvas c, int heightOfTree)
+        private void drawOutput(int heightOfTree)
         {
             //Creating an element to represent the output. Unique elementID of -1. 
             //Limitation of program can only draw single input gates. 
@@ -484,21 +498,20 @@ namespace _2BNOR_2B
             double y = calculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x);
-            logicGate.PreviewMouseDown += dragHandler; 
             c.Children.Add(logicGate);
-            logicGate.setLeftChildWire(drawOutputWire(c));
         }
 
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
-        public void drawDiagram(Canvas c, string inputExpression)
+        public void drawDiagram(string inputExpression)
         {
             canvasHeight = c.ActualHeight;
             canvasWidth = c.ActualWidth;
             generateBinaryTreeFromExpression(inputExpression);
             int heightOfTree = getHeightOfTree(rootNode); 
-            drawNodes(c, rootNode, heightOfTree);
-            drawWires(c, rootNode, inputExpression);
-            drawOutput(c, heightOfTree); 
+            drawNodes(rootNode, heightOfTree);
+            drawWires(rootNode, inputExpression);
+            drawOutput(heightOfTree);
+            drawOutputWire();
         }
 
         #endregion 
@@ -599,7 +612,7 @@ namespace _2BNOR_2B
             foreach (char token in booleanExpression)
             {
                 //any letter is an input within the expression. Therfore add it to the counter. 
-                if (char.IsLetter(token) && (!alreadyCounted.Contains(token)))
+                if ((char.IsLetter(token) || char.IsNumber(token)) && (!alreadyCounted.Contains(token)))
                 {
                     numberOfInputs++;
                     alreadyCounted += token;
@@ -682,7 +695,7 @@ namespace _2BNOR_2B
             //The inputs for the table. It only contains unique inputs. 
             foreach (char c in inputExpression)
             {
-                if (!tmp.Contains(c.ToString()) && char.IsLetter(c))
+                if (!tmp.Contains(c.ToString()) && (char.IsLetter(c) || char.IsNumber(c)))
                 {
                     tmp[i] = c.ToString();
                     i++;
@@ -694,7 +707,7 @@ namespace _2BNOR_2B
             //Producing the headers for evaluation. 
             foreach (char c in postfix)
             {
-                if (char.IsLetter(c))
+                if (char.IsLetter(c) || char.IsNumber(c))
                 {
                     subExpressionStack.Push(c.ToString());
                 }
@@ -808,6 +821,27 @@ namespace _2BNOR_2B
         #endregion
 
         #region Minimisation
+        //0100100
+        //for each key that isnt a prime implicant. 
+        //find the number largest number of 1s 
+        //choose these until the bit pattern is 11111111.
+
+
+        //Adds and gates to consecutive inputs (ie A!B -> (A.!B))
+        private string addANDGates(string epi)
+        {
+            string tmp = epi; 
+            char last = epi[0]; 
+            for (int i = 1; i < epi.Length; i++)
+            {
+                if (char.IsLetter(epi[i]) && char.IsLetter(last))
+                {
+                    tmp = tmp.Insert(i, ".");
+                }
+            }
+            return "(" + tmp + ")"; 
+        }
+
 
         //Produces the final minimised expression from the essential prime implicants.
         private string convertEPIsToExpression(List<string> essentialPrimeImplicants)
@@ -815,7 +849,7 @@ namespace _2BNOR_2B
             //Converting each implicant into input form. Ie (-100 becomes B!C!D)
             essentialPrimeImplicants = essentialPrimeImplicants.ConvertAll(new Converter<string, string>(convertImplicantToExpression));
             //Each implicant is separated by OR gates. 
-            string expression = string.Join(" + ", essentialPrimeImplicants);
+            string expression = string.Join("+", essentialPrimeImplicants);
             return expression;
         }
 
@@ -828,19 +862,19 @@ namespace _2BNOR_2B
             char input;
             for (int i = 0; i < epi.Length; i++)
             {
+                input = (char)(i + 65); 
                 if (epi[i] == '1')
                 {
                     //Each prime implicant in final expression is always sequential.
-                    input = (char)(i + 65);
                     tmp += input;
                 }
                 //If 0 in implicant then the input is the complement (Ie, NOT gate). 
                 else if (epi[i] == '0')
                 {
-                    input = (char)(i + 65);
                     tmp += "!" + input;
                 }
             }
+            tmp = addANDGates(tmp); 
             return tmp;
         }
 

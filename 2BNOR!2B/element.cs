@@ -89,5 +89,15 @@ namespace _2BNOR_2B
             this.unique = unique;
         }
 
+        public void setState(int state)
+        {
+            this.state = state; 
+        }
+
+        public int getState()
+        {
+            return state; 
+        }
+
     }
 }
