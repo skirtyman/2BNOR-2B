@@ -41,12 +41,13 @@ namespace _2BNOR_2B
 
         public Point getInputPoint1()
         {
+
             return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + 10);
         }
 
         public Point getInputPoint2()
         {
-            if (gate.leftChild == null)
+            if (gate.leftChild == null && gate.rightChild != null)
             {
                 return new Point(Canvas.GetLeft(this), Canvas.GetTop(this)+20);
             }

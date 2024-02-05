@@ -2,32 +2,36 @@
 
 Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f.svg)](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f)
 ---
-## Features
-- [ ] Drawing grid lines on the main canvas.
-- [ ] Making the grid resizable. 
-### Drawing diagrams from expressions 
-- [x] Added labels to the inputs
-- [ ] Adjust formulae so that the components are placed onto the grid.
-- [ ] Adjust formulae for odd shaped graphs
-- [x] Repeated inputs within expressions are not drawn
-- [ ] Wires are stored within the node objects (useful for repositioning nodes)
-- [x] Add outputs to the drawn diagrams.
-### making compnents interactive
-- [ ] wires change colours based off of input node states. 
-- [ ] Input pins show their state with a label
-- [ ] Gates change the state of wires.
-- [ ] Output pins displays the states of wires
-### Drawing diagrams through drag and drop
-- [ ] Clicking side menu adds component to the canvas
-- [ ] dragging the component follows the grid lines.
-- [ ] Wires will draw intersections if one is drawn over the other.
-- [ ] Drawn wires will follow the grid lines. 
-### Other features
-- [ ] carrying out traversal on drawn diagram to produce a boolean expression
-- [ ] Generating truth tables from drawn diagrams (find the expression and then produce table)
-- [ ] Scroll view for generated tables that are too large.
-- [ ] Minimising expressions and diagrams (Quine-Mclusky and Karnaugh maps)
-- [ ] Help pages detailing how the program works with markdown formatting.
-- [ ] Saving drawn diagrams in custom XML format. `Serialisation`
-- [ ] Exporting a trimmed version of the canvas with diagrams (optional truth table included).
-- [ ] Loading in the cuustom XML format. `Deserialisation`
+### Todo
+diagram drawing 
+- [ ] offset of the vertical wires for the repeated input case
+- [ ] draw circles in connected wires 
+- [ ] draw circular brigdes for wires. 
+- [ ] make the inputs smaller and square. 
+- [ ] redo sprite for the output pin 
+- [ ] diagrams can be created only with NAND and NOR, (ask for this with a dialog)
+
+diagram interactivity
+- [ ] inputs and outputs display the state that they are currently storing 
+- [ ] wires display the state of the child component that is connected to them 
+
+truth tables 
+- [ ] ?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
+
+minimisation 
+- [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. 
+- [ ] Reformat the brackets with expressions 
+- [ ] write a display for the minimisation code. Showing the implicants etc. 
+
+odd jobs 
+- [ ] write the help pages for the program 
+- [ ] redesign the main window for a more appealing side panel (key with the gates) 
+- [ ] display expression with LATEX, could render expressions as user is typing. 
+- [ ] Exporting drawn diagrams and truth tables. (option for both with a dialog), must crop properly
+- [ ] Increase size and readability of the dialogs. 
+- [ ] Customisation menu (year group selection) to change visuals for the type of user. 
+- [ ] Add a scroll viewer so that much larger tables and diagrams can be viewed more easily. 
+- [ ] ?functionality for diagrams with multiple inputs. 
+- [ ] Inputs do not have to be sequential within entered expressions. 
+- [ ] Add a application picture for the application. 
+

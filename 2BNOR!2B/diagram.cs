@@ -225,17 +225,14 @@ namespace _2BNOR_2B
             
             if (root.rightChild != null)
             {
-                inorderTraversal(root.rightChild); 
+                inorderTraversal(root.rightChild);
             }
         }
 
         public string getInfixExpression()
         {
-            infixExpression = ""; 
             inorderTraversal(rootNode);
-            string[] headers = generateTruthTableHeadersWithSteps(infixExpression);
-            //return infixExpression; 
-            return headers[headers.Length-1]; 
+            return infixExpression; 
         }
 
         private void generateBinaryTreeFromExpression(string inputExpression)
