@@ -343,7 +343,7 @@ namespace _2BNOR_2B
             return new Rect(new Size(maxX, maxY)); 
         }
 
-        private void drawWiresForLeftChildren(element root)
+        private wire drawWiresForLeftChildren(element root)
         {
             wire w = new wire(c);
             logicGate rootLogicGate = root.getLogicGate();
@@ -361,10 +361,12 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
             }
+            w.setGate(leftchildLogicGate);
             w.draw();
+            return w; 
         }
 
-        private void drawWiresForRightChildren(element root)
+        private wire drawWiresForRightChildren(element root)
         {
             wire w = new wire(c); 
             logicGate rootLogicGate = root.getLogicGate();
@@ -381,14 +383,16 @@ namespace _2BNOR_2B
                 w.setEnd(input.getLogicGate().getOutputPoint());
             }
             w.setGate(rightchildLogicGate);
-            w.draw(); 
+            w.draw();
+            return w; 
         }
 
         private void drawWires(element root, string inputExpression)
         {
             Queue<element> q = new Queue<element>();
-            wires = new wire[getNumberOfNodes(root)-1];
+            wires = new wire[getNumberOfNodes(root)];
             element tmp;
+            int i = 0;  
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
             while (q.Count != 0)
@@ -396,12 +400,14 @@ namespace _2BNOR_2B
                 tmp = q.Dequeue();  
                 if (tmp.leftChild != null)
                 {
-                    drawWiresForLeftChildren(tmp); 
+                    wires[i] = drawWiresForLeftChildren(tmp);
+                    i++;
                     q.Enqueue(tmp.leftChild);
                 }
                 if (tmp.rightChild != null)
                 {
-                    drawWiresForRightChildren(tmp); 
+                    wires[i] = drawWiresForRightChildren(tmp);
+                    i++;
                     q.Enqueue(tmp.rightChild);
                 }
             }
@@ -473,13 +479,13 @@ namespace _2BNOR_2B
         }
 
         //Small function for drawing the wire that connects the input to the root node of the binary tree. 
-        private wire drawOutputWire()
+        private void drawOutputWire()
         {
             wire w = new wire(c);
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
-            w.draw();
-            return w;
+            w.draw(); 
+            wires[wires.Length - 1] = w;
         }
 
         //Method that draws the output pin for the diagram. 
