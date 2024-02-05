@@ -17,7 +17,6 @@ diagram interactivity
 
 truth tables 
 - [ ] ?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
-- [ ] produce tables straight from the diagram
 
 minimisation 
 - [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. 
