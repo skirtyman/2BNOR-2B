@@ -21,9 +21,11 @@ namespace _2BNOR_2B
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
         private char[] booleanOperators = { '.', '^', '+', '!' };
         private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
+        private string[] inputMap;
+        private string[] outputMap;
         private string infixExpression = "";
         private string postfixExpression = "";
-        private string inputStates = "";
+        private string inputStates = "0110";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -153,6 +155,58 @@ namespace _2BNOR_2B
                 return flattenedExpression;
             }
         }
+
+        private void getInputStates(element root)
+        {
+            if (root.leftChild == null && root.rightChild == null)
+            {
+                inputStates += root.getState();
+            }
+
+            if (root.leftChild != null)
+            {
+                getInputStates(root.leftChild);
+            }
+
+            if (root.rightChild != null)
+            {
+                getInputStates(root.rightChild);
+            }
+        }
+
+
+        private void updateWires()
+        {
+            //outputmap contains strings which correspond with each row (ie 2nd row of AND table = "010" etc.) 
+            //find the truth table for the expression 
+            //find the corresponding row of the truth table and extract the string. 
+            //loop through each of the wires and set the state to the value of the truth 
+
+
+            //get the truth table row. 
+            //string tableRow = getTruthTableRow(inputStates);
+            string tableRow = getTruthTableRow(inputStates);
+            tableRow.Reverse(); 
+            wire currentWire; 
+            for (int i = 0; i < wires.Length-1; i++)
+            {
+                currentWire = wires[i];
+                //char bit = tableRow[tableRow.Length - i];
+                char bit = tableRow[i];
+                if (bit == '1')
+                {
+                    currentWire.setColour(Brushes.Green); 
+                }
+                else
+                {
+                    currentWire.setColour(Brushes.Red);
+                }
+            }
+        }
+
+        //Store the wires with in the diagram. Store the deepest node wihtin the wire object.
+        //test == check if button can toggle the colour of wire. 
+
 
         #region diagram drawing
         private int getHeightOfTree(element root)
@@ -413,34 +467,6 @@ namespace _2BNOR_2B
                 }
             }
         }
-
-        private void getInputStates(element root)
-        {
-            if (root.leftChild == null && root.rightChild == null)
-            {
-                inputStates += root.getState();
-            }
-
-            if (root.leftChild != null)
-            {
-                getInputStates(root.leftChild);
-            }
-
-            if (root.rightChild != null)
-            {
-                getInputStates(root.rightChild);
-            }
-        }
-
-
-        private void updateWires()
-        {
-
-        }
-
-        //Store the wires with in the diagram. Store the deepest node wihtin the wire object.
-        //test == check if button can toggle the colour of wire. 
-
         
         //function that carries out a breadth first traversal on the binary tree. Calculates the position of the nodes and draws them 
         //on the canvas. 
@@ -510,6 +536,7 @@ namespace _2BNOR_2B
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
             w.draw(); 
+            
             wires[wires.Length - 1] = w;
         }
 
@@ -535,11 +562,14 @@ namespace _2BNOR_2B
             canvasHeight = c.ActualHeight;
             canvasWidth = c.ActualWidth;
             generateBinaryTreeFromExpression(inputExpression);
+            inputMap = generateInputMap(inputExpression);
+            outputMap = generateOutputMap(inputExpression);
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(rootNode, heightOfTree);
             drawWires(rootNode, inputExpression);
             drawOutput(heightOfTree);
             drawOutputWire();
+            updateWires();
         }
 
         #endregion 
@@ -630,6 +660,15 @@ namespace _2BNOR_2B
         private string ConvertIntintoBinaryString(int n, string booleanExpression)
         {
             return Convert.ToString(n, 2).PadLeft(getNumberOfInputs(booleanExpression), '0');
+        }
+
+        //Gets the respective string value of the truth table based off of its input. 
+        private string getTruthTableRow(string expression)
+        {
+            int samerow = Array.IndexOf(inputMap, inputStates);
+            return outputMap[samerow];
+            //return the same row as the input map
+            //return generateOutputMap(expression)[Array.IndexOf(inputMap, inputStates)];
         }
 
         //counts the number of unique inputs within a boolean expression

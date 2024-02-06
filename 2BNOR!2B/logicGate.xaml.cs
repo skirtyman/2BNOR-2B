@@ -37,6 +37,29 @@ namespace _2BNOR_2B
             {
                 setLabel(); 
             }
+            this.PreviewMouseDown += LogicGate_PreviewMouseDown;
+        }
+
+        private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("Clicked!");
+            //If the component clicked is an input gate then change state and return 
+            //Otherwise do nothing and the event has been handled. 
+            if (gate.getElementName() == "input_pin")
+            {
+                if (gate.getState() == 1)
+                {
+                    gate.setState(0);
+                    
+                }
+                else
+                {
+                    gate.setState(1);
+                  
+                }
+
+                //return 1; 
+            }
         }
 
         public Point getInputPoint1()

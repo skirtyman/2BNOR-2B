@@ -17,6 +17,7 @@ namespace _2BNOR_2B
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
+        private Line[] lines = new Line[3];
         private logicGate inputGate; 
         private Brush colour = Brushes.Black; 
         private Canvas c; 
@@ -51,6 +52,10 @@ namespace _2BNOR_2B
         public void setColour(Brush colour)
         {
             this.colour = colour;
+            foreach (Line line in lines)
+            {
+                line.Stroke = colour;
+            }
         }
 
         private List<Point> calculatePoints()
@@ -74,6 +79,10 @@ namespace _2BNOR_2B
             for (int i = 0; i < points.Count - 1; i++)
             {
                 l = new Line();
+                if (i <= 2)
+                {
+                    lines[i] = l; 
+                }
                 l.StrokeThickness = 2;
                 l.Stroke = colour;
                 l.X1 = points[i].X;
