@@ -25,7 +25,7 @@ namespace _2BNOR_2B
         private string[] outputMap;
         private string infixExpression = "";
         private string postfixExpression = "";
-        private string inputStates = "0110";
+        private string inputStates = "011";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -188,7 +188,7 @@ namespace _2BNOR_2B
             string tableRow = getTruthTableRow(inputStates);
             tableRow.Reverse(); 
             wire currentWire; 
-            for (int i = 0; i < wires.Length-1; i++)
+            for (int i = 0; i < wires.Length; i++)
             {
                 currentWire = wires[i];
                 //char bit = tableRow[tableRow.Length - i];
