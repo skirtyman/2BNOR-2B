@@ -25,7 +25,7 @@ namespace _2BNOR_2B
         private string[] outputMap;
         private string infixExpression = "";
         private string postfixExpression = "";
-        private string inputStates = "011";
+        private string inputStates = "0110";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -468,24 +468,27 @@ namespace _2BNOR_2B
             }
         }
         
-        //function that carries out a breadth first traversal on the binary tree. Calculates the position of the nodes and draws them 
-        //on the canvas. 
-        /*
-          Current cases that do not work: 
-            Expressions with NOT gate (not offset properly, need to also offset all children)
-        */
-
         //Adds nodes to the canvas by finding their position and then placing them. This only adds gates to nodes that are either unique inputs or boolean operators. 
         private void drawNode(element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
             logicGate logicGate;
             //Position of the node within the canvas. 
             double x, y; 
-            //checking if a node is not a repeated input.
+            //checking if a node is not a repeated input. If it is then a logic gate doesn't have to be drawn. 
             if (currentNode.getUniqueness())
             {
                 x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
-                y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
+                //Gates are not being drawn in parallel to preserve the look of the tree. 
+                if (currentNode.parent != null && currentNode.parent.getElementName() == "not_gate" && currentNode.getElementName() == "input_pin")
+                {
+                    //If the nodes parent is a not gate then the child should be drawn in parallel. So the Ycoord of the NOT gate can be used 
+                    //and so does not have to be calculated. 
+                    y = Canvas.GetTop(currentNode.parent.getLogicGate()); 
+                }
+                else
+                {
+                    y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
+                }
                 logicGate = new logicGate(currentNode); 
                 //Adding the link between the tree and the visual diagram. 
                 currentNode.setLogicGate(logicGate);
