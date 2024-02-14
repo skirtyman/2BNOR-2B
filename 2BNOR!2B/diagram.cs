@@ -23,9 +23,10 @@ namespace _2BNOR_2B
         private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
         private string[] inputMap;
         private string[] outputMap;
+        private string[] headers; 
         private string infixExpression = "";
         private string postfixExpression = "";
-        private string inputStates = "0110";
+        private string inputStates = "001";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -156,57 +157,80 @@ namespace _2BNOR_2B
             }
         }
 
-        private void getInputStates(element root)
+        private char[] getLastOperands(string[] headers)
         {
-            if (root.leftChild == null && root.rightChild == null)
+            char[] lastOperands = new char[headers.Length];
+            string postfixHeader = "";
+            for (int i = 0; i < headers.Length; i++)
             {
-                inputStates += root.getState();
+                //The last character of a postfix expression is always the outermost operator (highest node in the subtree). 
+                postfixHeader = ConvertInfixtoPostfix(headers[i]);
+                //Adding the last char. 
+                lastOperands[i] = postfixHeader[postfixHeader.Length - 1];  
             }
-
-            if (root.leftChild != null)
-            {
-                getInputStates(root.leftChild);
-            }
-
-            if (root.rightChild != null)
-            {
-                getInputStates(root.rightChild);
-            }
+            return lastOperands;
         }
 
-
-        private void updateWires()
+        private void updateWires(element root)
         {
-            //outputmap contains strings which correspond with each row (ie 2nd row of AND table = "010" etc.) 
-            //find the truth table for the expression 
-            //find the corresponding row of the truth table and extract the string. 
-            //loop through each of the wires and set the state to the value of the truth 
-
-
-            //get the truth table row. 
-            //string tableRow = getTruthTableRow(inputStates);
+            char[] lastOperands = getLastOperands(headers);
             string tableRow = getTruthTableRow(inputStates);
-            tableRow.Reverse(); 
+            Queue<element> q = new Queue<element>();
             wire currentWire; 
-            for (int i = 0; i < wires.Length; i++)
+            element tmp;
+            int pos = 0;
+            int i = 0; 
+            bool isRoot = true; 
+            //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
+            q.Enqueue(root);
+            while (q.Count != 0)
             {
-                currentWire = wires[i];
-                //char bit = tableRow[tableRow.Length - i];
-                char bit = tableRow[i];
-                if (bit == '1')
+                tmp = q.Dequeue();
+                if (i == 0)
                 {
-                    currentWire.setColour(Brushes.Green); 
+                    pos = tableRow.Length-1;
                 }
                 else
                 {
-                    currentWire.setColour(Brushes.Red);
+                    pos = i - 1; 
                 }
+                currentWire = wires[pos]; 
+                colourWire(tableRow, currentWire, pos);
+
+                if (tmp.leftChild != null)
+                {
+
+                    q.Enqueue(tmp.leftChild);
+                }
+                if (tmp.rightChild != null)
+                {
+                    q.Enqueue(tmp.rightChild);
+                }
+                pos = 0; 
+                isRoot = false;
             }
         }
+        
 
-        //Store the wires with in the diagram. Store the deepest node wihtin the wire object.
-        //test == check if button can toggle the colour of wire. 
+        private int findPos(char[] lastOperands, char symbol)
+        {
+            //if the 
 
+            return -1;
+        }
+
+        private void colourWire(string tableRow, wire w, int pos)
+        {
+            char bit = tableRow[pos];
+            if (bit == '1')
+            {
+                w.setColour(Brushes.Green);
+            }
+            else
+            {
+                w.setColour(Brushes.Red);
+            }
+        }
 
         #region diagram drawing
         private int getHeightOfTree(element root)
@@ -253,18 +277,18 @@ namespace _2BNOR_2B
             return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
         }
 
-        private string convertNameToSymbol(element node)
+        private char convertNameToSymbol(element node)
         {
-            string symbol = "";
+            char symbol;
             if (char.IsLetter(node.getLabel()))
             {
-                symbol += node.getLabel();
+                symbol = node.getLabel();
             }
             else
             {
                 string name = node.getElementName();
                 int nameIndex = Array.IndexOf(gateNames, name);
-                symbol += booleanOperators[nameIndex];
+                symbol = booleanOperators[nameIndex];
             }
             return symbol;
         }
@@ -442,7 +466,7 @@ namespace _2BNOR_2B
             return w;
         }
 
-        private void drawWires(element root, string inputExpression)
+        private void drawWires(element root)
         {
             Queue<element> q = new Queue<element>();
             wires = new wire[getNumberOfNodes(root)];
@@ -481,12 +505,13 @@ namespace _2BNOR_2B
                 //Gates are not being drawn in parallel to preserve the look of the tree. 
                 if (currentNode.parent != null && currentNode.parent.getElementName() == "not_gate" && currentNode.getElementName() == "input_pin")
                 {
-                    //If the nodes parent is a not gate then the child should be drawn in parallel. So the Ycoord of the NOT gate can be used 
+                    //If the nodes parent is a not gate then the child should be drawn in parallel. So the Y-coord of the NOT gate can be used 
                     //and so does not have to be calculated. 
                     y = Canvas.GetTop(currentNode.parent.getLogicGate()); 
                 }
                 else
                 {
+                    //Otherwise, calculate the Y-coord of the node according to the location within the tree. 
                     y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
                 }
                 logicGate = new logicGate(currentNode); 
@@ -567,12 +592,13 @@ namespace _2BNOR_2B
             generateBinaryTreeFromExpression(inputExpression);
             inputMap = generateInputMap(inputExpression);
             outputMap = generateOutputMap(inputExpression);
+            headers = generateTruthTableHeadersWithSteps(inputExpression);
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(rootNode, heightOfTree);
-            drawWires(rootNode, inputExpression);
+            drawWires(rootNode);
             drawOutput(heightOfTree);
             drawOutputWire();
-            updateWires();
+            updateWires(rootNode);
         }
 
         #endregion 
@@ -874,9 +900,8 @@ namespace _2BNOR_2B
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
-            string[] headers = generateTruthTableHeadersWithSteps(inputExpression);
-            string[] outputMap = generateOutputMap(inputExpression);
-            int numberOfInputs = getNumberOfInputs(inputExpression);
+            headers = generateTruthTableHeadersWithSteps(inputExpression);
+            outputMap = generateOutputMap(inputExpression); 
             if (isSteps)
             {
                 //drawTruthTable(c, headers, outputMap);
