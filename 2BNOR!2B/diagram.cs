@@ -26,7 +26,7 @@ namespace _2BNOR_2B
         private string[] headers; 
         private string infixExpression = "";
         private string postfixExpression = "";
-        private string inputStates = "001";
+        private string inputStates = "100";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -171,66 +171,64 @@ namespace _2BNOR_2B
             return lastOperands;
         }
 
-        private void updateWires(element root)
+        private void assignGateStates(element root)
         {
-            char[] lastOperands = getLastOperands(headers);
             string tableRow = getTruthTableRow(inputStates);
-            Queue<element> q = new Queue<element>();
-            wire currentWire; 
-            element tmp;
-            int pos = 0;
-            int i = 0; 
-            bool isRoot = true; 
-            //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
-            q.Enqueue(root);
-            while (q.Count != 0)
+            Stack<element> s = new Stack<element>();
+            int i = 0;
+            while (true)
             {
-                tmp = q.Dequeue();
-                if (i == 0)
+                while (root != null)
                 {
-                    pos = tableRow.Length-1;
+                    s.Push(root);
+                    s.Push(root);
+                    root = root.leftChild;
+                }
+                if (s.Count == 0)
+                {
+                    return;
+                }
+                root = s.Pop();
+                if (s.Count != 0 && s.Peek() == root)
+                {
+                    root = root.rightChild;
                 }
                 else
                 {
-                    pos = i - 1; 
+                    //set the state of the gate to the corresponding position within table row.
+                    int state = tableRow[i] - 48;
+                    root.setState(state);
+                    i++;
+                    MessageBox.Show(root.getElementName());
+                    root = null;
                 }
-                currentWire = wires[pos]; 
-                colourWire(tableRow, currentWire, pos);
-
-                if (tmp.leftChild != null)
-                {
-
-                    q.Enqueue(tmp.leftChild);
-                }
-                if (tmp.rightChild != null)
-                {
-                    q.Enqueue(tmp.rightChild);
-                }
-                pos = 0; 
-                isRoot = false;
             }
-        }
-        
 
-        private int findPos(char[] lastOperands, char symbol)
+        }
+
+        private void colourWires()
         {
-            //if the 
-
-            return -1;
+            foreach (wire w in wires)
+            {
+                logicGate l = w.getGate();
+                element node = l.getGate();
+                if (node.getState() == 1)
+                {
+                    w.setColour(Brushes.Green);
+                }
+                else
+                {
+                    w.setColour(Brushes.Red);
+                }
+            }
         }
 
-        private void colourWire(string tableRow, wire w, int pos)
+        private void updateWires()
         {
-            char bit = tableRow[pos];
-            if (bit == '1')
-            {
-                w.setColour(Brushes.Green);
-            }
-            else
-            {
-                w.setColour(Brushes.Red);
-            }
+            assignGateStates(rootNode);
+            colourWires();
         }
+
 
         #region diagram drawing
         private int getHeightOfTree(element root)
@@ -563,6 +561,7 @@ namespace _2BNOR_2B
             wire w = new wire(c);
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
+            w.setGate(rootNode.getLogicGate()); 
             w.draw(); 
             
             wires[wires.Length - 1] = w;
@@ -598,7 +597,7 @@ namespace _2BNOR_2B
             drawWires(rootNode);
             drawOutput(heightOfTree);
             drawOutputWire();
-            updateWires(rootNode);
+            updateWires();
         }
 
         #endregion 
@@ -701,17 +700,20 @@ namespace _2BNOR_2B
         }
 
         //counts the number of unique inputs within a boolean expression
-        private int getNumberOfInputs(string booleanExpression)
+        private int getNumberOfInputs(string booleanExpression, bool isUnique=false)
         {
             int numberOfInputs = 0;
             string alreadyCounted = "";
             foreach (char token in booleanExpression)
             {
                 //any letter is an input within the expression. Therfore add it to the counter. 
-                if ((char.IsLetter(token) || char.IsNumber(token)) && (!alreadyCounted.Contains(token)))
+                if (char.IsLetter(token) || char.IsNumber(token))
                 {
+                    if (isUnique && !alreadyCounted.Contains(token))
+                    {
+                        alreadyCounted += token;
+                    }
                     numberOfInputs++;
-                    alreadyCounted += token;
                 }
             }
             return numberOfInputs;
@@ -776,20 +778,31 @@ namespace _2BNOR_2B
             return outputRow;
         }
 
-        private string[] generateTruthTableHeadersWithSteps(string inputExpression)
+        //function that takes an inputted expression and produces a series of headers either for display (inputs sorted) or for wires (postorder). 
+        private string[] getHeaders(string inputExpression, bool isDisplay = false)
         {
-            int numberOfInputs = getNumberOfInputs(inputExpression);
-            int numberOfOperators = getNumberOfOperators(inputExpression);
-            string[] headers = new string[numberOfInputs + numberOfOperators];
-            Stack<string> subExpressionStack = new Stack<string>();
             string postfix = ConvertInfixtoPostfix(inputExpression);
-            string subexpression;
-            string operand1;
-            string operand2;
-            string[] tmp = new string[numberOfInputs];
+            string[] headers; 
+            int numberOfInputs;
+            int numberOfOperators = getNumberOfOperators(postfix);
+            if (isDisplay)
+            {
+                numberOfInputs = getNumberOfInputs(postfix, true);
+                headers = generateDisplayoperatorHeaders(postfix, numberOfInputs, numberOfOperators);
+            }
+            else
+            {
+                numberOfInputs = getNumberOfInputs(postfix);
+                headers = generatePostOrderHeaders(postfix, numberOfInputs, numberOfOperators); 
+            }
+            return headers;
+        }
+
+        private string[] getSortedInputs(string postfix, int numberOfInputs)
+        {
+            string[] tmp = new string[numberOfInputs]; 
             int i = 0;
-            //The inputs for the table. It only contains unique inputs. 
-            foreach (char c in inputExpression)
+            foreach(char c in postfix)
             {
                 if (!tmp.Contains(c.ToString()) && (char.IsLetter(c) || char.IsNumber(c)))
                 {
@@ -797,10 +810,27 @@ namespace _2BNOR_2B
                     i++;
                 }
             }
-            //sorting into alphabetical order and adding to the headers.
-            Array.Sort(tmp);
-            Array.Copy(tmp, headers, tmp.Length);
-            //Producing the headers for evaluation. 
+            Array.Sort(tmp); 
+            return tmp;
+        }
+
+        //function that takes a postfix expression and produces truth table headers that being displayed to the user. (original function). 
+        private string[] generateDisplayoperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
+        {
+            string[] headers = new string[numberOfInputs + numberOfOperators];
+            string[] inputs = getSortedInputs(inputExpression, numberOfInputs);
+            Array.Copy(inputs, headers, inputs.Length);
+            return headers; 
+        }
+
+        private string[] generatePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
+        {
+            Stack<string> subExpressionStack = new Stack<string>();
+            string[] headers = new string[numberOfOperators + numberOfInputs];
+            string subexpression;
+            string operand1;
+            string operand2;
+            int i = 0; 
             foreach (char c in postfix)
             {
                 if (char.IsLetter(c) || char.IsNumber(c))
@@ -811,21 +841,21 @@ namespace _2BNOR_2B
                 {
                     if (c == '!')
                     {
-                        operand1 = subExpressionStack.Pop();
+                        operand1 = subExpressionStack.Pop(); 
                         subexpression = "(" + c + operand1 + ")";
                     }
                     else
                     {
-                        operand1 = subExpressionStack.Pop();
+                        operand1 = subExpressionStack.Pop();    
                         operand2 = subExpressionStack.Pop();
                         subexpression = "(" + operand2 + c + operand1 + ")";
                     }
                     subExpressionStack.Push(subexpression);
-                    headers[i] = subexpression;
+                    headers[i] = subexpression; 
                     i++;
                 }
             }
-            return headers;
+            return headers; 
         }
 
         private void drawTruthTableHeaders(Canvas c, string[] headers)

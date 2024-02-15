@@ -49,6 +49,11 @@ namespace _2BNOR_2B
             inputGate = logicGate; 
         }
 
+        public logicGate getGate()
+        {
+            return inputGate;
+        }
+
         public void setColour(Brush colour)
         {
             this.colour = colour;
