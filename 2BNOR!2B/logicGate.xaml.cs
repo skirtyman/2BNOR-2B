@@ -42,7 +42,18 @@ namespace _2BNOR_2B
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            MessageBox.Show(gate.getState().ToString());
+            if (gate.getElementName() == "input_pin")
+            {
+                if (gate.getState() == 1)
+                {
+                    gate.setState(0);
+
+                }
+                else
+                {
+                    gate.setState(1);
+                }
+            }
 
         }
 

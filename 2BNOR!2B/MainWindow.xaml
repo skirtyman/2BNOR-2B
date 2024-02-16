@@ -47,7 +47,7 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" BorderThickness="1" BorderBrush="Gray" Margin="5">
-                <Canvas x:Name="MainWindowCanvas" Background="Bisque"/>
+                <Canvas x:Name="MainWindowCanvas" Background="Bisque" MouseDown="MainWindowCanvas_MouseDown"/>
             </Border>
 
             <ScrollViewer Grid.Column="1" HorizontalAlignment="Right" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">

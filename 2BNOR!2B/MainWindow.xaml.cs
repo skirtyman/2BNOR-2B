@@ -201,5 +201,11 @@ namespace _2BNOR_2B
         }
 
         #endregion
+
+        private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //MessageBox.Show("Clicked");
+            d.updateWires();
+        }
     }
 }

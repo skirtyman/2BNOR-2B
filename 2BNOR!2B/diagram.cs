@@ -25,8 +25,7 @@ namespace _2BNOR_2B
         private string[] outputMap;
         private string[] headers; 
         private string infixExpression = "";
-        private string postfixExpression = "";
-        private string inputStates = "100";
+        private string inputStates = "";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private element rootNode;
         private element outputNode;
@@ -157,20 +156,6 @@ namespace _2BNOR_2B
             }
         }
 
-        private char[] getLastOperands(string[] headers)
-        {
-            char[] lastOperands = new char[headers.Length];
-            string postfixHeader = "";
-            for (int i = 0; i < headers.Length; i++)
-            {
-                //The last character of a postfix expression is always the outermost operator (highest node in the subtree). 
-                postfixHeader = ConvertInfixtoPostfix(headers[i]);
-                //Adding the last char. 
-                lastOperands[i] = postfixHeader[postfixHeader.Length - 1];  
-            }
-            return lastOperands;
-        }
-
         private void assignGateStates(element root)
         {
             string tableRow = getTruthTableRow(inputStates);
@@ -199,7 +184,6 @@ namespace _2BNOR_2B
                     int state = tableRow[i] - 48;
                     root.setState(state);
                     i++;
-                    MessageBox.Show(root.getElementName());
                     root = null;
                 }
             }
@@ -223,10 +207,30 @@ namespace _2BNOR_2B
             }
         }
 
-        private void updateWires()
+        public void updateWires()
         {
+            inputStates = "";
+            getInputStates(rootNode); 
             assignGateStates(rootNode);
             colourWires();
+        }
+
+        private void getInputStates(element root)
+        {
+            if (root.leftChild != null)
+            {
+                getInputStates(root.leftChild);
+            }
+
+            if (root.getElementName() == "input_pin")
+            {
+                inputStates += root.getState(); 
+            }
+
+            if (root.rightChild != null)
+            {
+                getInputStates(root.rightChild); 
+            }
         }
 
 
@@ -590,14 +594,14 @@ namespace _2BNOR_2B
             canvasWidth = c.ActualWidth;
             generateBinaryTreeFromExpression(inputExpression);
             inputMap = generateInputMap(inputExpression);
-            outputMap = generateOutputMap(inputExpression);
-            headers = generateTruthTableHeadersWithSteps(inputExpression);
+            headers = getHeaders(inputExpression);
+            outputMap = generateOutputMap(inputExpression, headers);
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(rootNode, heightOfTree);
             drawWires(rootNode);
             drawOutput(heightOfTree);
             drawOutputWire();
-            updateWires();
+            //updateWires();
         }
 
         #endregion 
@@ -748,9 +752,8 @@ namespace _2BNOR_2B
             return inputMap;
         }
 
-        private string[] generateOutputMap(string inputExpression)
+        private string[] generateOutputMap(string inputExpression, string[] headers)
         {
-            string[] headers = generateTruthTableHeadersWithSteps(inputExpression);
             string[] inputMap = generateInputMap(inputExpression);
             int numberOfRows = (int)Math.Pow(2, getNumberOfInputs(inputExpression));
             //Number of columns within the table is always the number of inputs and number of operators. 
@@ -778,7 +781,8 @@ namespace _2BNOR_2B
             return outputRow;
         }
 
-        //function that takes an inputted expression and produces a series of headers either for display (inputs sorted) or for wires (postorder). 
+        //function that takes an inputted expression and produces a series of headers either for display (inputs sorted to beginning)
+        //or for colouring wires (postorder). 
         private string[] getHeaders(string inputExpression, bool isDisplay = false)
         {
             string postfix = ConvertInfixtoPostfix(inputExpression);
@@ -788,7 +792,7 @@ namespace _2BNOR_2B
             if (isDisplay)
             {
                 numberOfInputs = getNumberOfInputs(postfix, true);
-                headers = generateDisplayoperatorHeaders(postfix, numberOfInputs, numberOfOperators);
+                headers = generateDisplayOperatorHeaders(postfix, numberOfInputs, numberOfOperators);
             }
             else
             {
@@ -815,12 +819,11 @@ namespace _2BNOR_2B
         }
 
         //function that takes a postfix expression and produces truth table headers that being displayed to the user. (original function). 
-        private string[] generateDisplayoperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
+        private string[] generateDisplayOperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
         {
-            string[] headers = new string[numberOfInputs + numberOfOperators];
-            string[] inputs = getSortedInputs(inputExpression, numberOfInputs);
-            Array.Copy(inputs, headers, inputs.Length);
-            return headers; 
+            string[] postorderHeaders = generatePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
+            Array.Sort(postorderHeaders, (x,y) => x.Length.CompareTo(y.Length));
+            return postorderHeaders; 
         }
 
         private string[] generatePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
@@ -836,6 +839,8 @@ namespace _2BNOR_2B
                 if (char.IsLetter(c) || char.IsNumber(c))
                 {
                     subExpressionStack.Push(c.ToString());
+                    headers[i] = c.ToString();
+                    i++;
                 }
                 else
                 {
@@ -930,8 +935,9 @@ namespace _2BNOR_2B
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
-            headers = generateTruthTableHeadersWithSteps(inputExpression);
-            outputMap = generateOutputMap(inputExpression); 
+            //headers = generateTruthTableHeadersWithSteps(inputExpression);
+            headers = getHeaders(inputExpression, true); 
+            outputMap = generateOutputMap(inputExpression, headers); 
             if (isSteps)
             {
                 //drawTruthTable(c, headers, outputMap);

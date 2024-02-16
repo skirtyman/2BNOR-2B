@@ -13,7 +13,6 @@ namespace _2BNOR_2B
     public class wire
     {
         private int state;
-        //This is the element that provides the signal to the wire 
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
@@ -47,6 +46,7 @@ namespace _2BNOR_2B
         public void setGate(logicGate logicGate)
         {
             inputGate = logicGate; 
+            
         }
 
         public logicGate getGate()
