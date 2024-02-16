@@ -2,6 +2,9 @@
 
 Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f.svg)](https://wakatime.com/badge/user/8eec35f3-fd84-49c8-835b-b417c4509a9a/project/018bba66-c7a6-493e-a108-66e509c4020f)
 ---
+
+https://stackoverflow.com/questions/2828942/how-to-draw-scrollbars-on-wpf-canvas#:~:text=You%20could%20put%20the%20canvas,the%20contents%20of%20the%20canvas.&text=edit%3A%20Here%20is%20an%20example,as%20the%20canvas%20size%20changes.
+
 ### Todo
 diagram drawing 
 - [ ] offset of the vertical wires for the repeated input case
@@ -13,7 +16,7 @@ diagram drawing
 
 diagram interactivity
 - [ ] inputs and outputs display the state that they are currently storing 
-- [ ] wires display the state of the child component that is connected to them 
+- [x] wires display the state of the child component that is connected to them 
 
 truth tables 
 - [ ] ?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
