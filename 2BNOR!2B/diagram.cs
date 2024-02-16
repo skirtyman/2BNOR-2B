@@ -51,6 +51,18 @@ namespace _2BNOR_2B
             generateBinaryTreeFromExpression(expression);
         }
 
+        public void clearDiagram()
+        {
+            rootNode = null;
+            outputNode = null;
+            wires = null;
+            outputMap = null;
+            inputMap = null;
+            headers = null;
+            elements = null;
+            inputStates = null;
+        }
+
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
         private string ConvertInfixtoPostfix(string infixExpression)
         {
@@ -187,7 +199,6 @@ namespace _2BNOR_2B
                     root = null;
                 }
             }
-
         }
 
         private void colourWires()

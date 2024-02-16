@@ -9,7 +9,7 @@
     <!--Original window size, height: 450, width: 800-->
     <Window.Resources>
         <ResourceDictionary>
-
+            
         </ResourceDictionary>
     </Window.Resources>
 
@@ -42,7 +42,8 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2.25*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
@@ -50,145 +51,104 @@
                 <Canvas x:Name="MainWindowCanvas" Background="Bisque" MouseDown="MainWindowCanvas_MouseDown"/>
             </Border>
 
-            <ScrollViewer Grid.Column="1" HorizontalAlignment="Right" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-                <StackPanel Margin="5">
-                    <Border BorderBrush="Transparent" BorderThickness="1">
-                        <TextBlock TextAlignment="Center" HorizontalAlignment="Center" FontFamily="Consolas"
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
+                <ScrollViewer>
+                    <Canvas x:Name="TruthTableCanvas" Background="Bisque"/>
+                </ScrollViewer>
+            </Border>
+
+            <Border Grid.Column="2">
+                <ScrollViewer Grid.Column="1" HorizontalAlignment="Right" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                    <StackPanel Margin="5">
+                        <Border BorderBrush="Transparent" BorderThickness="1">
+                            <TextBlock TextAlignment="Center" HorizontalAlignment="Center" FontFamily="Consolas"
                            FontSize="18">
-                            Diagram <LineBreak/> Components
-                        </TextBlock>
-                    </Border>
+                            Logic Gates
+                            </TextBlock>
+                        </Border>
 
-                    <ListView BorderBrush="Transparent">
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/and_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
+                        <ListView BorderBrush="Transparent">
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/and_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                                         AND gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/or_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        OR gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/not_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        NOT gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/xor_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        XOR gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/nand_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        NAND gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Button Width="200" Background="#eeefed">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image Source="/images/nor_gate.png"/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        NOR gate
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
-
-                        <ListViewItem>
-                            <Border Background="LightGray" BorderBrush="Gray" BorderThickness="1">
-                                <StackPanel Orientation="Horizontal" Background="#eeefed">
-                                    <CheckBox>
-                                        <CheckBox.LayoutTransform>
-                                            <ScaleTransform ScaleX="2" ScaleY="2"/>
-                                        </CheckBox.LayoutTransform>
-                                    </CheckBox>
-                                    <TextBlock FontFamily="Consolas" TextAlignment="Center"
-                                           FontSize="18" Width="166" VerticalAlignment="Center">
-                                        Enable wire mode
                                     </TextBlock>
-
                                 </StackPanel>
-                            </Border>
+                            </ListViewItem>
 
-                        </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/or_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                        OR gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
 
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/not_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                        NOT gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
 
-                        <ListViewItem>
-                            <Button Width="200" Height="100" Background="#eeefed"
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/xor_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                        XOR gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
+
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/nand_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                        NAND gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
+                            
+                            <ListViewItem>
+                                <StackPanel Width="200">
+                                    <Image Source="/images/nor_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                        NOR gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
+
+                            <ListViewItem>
+                                <Button Width="200" Height="100" Background="#eeefed"
                                 Click="componentSidePanel_AddBuiltinCircuit">
-                                <Button.Content>
-                                    <StackPanel>
-                                        <Image/>
-                                        <TextBlock TextAlignment="Center" FontFamily="Consolas"
+                                    <Button.Content>
+                                        <StackPanel>
+                                            <Image/>
+                                            <TextBlock TextAlignment="Center" FontFamily="Consolas"
                                                FontSize="18">
                                         Add built-in <LineBreak/> circuit
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                        </ListViewItem>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+                            </ListViewItem>
 
-                        <ListViewItem>
-                            <Button Width="200" Height="100" Click="Button_Click">
-                                Clear
-                            </Button>
-                        </ListViewItem>
+                            <!--Debug button need to remove--> 
+                            <ListViewItem>
+                                <Button Width="200" Height="100" Click="Button_Click">
+                                    Clear
+                                </Button>
+                            </ListViewItem>
 
-                    </ListView>
-                </StackPanel>
-            </ScrollViewer>
-            
-           
+                        </ListView>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
         </Grid>
     </DockPanel>
 </Window>

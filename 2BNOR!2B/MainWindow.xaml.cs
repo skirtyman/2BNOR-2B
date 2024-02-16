@@ -36,16 +36,12 @@ namespace _2BNOR_2B
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
             StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
-            displayWindow displayWindow = new displayWindow();
             string expression = d.getInfixExpression();
             bool isSteps = false;
             if (stepsDialog.ShowDialog() == true)
             {
                 isSteps = stepsDialog.result;
-                displayWindow.setStatusForTables(expression);
-                displayWindow.Show();
-                Canvas c = displayWindow.getCanvas();
-                d.drawTruthTable(c, expression, isSteps);
+                d.drawTruthTable(TruthTableCanvas, expression, isSteps);
             }
 
         }
@@ -63,6 +59,7 @@ namespace _2BNOR_2B
         //Debug button to remove items from the canvas. 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            d.clearDiagram(); 
             MainWindowCanvas.Children.Clear(); 
         }
 
@@ -85,7 +82,6 @@ namespace _2BNOR_2B
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
             StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
-            displayWindow displayWindow = new displayWindow();
             string expression = "";
             bool isSteps = false;
             if (expressionInputDialog.ShowDialog() == true)
@@ -94,10 +90,7 @@ namespace _2BNOR_2B
                 if (stepsDialog.ShowDialog() == true)
                 {
                     isSteps = stepsDialog.result;
-                    displayWindow.setStatusForTables(expression);
-                    displayWindow.Show();
-                    Canvas c = displayWindow.getCanvas();
-                    d.drawTruthTable(c, expression, isSteps);
+                    d.drawTruthTable(TruthTableCanvas, expression, isSteps);
                 }
             }
         }
@@ -204,7 +197,7 @@ namespace _2BNOR_2B
 
         private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //MessageBox.Show("Clicked");
+            //Refreshes the wire states whenever the canvas is clicked. 
             d.updateWires();
         }
     }

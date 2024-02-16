@@ -62,9 +62,6 @@
       <DependentUpon>BuiltInCircuitDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="diagram.cs" />
-    <Compile Include="displayWindow.xaml.cs">
-      <DependentUpon>displayWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="element.cs" />
     <Compile Include="HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
@@ -81,10 +78,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="BuiltInCircuitDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="displayWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
