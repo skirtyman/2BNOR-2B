@@ -5,24 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
-        Title="2B NOR !2B" Height="1080" Width="1920" WindowState="Maximized">
+        Title="2B NOR !2B" Height="600" Width="1000" WindowState="Maximized">
     <!--Original window size, height: 450, width: 800-->
+    <!--colour pallete; 
+    36393B
+    BCB8B1
+    F4F3EE
+    554C57
+    18508C-->
     <Window.Resources>
         <ResourceDictionary>
-            
+
         </ResourceDictionary>
     </Window.Resources>
 
-    <DockPanel>
-        <Menu DockPanel.Dock="Top">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" FontFamily="Consolas">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open Diagram" Click="MenuItem_LoadDiagram"/>
-                    <MenuItem Header="_Save Diagram" Click="MenuItem_SaveDiagram"/>
-                    <MenuItem Header="_Export" Click="MenuItem_ExportDiagram" />
-                    <Separator/>
-                    <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
-                </MenuItem>
-                <MenuItem Header="_Truth tables">
+                <MenuItem Header="_Save Diagram" Click="MenuItem_SaveDiagram"/>
+                <MenuItem Header="_Export" Click="MenuItem_ExportDiagram" />
+                <Separator/>
+                <MenuItem Header="Exit" Click="MenuItem_CloseApp" />
+            </MenuItem>
+            <MenuItem Header="_Truth tables">
                 <MenuItem Header="Generate From Diagram" Click="MenuItem_GenerateTableFromDiagram"/>
                 <MenuItem Header="Generate From Expression" Click="MenuItem_GenerateTableFromExpression"/>
             </MenuItem>
@@ -35,12 +47,10 @@
                 <MenuItem Header="Minimise Expression" Click="MenuItem_MinimiseExpression"/>
             </MenuItem>
             <MenuItem Header="_Help" Click="MenuItem_OpenHelpWindow"/>
-            <TextBlock x:Name="statusBox_mainWindow">
-                Status:
-            </TextBlock>
         </Menu>
 
-        <Grid>
+
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="2.25*"/>
@@ -52,7 +62,7 @@
             </Border>
 
             <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-                <ScrollViewer>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas x:Name="TruthTableCanvas" Background="Bisque"/>
                 </ScrollViewer>
             </Border>
@@ -62,84 +72,84 @@
                     <StackPanel Margin="5">
                         <Border BorderBrush="Transparent" BorderThickness="1">
                             <TextBlock TextAlignment="Center" HorizontalAlignment="Center" FontFamily="Consolas"
-                           FontSize="18">
-                            Logic Gates
+                   FontSize="18">
+                    Logic Gates
                             </TextBlock>
                         </Border>
 
                         <ListView BorderBrush="Transparent">
                             <ListViewItem>
-                                <StackPanel Width="200">
+                                <StackPanel Width="150">
                                     <Image Source="/images/and_gate.png"/>
                                     <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        AND gate
+                                AND gate
                                     </TextBlock>
                                 </StackPanel>
                             </ListViewItem>
 
                             <ListViewItem>
-                                <StackPanel Width="200">
+                                <StackPanel Width="150">
                                     <Image Source="/images/or_gate.png"/>
                                     <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        OR gate
+                                OR gate
                                     </TextBlock>
                                 </StackPanel>
                             </ListViewItem>
 
                             <ListViewItem>
-                                <StackPanel Width="200">
+                                <StackPanel Width="150">
                                     <Image Source="/images/not_gate.png"/>
                                     <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        NOT gate
+                                NOT gate
                                     </TextBlock>
                                 </StackPanel>
                             </ListViewItem>
 
                             <ListViewItem>
-                                <StackPanel Width="200">
+                                <StackPanel Width="150">
                                     <Image Source="/images/xor_gate.png"/>
                                     <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        XOR gate
+                                XOR gate
                                     </TextBlock>
                                 </StackPanel>
                             </ListViewItem>
 
                             <ListViewItem>
-                                <StackPanel Width="200">
+                                <StackPanel Width="150">
                                     <Image Source="/images/nand_gate.png"/>
                                     <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        NAND gate
-                                    </TextBlock>
-                                </StackPanel>
-                            </ListViewItem>
-                            
-                            <ListViewItem>
-                                <StackPanel Width="200">
-                                    <Image Source="/images/nor_gate.png"/>
-                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                                        NOR gate
+                                NAND gate
                                     </TextBlock>
                                 </StackPanel>
                             </ListViewItem>
 
                             <ListViewItem>
-                                <Button Width="200" Height="100" Background="#eeefed"
-                                Click="componentSidePanel_AddBuiltinCircuit">
+                                <StackPanel Width="150">
+                                    <Image Source="/images/nor_gate.png"/>
+                                    <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
+                                NOR gate
+                                    </TextBlock>
+                                </StackPanel>
+                            </ListViewItem>
+
+                            <ListViewItem>
+                                <Button Width="150" Height="80" Background="#eeefed"
+                        Click="componentSidePanel_AddBuiltinCircuit">
                                     <Button.Content>
                                         <StackPanel>
                                             <Image/>
                                             <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                               FontSize="18">
-                                        Add built-in <LineBreak/> circuit
+                                       FontSize="18">
+                                Add built-in <LineBreak/> circuit
                                             </TextBlock>
                                         </StackPanel>
                                     </Button.Content>
                                 </Button>
                             </ListViewItem>
 
-                            <!--Debug button need to remove--> 
+                            <!--Debug button need to remove-->
                             <ListViewItem>
-                                <Button Width="200" Height="100" Click="Button_Click">
+                                <Button Width="150" Height="100" Click="Button_Click">
                                     Clear
                                 </Button>
                             </ListViewItem>
@@ -148,7 +158,12 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-
         </Grid>
-    </DockPanel>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="statusBar_Text" FontFamily="Consolas" FontSize="14"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
 </Window>

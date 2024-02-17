@@ -36,12 +36,13 @@ namespace _2BNOR_2B
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
             StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
-            string expression = d.getInfixExpression();
+            string expression = "A.B";
             bool isSteps = false;
             if (stepsDialog.ShowDialog() == true)
             {
                 isSteps = stepsDialog.result;
                 d.drawTruthTable(TruthTableCanvas, expression, isSteps);
+                statusBar_Text.Text = "Generated Truth table from diagram: " + saveString; 
             }
 
         }
@@ -60,7 +61,8 @@ namespace _2BNOR_2B
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             d.clearDiagram(); 
-            MainWindowCanvas.Children.Clear(); 
+            MainWindowCanvas.Children.Clear();
+            statusBar_Text.Text = "Cleared current diagram from the window. Diagram reset for new expression."; 
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -76,6 +78,7 @@ namespace _2BNOR_2B
         {
             HelpWindow helpWindow = new HelpWindow();
             helpWindow.Show();
+            statusBar_Text.Text = "Opened help window.";
         }
 
         private void MenuItem_GenerateTableFromExpression(object sender, RoutedEventArgs e)
@@ -91,13 +94,14 @@ namespace _2BNOR_2B
                 {
                     isSteps = stepsDialog.result;
                     d.drawTruthTable(TruthTableCanvas, expression, isSteps);
+                    statusBar_Text.Text = "Generated Truth table from expression: " + expression; 
                 }
             }
         }
 
         private void MenuItem_GenerateExpressionFromDiagram(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(d.getInfixExpression()); 
+            //MessageBox.Show(d.getInfixExpression()); 
         }
 
 
@@ -108,9 +112,8 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
-                statusBox_mainWindow.Text = "Status: Drew expression " + expression;
-                d.drawDiagram(expression);
-               
+                statusBar_Text.Text = "Generated diagram from expression: " + expression;
+                d.drawDiagram(expression); 
                 saveString = expression; 
             }
         }
@@ -122,7 +125,8 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
-                MessageBox.Show(d.minimiseExpression(expression)); 
+                MessageBox.Show(d.minimiseExpression(expression));
+                statusBar_Text.Text = "Minimised expression: " + expression; 
             }
         }
 
@@ -133,6 +137,7 @@ namespace _2BNOR_2B
             saveFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
             saveFileDialog.ShowDialog();
             File.WriteAllText(saveFileDialog.FileName, saveString);
+            statusBar_Text.Text = "Saved diagram at the path " + saveFileDialog.FileName;
         }
 
         private void MenuItem_LoadDiagram(object sender, RoutedEventArgs e)
@@ -143,6 +148,7 @@ namespace _2BNOR_2B
             openFileDialog.ShowDialog();
             saveString = File.ReadAllText(openFileDialog.FileName);
             d.drawDiagram(saveString);
+            statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
         }
 
         private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
@@ -186,6 +192,7 @@ namespace _2BNOR_2B
             {
                 MessageBox.Show(err.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            statusBar_Text.Text = "Exported diagram to " + sfd.FileName; 
         }
 
         private void MenuItem_CloseApp(object sender, RoutedEventArgs e)
@@ -199,6 +206,15 @@ namespace _2BNOR_2B
         {
             //Refreshes the wire states whenever the canvas is clicked. 
             d.updateWires();
+            statusBar_Text.Text = "Updated the state of the diagram.";
+            //if (e.OriginalSource is logicGate)
+            //{
+            //    logicGate l = (logicGate)e.OriginalSource;
+            //    if (l.getGate().getElementName() == "input_pin")
+            //    {
+            //        d.updateWires();
+            //    }
+            //}
         }
     }
 }

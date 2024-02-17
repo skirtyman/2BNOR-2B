@@ -168,56 +168,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private void assignGateStates(element root)
-        {
-            string tableRow = getTruthTableRow(inputStates);
-            Stack<element> s = new Stack<element>();
-            int i = 0;
-            while (true)
-            {
-                while (root != null)
-                {
-                    s.Push(root);
-                    s.Push(root);
-                    root = root.leftChild;
-                }
-                if (s.Count == 0)
-                {
-                    return;
-                }
-                root = s.Pop();
-                if (s.Count != 0 && s.Peek() == root)
-                {
-                    root = root.rightChild;
-                }
-                else
-                {
-                    //set the state of the gate to the corresponding position within table row.
-                    int state = tableRow[i] - 48;
-                    root.setState(state);
-                    i++;
-                    root = null;
-                }
-            }
-        }
-
-        private void colourWires()
-        {
-            foreach (wire w in wires)
-            {
-                logicGate l = w.getGate();
-                element node = l.getGate();
-                if (node.getState() == 1)
-                {
-                    w.setColour(Brushes.Green);
-                }
-                else
-                {
-                    w.setColour(Brushes.Red);
-                }
-            }
-        }
-
+        //Whenever the canvas is clicked. Rerun the colouring to ensure the diagram reflects the new state of the diagram. 
         public void updateWires()
         {
             inputStates = "";
@@ -226,6 +177,9 @@ namespace _2BNOR_2B
             colourWires();
         }
 
+        #region diagram drawing
+
+        //Recursive inorder traversal to get the states of the inputs. A state is added only when the element has the correct name. 
         private void getInputStates(element root)
         {
             if (root.leftChild != null)
@@ -235,17 +189,15 @@ namespace _2BNOR_2B
 
             if (root.getElementName() == "input_pin")
             {
-                inputStates += root.getState(); 
+                inputStates += root.getState();
             }
 
             if (root.rightChild != null)
             {
-                getInputStates(root.rightChild); 
+                getInputStates(root.rightChild);
             }
         }
 
-
-        #region diagram drawing
         private int getHeightOfTree(element root)
         {
             //If the root doesn't exist, height must be 0. 
@@ -304,27 +256,6 @@ namespace _2BNOR_2B
                 symbol = booleanOperators[nameIndex];
             }
             return symbol;
-        }
-
-        private void inorderTraversal(element root)
-        {
-            if (root.leftChild != null)
-            {
-                inorderTraversal(root.leftChild);
-            }
-
-            infixExpression += convertNameToSymbol(root);
-
-            if (root.rightChild != null)
-            {
-                inorderTraversal(root.rightChild);
-            }
-        }
-
-        public string getInfixExpression()
-        {
-            inorderTraversal(rootNode);
-            return infixExpression;
         }
 
         private void generateBinaryTreeFromExpression(string inputExpression)
@@ -446,14 +377,16 @@ namespace _2BNOR_2B
             if (leftchildLogicGate != null)
             {
                 w.setEnd(leftchildLogicGate.getOutputPoint());
+                w.setGate(leftchildLogicGate);
             }
             else
             {
                 //Searching for the input with the same label as the left child node does exist but doesnt have a logic gate, therefore it is not a unique input. 
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
+                w.setGate(input.getLogicGate());
             }
-            w.setGate(leftchildLogicGate);
+            //w.setGate(leftchildLogicGate);
             w.draw();
             return w;
         }
@@ -468,13 +401,15 @@ namespace _2BNOR_2B
             if (rightchildLogicGate != null)
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
+                w.setGate(rightchildLogicGate);
             }
             else
             {
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
+                w.setGate(input.getLogicGate()); 
             }
-            w.setGate(rightchildLogicGate);
+            //w.setGate(rightchildLogicGate);
             w.draw();
             return w;
         }
@@ -504,7 +439,26 @@ namespace _2BNOR_2B
                 }
             }
         }
-        
+
+        //Sets the colours of the wires within the diagram. 
+        private void colourWires()
+        {
+            //As the wires have gates assigned to them, the wire can simply assume the state of the deepest node it connects in the tree. 
+            foreach (wire w in wires)
+            {
+                logicGate l = w.getGate();
+                element node = l.getGate();
+                if (node.getState() == 1)
+                {
+                    w.setColour(Brushes.Green);
+                }
+                else
+                {
+                    w.setColour(Brushes.Red);
+                }
+            }
+        }
+
         //Adds nodes to the canvas by finding their position and then placing them. This only adds gates to nodes that are either unique inputs or boolean operators. 
         private void drawNode(element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
@@ -567,6 +521,43 @@ namespace _2BNOR_2B
                 }
                 depthWithinTree++;
                 positionWithinLayer = 0;
+            }
+        }
+
+        //Iterative postorder traversal. Traverses the tree and assigns the gates a state corresponding to the row  the row in the truth table
+        //which is also in postorder. 
+        private void assignGateStates(element root)
+        {
+            //A singular row of the truth table. Using the input states to find the correct row. 
+            string tableRow = getTruthTableRow(inputStates);
+            Stack<element> s = new Stack<element>();
+            int i = 0;
+            while (true)
+            {
+                while (root != null)
+                {
+                    s.Push(root);
+                    s.Push(root);
+                    //Traversing the left subtree. 
+                    root = root.leftChild;
+                }
+                if (s.Count == 0)
+                {
+                    return;
+                }
+                root = s.Pop();
+                if (s.Count != 0 && s.Peek() == root)
+                {
+                    root = root.rightChild;
+                }
+                else
+                {
+                    //set the state of the gate to the corresponding position within table row.
+                    int state = tableRow[i] - 48;
+                    root.setState(state);
+                    i++;
+                    root = null;
+                }
             }
         }
 
@@ -886,7 +877,7 @@ namespace _2BNOR_2B
                 //Checking for inputs of the table
                 if (header.Length != 1)
                 {
-                    cellWidth = (header.Length * 10) + 5;
+                    cellWidth = (header.Length * 10)+10;
                 }
                 cell = new Label();
                 cell.HorizontalContentAlignment = HorizontalAlignment.Center;
@@ -919,7 +910,7 @@ namespace _2BNOR_2B
                     //Checking for inputs of the table
                     if (headers[i].Length != 1)
                     {
-                        cellWidth = (headers[i].Length * 10) + 5;
+                        cellWidth = (headers[i].Length * 10)+10;
                     }
                     cell = new Label();
                     cell.HorizontalContentAlignment = HorizontalAlignment.Center;
