@@ -3,10 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:WpfMath.Controls;assembly=WpfMath"   
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
         Title="Input Expression" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         Topmost="True" ContentRendered="Window_ContentRendered">
+    <Window.Resources>
+        <local:booleanConverter x:Key="booleanConverter"/>
+    </Window.Resources>
+
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -20,8 +25,6 @@
         </Grid.RowDefinitions>
 
         <!--The table of logic gates-->
-        
-
         <Border Grid.Column="2" BorderBrush="LightGray" BorderThickness="2" Grid.RowSpan="3">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Margin="2.5">
@@ -40,32 +43,36 @@
             </StackPanel>
         </Border>
 
-        
-        <Label Grid.Row="0" FontFamily="Consolas">
-            <Label.Content>Enter a boolean expression: </Label.Content>
-        </Label>
+        <StackPanel Grid.Row="0">
+            <Label FontFamily="Consolas">
+                <Label.Content>Enter a boolean expression: </Label.Content>
+            </Label>
 
-        <TextBox Margin="5,0" Grid.Row="1" Grid.Column="0" FontFamily="Consolas" Name="inputBox"/>
-        <Rectangle Grid.Row="2" Grid.Column="0" Height="10"/>
-        
-        <StackPanel Margin="10" Grid.Row ="2" Grid.Column="0" Orientation="Horizontal">
-            <Button IsDefault="True" Margin ="10,0" HorizontalAlignment="Center" Click="btnDialogOk_Click">
-                <Button.Content>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/images/tick.png"/>
-                        <TextBlock Text=" Ok " FontFamily="Consolas"/>
-                    </StackPanel>
-                </Button.Content>
-            </Button>
+            <TextBox Margin="5,0" FontFamily="Consolas" Name="inputBox"/>
+            <Rectangle Height="10"/>
+            <TextBlock Margin="5,0" FontFamily="Consolas" Name="renderedExpressiontmp"
+                       Text="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
+            <controls:FormulaControl x:Name="renderedExpression" Formula="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
 
-            <Button IsCancel="True" Click="btnDialogCancel_Click">
-                <Button.Content>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/images/cancel.png"/>
-                        <TextBlock Text=" Cancel " FontFamily="Consolas"/>
-                    </StackPanel>
-                </Button.Content>
-            </Button>
+            <StackPanel Margin="10" Orientation="Horizontal">
+                <Button IsDefault="True" Margin ="10,0" HorizontalAlignment="Center" Click="btnDialogOk_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/images/tick.png"/>
+                            <TextBlock Text=" Ok " FontFamily="Consolas"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+                <Button IsCancel="True" Click="btnDialogCancel_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/images/cancel.png"/>
+                            <TextBlock Text=" Cancel " FontFamily="Consolas"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

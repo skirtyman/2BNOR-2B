@@ -94,9 +94,10 @@ namespace _2BNOR_2B
         {
             BitmapImage bitmap = new BitmapImage(); 
             string imageName = gate.getElementName();
-            using (FileStream stream = new FileStream($"../../images/{imageName}.png", FileMode.Open))
+            string filePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images", imageName+".png");
+            using (FileStream stream = new FileStream(@$"C:\Users\andreas\source\repos\2BNOR!2B - Copy\2BNOR!2B\images\{imageName}.png", FileMode.Open))
             {
-                bitmap.BeginInit(); 
+                bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.StreamSource = stream;
                 bitmap.EndInit();

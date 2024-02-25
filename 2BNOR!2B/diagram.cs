@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
 using System.Security.RightsManagement;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -43,12 +42,6 @@ namespace _2BNOR_2B
         public diagram(Canvas c)
         {
             this.c = c;
-        }
-
-        public void setExpression(string expression)
-        {
-            this.infixExpression = expression;
-            generateBinaryTreeFromExpression(expression);
         }
 
         public void clearDiagram()
@@ -242,22 +235,6 @@ namespace _2BNOR_2B
             return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
         }
 
-        private char convertNameToSymbol(element node)
-        {
-            char symbol;
-            if (char.IsLetter(node.getLabel()))
-            {
-                symbol = node.getLabel();
-            }
-            else
-            {
-                string name = node.getElementName();
-                int nameIndex = Array.IndexOf(gateNames, name);
-                symbol = booleanOperators[nameIndex];
-            }
-            return symbol;
-        }
-
         private void generateBinaryTreeFromExpression(string inputExpression)
         {
             string postfixExpression = ConvertInfixtoPostfix(inputExpression);
@@ -346,6 +323,7 @@ namespace _2BNOR_2B
         private double calculateNodeXposition(element node, int heightOfTree, int depthWithinTree)
         {
             double x;
+            //Inputs (leaf nodes) should be drawn at minimum x position within the canvas. 
             if ((node.leftChild == null) && (node.rightChild == null))
             {
                 x = calculateXposition(heightOfTree);
@@ -802,22 +780,6 @@ namespace _2BNOR_2B
                 headers = generatePostOrderHeaders(postfix, numberOfInputs, numberOfOperators); 
             }
             return headers;
-        }
-
-        private string[] getSortedInputs(string postfix, int numberOfInputs)
-        {
-            string[] tmp = new string[numberOfInputs]; 
-            int i = 0;
-            foreach(char c in postfix)
-            {
-                if (!tmp.Contains(c.ToString()) && (char.IsLetter(c) || char.IsNumber(c)))
-                {
-                    tmp[i] = c.ToString();
-                    i++;
-                }
-            }
-            Array.Sort(tmp); 
-            return tmp;
         }
 
         //function that takes a postfix expression and produces truth table headers that being displayed to the user. (original function). 
