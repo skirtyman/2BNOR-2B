@@ -14,7 +14,6 @@ diagram drawing
 
 diagram interactivity
 - [ ] inputs and outputs display the state that they are currently storing 
-- [x] wires display the state of the child component that is connected to them 
 
 truth tables 
 - [ ] ?trim excess brackets from headers to reduce length and produce more visually appealing tables. 
