@@ -5,6 +5,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,7 +25,7 @@ namespace _2BNOR_2B
     public partial class MainWindow : Window
     {
         private diagram d;
-        private string saveString = ""; 
+        private string saveString = "";
 
         public MainWindow()
         {

@@ -24,11 +24,6 @@
     <Resource Include="images\cancel.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="images\input_pin.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="images\output_pin.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

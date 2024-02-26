@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
@@ -11,59 +14,115 @@ namespace _2BNOR_2B
     public class booleanConverter : IValueConverter
     {
         private char[] booleanOperators = { '.', '^', '+', '!' };
+        private static Regex r = new Regex(@"\s+");
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        private static string removeWhitespace(string input, string replacement)
         {
-            string convertedString = "";
-            //The current expression stored within the input text box. 
-            string inputString = value as string;
-            int numberOfOpenBrackets = 0;
-            //Stores the current position within the converted string where the new tokens are being inserted. 
-            int pos = 0;
-            for (int i = 0; i < inputString.Length; i++)
+            return r.Replace(input, replacement);
+        }
+
+        //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
+        private string ConvertInfixtoPostfix(string infixExpression)
+        {
+            infixExpression = removeWhitespace(infixExpression, "");
+            Stack<char> operatorStack = new Stack<char>();
+            string postfixExpression = "";
+            int operatorPrecedence;
+            //tokenising infix ready for the conversion
+            foreach (char token in infixExpression)
             {
-                if (inputString[i] == '!')
+                if (char.IsLetter(token) || char.IsNumber(token))
                 {
-                    convertedString = convertedString.Insert(pos, @"\overline{}");
-                    pos += 10;
+                    postfixExpression += token;
                 }
-                else if (inputString[i] == '(')
+                else if (booleanOperators.Contains(token))
                 {
-                    convertedString = convertedString.Insert(pos, @"\left(");
-                    pos += 6;
-                    numberOfOpenBrackets++;
+                    //precedence value of the token
+                    operatorPrecedence = Array.IndexOf(booleanOperators, token);
+                    while ((operatorStack.Count > 0 && operatorStack.Peek() != '(') && (Array.IndexOf(booleanOperators, operatorStack.Peek()) > operatorPrecedence))
+                    {
+                        postfixExpression += operatorStack.Pop();
+                    }
+                    operatorStack.Push(token);
                 }
-                else if (inputString[i] == ')')
+                else if (token == '(')
                 {
-                    convertedString = convertedString.Insert(pos+1, @"\right)");
-                    pos += 7;
-                    numberOfOpenBrackets--;
+                    operatorStack.Push(token);
                 }
-                else if (inputString[i] == '.')
+                else if (token == ')')
                 {
-                    convertedString = convertedString.Insert(pos, @"\;.\;");
-                    pos += 5;
+                    while (operatorStack.Peek() != '(')
+                    {
+                        postfixExpression += operatorStack.Pop();
+                    }
+                    operatorStack.Pop();
                 }
-                else if (inputString[i] == '^')
+            }
+            while (operatorStack.Count > 0)
+            {
+                postfixExpression += operatorStack.Pop();
+            }
+            return postfixExpression;
+        }
+
+        private string getLATEXFromChar(char c)
+        {
+            switch (c)
+            {
+                case '!':
+                    return @"\overline{";
+                case '.':
+                    return @"\;.\;";
+                case '^':
+                    return @"\oplus ";
+                default:
+                    return c.ToString();
+            }
+        }
+
+        private string convertString(string inputString)
+        {
+            Stack<string> subExpressionStack = new Stack<string>();
+            string subexpression;
+            string postfix = ConvertInfixtoPostfix(inputString);
+            string operand1;
+            string operand2;
+            foreach (char c in postfix)
+            {
+                if (char.IsLetter(c) || char.IsNumber(c))
                 {
-                    convertedString = convertedString.Insert(pos, @"\oplus ");
-                    pos += 7;
+                    subExpressionStack.Push(c.ToString());
                 }
                 else
                 {
-                    convertedString = convertedString.Insert(pos, inputString[i].ToString());
-                    pos++;
-                }
-
-                if (i != inputString.Length - 1 && numberOfOpenBrackets == 0)
-                {
-                    if (booleanOperators.Contains(inputString[i + 1]))
+                    if (c == '!')
                     {
-                        pos = convertedString.Length;
+                        operand1 = subExpressionStack.Pop();
+                        subexpression = getLATEXFromChar(c) + operand1 + "}";
                     }
+                    else
+                    {
+                        operand1 = subExpressionStack.Pop();
+                        operand2 = subExpressionStack.Pop();
+                        subexpression = @"\left(" + operand2 + getLATEXFromChar(c) + operand1 + @"\right)";
+                    }
+                    subExpressionStack.Push(subexpression);
                 }
             }
-            return convertedString;
+            return subExpressionStack.Pop();
+        }
+
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return convertString(value as string); 
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

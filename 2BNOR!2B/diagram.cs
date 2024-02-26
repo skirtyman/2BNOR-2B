@@ -17,6 +17,7 @@ namespace _2BNOR_2B
 {
     class diagram
     {
+        private static Regex r = new Regex(@"\s+");
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
         private char[] booleanOperators = { '.', '^', '+', '!' };
         private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
@@ -44,6 +45,12 @@ namespace _2BNOR_2B
             this.c = c;
         }
 
+
+        private string removeWhitespace(string input, string replacement)
+        {
+            return r.Replace(input, replacement);
+        }
+
         public void clearDiagram()
         {
             rootNode = null;
@@ -59,20 +66,14 @@ namespace _2BNOR_2B
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
         private string ConvertInfixtoPostfix(string infixExpression)
         {
-            //removing the compound gates from the expression (NAND and NOR) because they do not have operator precedence.  
-            infixExpression = removeCompoundGates(infixExpression);
+            //removing the compound gates from the expression (NAND and NOR) because they do not have operator precedence.  Also removing whitespace for ease. 
+            infixExpression = removeCompoundGates(removeWhitespace(infixExpression, ""));
             Stack<char> operatorStack = new Stack<char>();
             string postfixExpression = "";
             int operatorPrecedence;
             //tokenising infix ready for the conversion
             foreach (char token in infixExpression)
             {
-                //spaces within the expression no longer matter as they are simply skipped when found. 
-                if (token == ' ')
-                {
-                    continue;
-                }
-
                 if (char.IsLetter(token) || char.IsNumber(token))
                 {
                     postfixExpression += token;
@@ -165,9 +166,12 @@ namespace _2BNOR_2B
         public void updateWires()
         {
             inputStates = "";
-            getInputStates(rootNode); 
-            assignGateStates(rootNode);
-            colourWires();
+            if (rootNode != null)
+            {
+                getInputStates(rootNode);
+                assignGateStates(rootNode);
+                colourWires();
+            }
         }
 
         #region diagram drawing
@@ -356,6 +360,7 @@ namespace _2BNOR_2B
             {
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
+                w.draw(); 
             }
             else
             {
@@ -363,9 +368,10 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
+                w.draw(25);
             }
             //w.setGate(leftchildLogicGate);
-            w.draw();
+            //w.draw(); 
             return w;
         }
 
@@ -380,15 +386,17 @@ namespace _2BNOR_2B
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
+                w.draw(); 
             }
             else
             {
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
-                w.setGate(input.getLogicGate()); 
+                w.setGate(input.getLogicGate());
+                w.draw(25); 
             }
             //w.setGate(rightchildLogicGate);
-            w.draw();
+            //w.draw();
             return w;
         }
 
@@ -787,7 +795,7 @@ namespace _2BNOR_2B
         {
             string[] postorderHeaders = generatePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
             Array.Sort(postorderHeaders, (x,y) => x.Length.CompareTo(y.Length));
-            return postorderHeaders; 
+            return postorderHeaders.Distinct().ToArray(); 
         }
 
         private string[] generatePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
@@ -899,6 +907,8 @@ namespace _2BNOR_2B
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
+            //Removing any previously drawn tables from the canvas. 
+            c.Children.Clear(); 
             //headers = generateTruthTableHeadersWithSteps(inputExpression);
             headers = getHeaders(inputExpression, true); 
             outputMap = generateOutputMap(inputExpression, headers); 

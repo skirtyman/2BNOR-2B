@@ -63,11 +63,11 @@ namespace _2BNOR_2B
             }
         }
 
-        private List<Point> calculatePoints()
+        private List<Point> calculatePoints(int shift = 0)
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
-            double midpointX = (inputPoint.X + outputPoint.X) / 2;
+            double midpointX = ((inputPoint.X + outputPoint.X) / 2) + (shift * 5); 
             Point midpoint = new Point(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
@@ -76,10 +76,17 @@ namespace _2BNOR_2B
             return points;
         }
 
-        public void draw()
+        public void draw(int shift=0)
         {
+            //Adjust for two shift params, xshift and yshift.
+            //xshift adjusts the position of the vertical line within the wire. 
+            //  dependent on the number of parents nodes. (how many nodes the input connects too) 
+            //yshift adjusts the position of the line connecting the child to the vertical line. 
+            //  dependent on the number of parents nodes.
+            // use expression to calculate spacings based off of number of times input appears? 
+
             points.Clear(); 
-            points = calculatePoints();
+            points = calculatePoints(shift);
             Line l;
             for (int i = 0; i < points.Count - 1; i++)
             {

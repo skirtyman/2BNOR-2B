@@ -50,8 +50,6 @@
 
             <TextBox Margin="5,0" FontFamily="Consolas" Name="inputBox"/>
             <Rectangle Height="10"/>
-            <TextBlock Margin="5,0" FontFamily="Consolas" Name="renderedExpressiontmp"
-                       Text="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
             <controls:FormulaControl x:Name="renderedExpression" Formula="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
 
             <StackPanel Margin="10" Orientation="Horizontal">
