@@ -26,7 +26,6 @@ minimisation
 odd jobs 
 - [ ] write the help pages for the program 
 - [ ] redesign the main window for a more appealing side panel (key with the gates) 
-- [ ] display expression with LATEX, could render expressions as user is typing. 
 - [ ] Exporting drawn diagrams and truth tables. (option for both with a dialog), must crop properly
 - [ ] Increase size and readability of the dialogs. 
 - [ ] Customisation menu (year group selection) to change visuals for the type of user. 
