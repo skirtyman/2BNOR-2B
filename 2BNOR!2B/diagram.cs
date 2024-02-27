@@ -266,6 +266,15 @@ namespace _2BNOR_2B
                         nodeToAdd.setState(c - 48);
                     }
 
+                    // OLD METHOD. 
+                    ////marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
+                    //if (inputsAdded.Contains(c) == false)
+                    //{
+                    //    nodeToAdd.setUniqueness(true);
+                    //    inputsAdded += c;
+                    //}
+
+
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
