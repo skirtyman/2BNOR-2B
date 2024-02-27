@@ -269,7 +269,7 @@ namespace _2BNOR_2B
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
-                        nodeToAdd.setUniqueness(true);
+                        nodeToAdd.setAppearances(nodeToAdd.getAppearances()+1);
                         inputsAdded += c;
                     }
                 }
@@ -360,7 +360,8 @@ namespace _2BNOR_2B
             {
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
-                w.draw(); 
+                leftchildLogicGate.addWire();
+                w.draw(leftchildLogicGate.getConnectedWires()); 
             }
             else
             {
@@ -368,9 +369,9 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
-                w.draw(25);
+                input.getLogicGate().addWire();
+                w.draw(input.getLogicGate().getConnectedWires());
             }
-            //w.setGate(leftchildLogicGate);
             //w.draw(); 
             return w;
         }
@@ -386,16 +387,17 @@ namespace _2BNOR_2B
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
-                w.draw(); 
+                rightchildLogicGate.addWire();
+                w.draw(rightchildLogicGate.getConnectedWires());
             }
             else
             {
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
-                w.setGate(input.getLogicGate());
-                w.draw(25); 
+                w.setGate(input.getLogicGate()); 
+                input.getLogicGate().addWire();
+                w.draw(input.getLogicGate().getConnectedWires());
             }
-            //w.setGate(rightchildLogicGate);
             //w.draw();
             return w;
         }

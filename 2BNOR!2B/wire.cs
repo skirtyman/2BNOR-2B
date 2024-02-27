@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -67,7 +68,7 @@ namespace _2BNOR_2B
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
-            double midpointX = ((inputPoint.X + outputPoint.X) / 2) + (shift * 5); 
+            double midpointX = ((inputPoint.X + outputPoint.X) / 2) + (shift * 10); 
             Point midpoint = new Point(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
@@ -76,7 +77,7 @@ namespace _2BNOR_2B
             return points;
         }
 
-        public void draw(int shift=0)
+        public void draw(int shift = 0)
         {
             //Adjust for two shift params, xshift and yshift.
             //xshift adjusts the position of the vertical line within the wire. 

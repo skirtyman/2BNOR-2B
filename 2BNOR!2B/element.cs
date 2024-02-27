@@ -16,7 +16,7 @@ namespace _2BNOR_2B
         private int state;
         private char label;
         private string elementName;
-        private bool unique = false; 
+        private int appearances = 1; 
 
         public element()
         {
@@ -79,14 +79,14 @@ namespace _2BNOR_2B
             return logicGate; 
         }
 
-        public bool getUniqueness()
+        public int getAppearances()
         {
-            return unique; 
+            return appearances; 
         }
 
-        public void setUniqueness(bool unique)
+        public void setAppearances(int appearances)
         {
-            this.unique = unique;
+            this.appearances = appearances;
         }
 
         public void setState(int state)
