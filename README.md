@@ -8,8 +8,6 @@ diagram drawing
 - [ ] offset of the vertical wires for the repeated input case
 - [ ] draw circles in connected wires 
 - [ ] draw circular brigdes for wires. 
-- [ ] make the inputs smaller and square. 
-- [ ] redo sprite for the output pin 
 - [ ] diagrams can be created only with NAND and NOR, (ask for this with a dialog)
 
 diagram interactivity
@@ -33,4 +31,3 @@ odd jobs
 - [ ] ?functionality for diagrams with multiple inputs. 
 - [ ] Inputs do not have to be sequential within entered expressions. 
 - [ ] Add a application picture for the application. 
-
