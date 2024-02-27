@@ -23,22 +23,21 @@ namespace _2BNOR_2B
     {
         private element gate;
         private double labelWidth;
-        //Store the wires connected to the logic gate so that they can moved when the logic gate is dragged. 
-        private wire leftChildWire;
-        private wire rightChildWire;
-        private wire parentWire; 
 
         public logicGate(element gate)
         {
             InitializeComponent();
             this.gate = gate;
             setImage();
-            //if (gate.leftChild == null &&  gate.rightChild == null)
-            //{
-            //    setLabel(); 
-            //}
             this.PreviewMouseDown += LogicGate_PreviewMouseDown;
+            this.MouseMove += LogicGate_MouseMove;
         }
+
+        private void LogicGate_MouseMove(object sender, MouseEventArgs e)
+        {
+            Mouse.SetCursor(Cursors.Hand);
+        }
+
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -116,31 +115,5 @@ namespace _2BNOR_2B
             elementImage.Source = bitmap;
             elementLabel.Content = gate.getLabel(); 
         }
-
-        //private void setLabel()
-        //{
-        //    Label l = new Label();
-        //    l.BorderThickness = new Thickness(2);
-        //    l.BorderBrush = Brushes.LightGray; 
-        //    l.Width = elementImage.Width - (elementImage.Width - 30);
-        //    labelWidth = l.Width;
-        //    //Do not need to adjust height as this doesn't matter. 
-        //    l.Height = elementImage.Height;
-        //    l.HorizontalAlignment = HorizontalAlignment.Center;
-        //    l.VerticalAlignment = VerticalAlignment.Center;
-        //    l.FontFamily = new FontFamily("Consolas");
-        //    l.FontSize = 24;
-        //    l.Content = gate.getLabel();
-        //    //If gate is an output then the label must be prepended to the stack panel for correct formatting. 
-        //    if (gate.getElementName() == "output_pin")
-        //    {
-        //        elementPanel.Children.Add(l);
-        //    }
-        //    else
-        //    {
-        //        elementPanel.Children.Insert(0, l);
-        //    }
-        //}
-
     }
 }

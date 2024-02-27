@@ -208,14 +208,6 @@ namespace _2BNOR_2B
             //Refreshes the wire states whenever the canvas is clicked. 
             d.updateWires();
             statusBar_Text.Text = "Updated the state of the diagram.";
-            //if (e.OriginalSource is logicGate)
-            //{
-            //    logicGate l = (logicGate)e.OriginalSource;
-            //    if (l.getGate().getElementName() == "input_pin")
-            //    {
-            //        d.updateWires();
-            //    }
-            //}
         }
     }
 }
