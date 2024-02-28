@@ -23,7 +23,6 @@ namespace _2BNOR_2B
     {
         private element gate;
         private double labelWidth;
-        private int connectedWires = 1; 
 
         public logicGate(element gate)
         {
@@ -57,17 +56,6 @@ namespace _2BNOR_2B
 
         }
 
-        public void addWire()
-        {
-            connectedWires++;
-        }
-
-        public int getConnectedWires()
-        {
-            return connectedWires; 
-        }
-
-
         public Point getInputPoint1()
         {
             return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + 10);
@@ -95,7 +83,7 @@ namespace _2BNOR_2B
         {
             if (gate.getElementName() == "input_pin")
             {
-                return new Point(Canvas.GetLeft(this) + elementImage.Width + labelWidth - 43, Canvas.GetTop(this) + (elementImage.Height / (connectedWires + 1)));
+                return new Point(Canvas.GetLeft(this) + elementImage.Width + labelWidth - 43, Canvas.GetTop(this) + elementImage.Height / 2);
             }
             else
             {

@@ -267,20 +267,20 @@ namespace _2BNOR_2B
                     }
 
                     // OLD METHOD. 
-                    ////marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
-                    //if (inputsAdded.Contains(c) == false)
-                    //{
-                    //    nodeToAdd.setUniqueness(true);
-                    //    inputsAdded += c;
-                    //}
-
-
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
-                        nodeToAdd.setAppearances(nodeToAdd.getAppearances()+1);
+                        nodeToAdd.setUniqueness(true);
                         inputsAdded += c;
                     }
+
+
+                    ////marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
+                    //if (inputsAdded.Contains(c) == false)
+                    //{
+                    //    nodeToAdd.setAppearances(nodeToAdd.getAppearances()+1);
+                    //    inputsAdded += c;
+                    //}
                 }
                 //One operand must be popped for a NOT gate, this means it must be considered separately to the other gates. 
                 else if (c == '!')
@@ -369,8 +369,6 @@ namespace _2BNOR_2B
             {
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
-                leftchildLogicGate.addWire();
-                w.draw(leftchildLogicGate.getConnectedWires()); 
             }
             else
             {
@@ -378,10 +376,8 @@ namespace _2BNOR_2B
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
-                input.getLogicGate().addWire();
-                w.draw(input.getLogicGate().getConnectedWires());
             }
-            //w.draw(); 
+            w.draw(); 
             return w;
         }
 
@@ -396,18 +392,14 @@ namespace _2BNOR_2B
             {
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
-                rightchildLogicGate.addWire();
-                w.draw(rightchildLogicGate.getConnectedWires());
             }
             else
             {
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate()); 
-                input.getLogicGate().addWire();
-                w.draw(input.getLogicGate().getConnectedWires());
             }
-            //w.draw();
+            w.draw();
             return w;
         }
 
