@@ -31,6 +31,7 @@ namespace _2BNOR_2B
         private element outputNode;
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
         private element[] elements;
+        private element[] inputs;
         private wire[] wires;
         private Canvas c;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
@@ -242,13 +243,16 @@ namespace _2BNOR_2B
         private void generateBinaryTreeFromExpression(string inputExpression)
         {
             string postfixExpression = ConvertInfixtoPostfix(inputExpression);
+            inputs = new element[getNumberOfInputs(inputExpression, false)];
             Stack<element> nodeStack = new Stack<element>();
             elements = new element[inputExpression.Length + 1];
             element nodeToAdd;
             element leftChild;
             element rightChild;
+            element tmp;
             //The ID of the node within the tree. This is also the same as the position within the input string. 
             int elementID = 0;
+            int i = 0; 
             string elementName = "";
             string inputsAdded = "";
             //Tokenising the postfix expression, each token is a node within the tree. The order of postfix is the same as
@@ -260,6 +264,8 @@ namespace _2BNOR_2B
                 {
                     //creating an input pin
                     nodeToAdd = new element(elementID, c);
+                    inputs[i] = nodeToAdd;
+                    i++; 
                     //If the input is a number then the state can already by set. 
                     if (char.IsNumber(c))
                     {
@@ -267,20 +273,25 @@ namespace _2BNOR_2B
                     }
 
                     // OLD METHOD. 
-                    //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
-                    if (inputsAdded.Contains(c) == false)
-                    {
-                        nodeToAdd.setUniqueness(true);
-                        inputsAdded += c;
-                    }
-
-
                     ////marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     //if (inputsAdded.Contains(c) == false)
                     //{
-                    //    nodeToAdd.setAppearances(nodeToAdd.getAppearances()+1);
+                    //    nodeToAdd.setUniqueness(true);
                     //    inputsAdded += c;
                     //}
+
+
+                    //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
+                    if (inputsAdded.Contains(c) == false)
+                    {
+                        nodeToAdd.setInstances(1); 
+                        inputsAdded += c;
+                    }
+                    else
+                    {
+                        tmp = inputs[c - 65];
+                        tmp.addInstance(); 
+                    }
                 }
                 //One operand must be popped for a NOT gate, this means it must be considered separately to the other gates. 
                 else if (c == '!')
@@ -288,7 +299,7 @@ namespace _2BNOR_2B
                     rightChild = nodeStack.Pop();
                     //create a logic gate
                     nodeToAdd = new element("not_gate", elementID, null, rightChild);
-                    nodeToAdd.setUniqueness(true);
+                    nodeToAdd.setInstances(1);
                     rightChild.parent = nodeToAdd;
                 }
                 //Gate has been found, form the higher level within the tree. 
@@ -300,7 +311,7 @@ namespace _2BNOR_2B
                     //create a logic gate
                     elementName = gateNames[Array.IndexOf(booleanOperators, c)];
                     nodeToAdd = new element(elementName, elementID, leftChild, rightChild);
-                    nodeToAdd.setUniqueness(true);
+                    nodeToAdd.setInstances(1);
                     leftChild.parent = nodeToAdd;
                     rightChild.parent = nodeToAdd;
                 }
@@ -367,17 +378,24 @@ namespace _2BNOR_2B
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
             {
+                w.setRepeated(false); 
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
+                w.draw(leftchildLogicGate.getConnectedWires());
+                //leftchildLogicGate.addWire(); 
             }
             else
             {
+                w.setRepeated(true);
                 //Searching for the input with the same label as the left child node does exist but doesnt have a logic gate, therefore it is not a unique input. 
                 input = getInputWithSameLabel(root.leftChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
+                input.getLogicGate().addWire(); 
+                w.draw(input.getLogicGate().getConnectedWires(), true);
+                //input.getLogicGate().addWire(); 
             }
-            w.draw(); 
+            //w.draw(); 
             return w;
         }
 
@@ -390,16 +408,23 @@ namespace _2BNOR_2B
             w.setStart(rootLogicGate.getInputPoint2());
             if (rightchildLogicGate != null)
             {
+                w.setRepeated(false); 
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
+                w.draw(rightchildLogicGate.getConnectedWires()); 
+                //rightchildLogicGate.addWire();
             }
             else
             {
+                w.setRepeated(true);
                 input = getInputWithSameLabel(root.rightChild.getLabel());
                 w.setEnd(input.getLogicGate().getOutputPoint());
-                w.setGate(input.getLogicGate()); 
+                w.setGate(input.getLogicGate());
+                input.getLogicGate().addWire();
+                w.draw(input.getLogicGate().getConnectedWires(), true);
+                //input.getLogicGate().addWire(); 
             }
-            w.draw();
+            //w.draw();
             return w;
         }
 
@@ -409,17 +434,22 @@ namespace _2BNOR_2B
             wires = new wire[getNumberOfNodes(root)];
             element tmp;
             int i = 0;
+            int deb = 0; 
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
             while (q.Count != 0)
             {
                 tmp = q.Dequeue();
+                //MessageBox.Show("");
+                //deb++; 
                 if (tmp.leftChild != null)
                 {
                     wires[i] = drawWiresForLeftChildren(tmp);
                     i++;
                     q.Enqueue(tmp.leftChild);
                 }
+                //MessageBox.Show("");
+                //deb++; 
                 if (tmp.rightChild != null)
                 {
                     wires[i] = drawWiresForRightChildren(tmp);
@@ -455,7 +485,7 @@ namespace _2BNOR_2B
             //Position of the node within the canvas. 
             double x, y; 
             //checking if a node is not a repeated input. If it is then a logic gate doesn't have to be drawn. 
-            if (currentNode.getUniqueness())
+            if (currentNode.getInstances() != 0)
             {
                 x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
                 //Gates are not being drawn in parallel to preserve the look of the tree. 
@@ -584,9 +614,9 @@ namespace _2BNOR_2B
             canvasHeight = c.ActualHeight;
             canvasWidth = c.ActualWidth;
             generateBinaryTreeFromExpression(inputExpression);
-            inputMap = generateInputMap(inputExpression);
-            headers = getHeaders(inputExpression);
-            outputMap = generateOutputMap(inputExpression, headers);
+            inputMap = generateInputMap(inputExpression, false);
+            headers = getHeaders(inputExpression, false);
+            outputMap = generateOutputMap(inputExpression, headers, false);
             int heightOfTree = getHeightOfTree(rootNode); 
             drawNodes(rootNode, heightOfTree);
             drawWires(rootNode);
@@ -680,9 +710,9 @@ namespace _2BNOR_2B
         }
 
         //Converts an int into binary string. This can be used to generate the input combinations for truth tables. 
-        private string ConvertIntintoBinaryString(int n, string booleanExpression)
+        private string ConvertIntintoBinaryString(int n, string booleanExpression, bool isUnique)
         {
-            return Convert.ToString(n, 2).PadLeft(getNumberOfInputs(booleanExpression), '0');
+            return Convert.ToString(n, 2).PadLeft(getNumberOfInputs(booleanExpression, isUnique), '0');
         }
 
         //Gets the respective string value of the truth table based off of its input. 
@@ -695,7 +725,7 @@ namespace _2BNOR_2B
         }
 
         //counts the number of unique inputs within a boolean expression
-        private int getNumberOfInputs(string booleanExpression, bool isUnique=false)
+        private int getNumberOfInputs(string booleanExpression, bool isUnique)
         {
             int numberOfInputs = 0;
             string alreadyCounted = "";
@@ -704,11 +734,18 @@ namespace _2BNOR_2B
                 //any letter is an input within the expression. Therfore add it to the counter. 
                 if (char.IsLetter(token) || char.IsNumber(token))
                 {
-                    if (isUnique && !alreadyCounted.Contains(token))
+                    if (isUnique)
                     {
-                        alreadyCounted += token;
+                        if (!alreadyCounted.Contains(token))
+                        {
+                            alreadyCounted += token;
+                            numberOfInputs++;
+                        }
                     }
-                    numberOfInputs++;
+                    else
+                    {
+                        numberOfInputs++;
+                    }
                 }
             }
             return numberOfInputs;
@@ -729,26 +766,26 @@ namespace _2BNOR_2B
             return numberOfOperators;
         }
 
-        private string[] generateInputMap(string inputExpression)
+        private string[] generateInputMap(string inputExpression, bool isUnique)
         {
-            int numberOfInputs = getNumberOfInputs(inputExpression);
+            int numberOfInputs = getNumberOfInputs(inputExpression, isUnique);
             // 2^n is the number of possible binary combinations hence number of rows within table. 
             int numberOfRows = (int)Math.Pow(2, numberOfInputs);
             //the input map of the truth table. Stores the input columns of the truth table. 
             string[] inputMap = new string[numberOfRows];
             for (int i = 0; i < numberOfRows; i++)
             {
-                inputMap[i] = ConvertIntintoBinaryString(i, inputExpression);
+                inputMap[i] = ConvertIntintoBinaryString(i, inputExpression, isUnique);
             }
             return inputMap;
         }
 
-        private string[] generateOutputMap(string inputExpression, string[] headers)
+        private string[] generateOutputMap(string inputExpression, string[] headers, bool isUnique)
         {
-            string[] inputMap = generateInputMap(inputExpression);
-            int numberOfRows = (int)Math.Pow(2, getNumberOfInputs(inputExpression));
+            string[] inputMap = generateInputMap(inputExpression, isUnique);
+            int numberOfRows = (int)Math.Pow(2, getNumberOfInputs(inputExpression, isUnique));
             //Number of columns within the table is always the number of inputs and number of operators. 
-            int numberOfColumns = getNumberOfInputs(inputExpression) + getNumberOfOperators(inputExpression);
+            int numberOfColumns = getNumberOfInputs(inputExpression, isUnique) + getNumberOfOperators(inputExpression);
             string inputCombination;
             //array that handles only the output portion of the truth, this can be put together with the input map to form a complete table
             string[] outputMap = new string[inputMap.Length];
@@ -774,20 +811,20 @@ namespace _2BNOR_2B
 
         //function that takes an inputted expression and produces a series of headers either for display (inputs sorted to beginning)
         //or for colouring wires (postorder). 
-        private string[] getHeaders(string inputExpression, bool isDisplay = false)
+        private string[] getHeaders(string inputExpression, bool isDisplay)
         {
             string postfix = ConvertInfixtoPostfix(inputExpression);
             string[] headers; 
-            int numberOfInputs;
+            int numberOfInputs = getNumberOfInputs(postfix, false);
             int numberOfOperators = getNumberOfOperators(postfix);
             if (isDisplay)
             {
-                numberOfInputs = getNumberOfInputs(postfix, true);
+                //numberOfInputs = getNumberOfInputs(postfix, true);
                 headers = generateDisplayOperatorHeaders(postfix, numberOfInputs, numberOfOperators);
             }
             else
             {
-                numberOfInputs = getNumberOfInputs(postfix);
+                //numberOfInputs = getNumberOfInputs(postfix, false);
                 headers = generatePostOrderHeaders(postfix, numberOfInputs, numberOfOperators); 
             }
             return headers;
@@ -797,8 +834,11 @@ namespace _2BNOR_2B
         private string[] generateDisplayOperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
         {
             string[] postorderHeaders = generatePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
+            string[] displayHeaders = new string[getNumberOfInputs(inputExpression, true) + numberOfOperators];
             Array.Sort(postorderHeaders, (x,y) => x.Length.CompareTo(y.Length));
-            return postorderHeaders.Distinct().ToArray(); 
+            postorderHeaders = postorderHeaders.Distinct().ToArray();
+            Array.Copy(postorderHeaders, displayHeaders, displayHeaders.Length);
+            return displayHeaders; 
         }
 
         private string[] generatePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
@@ -868,7 +908,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private void drawTruthTable(Canvas c, string[] headers, string[] outputMap)
+        private void drawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
         {
             Label cell;
             Thickness border = new Thickness(2);
@@ -910,16 +950,20 @@ namespace _2BNOR_2B
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
+            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", true).ToString());
+            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", false).ToString());
+
+
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear(); 
             //headers = generateTruthTableHeadersWithSteps(inputExpression);
             headers = getHeaders(inputExpression, true); 
-            outputMap = generateOutputMap(inputExpression, headers); 
+            outputMap = generateOutputMap(inputExpression, headers, true); 
             if (isSteps)
             {
                 //drawTruthTable(c, headers, outputMap);
                 drawTruthTableHeaders(c, headers);
-                drawTruthTable(c, headers, outputMap); 
+                drawTruthTableBody(c, headers, outputMap); 
             }
             else
             {
@@ -1098,7 +1142,7 @@ namespace _2BNOR_2B
         private List<string> getMinterms(string expression)
         {
             List<string> minterms = new List<string>();
-            string[] inputMap = generateInputMap(expression);
+            string[] inputMap = generateInputMap(expression, true);
             foreach (string input in inputMap)
             {
                 //A minterm has been found if input results in the expresion evaluating to true. 
@@ -1165,6 +1209,20 @@ namespace _2BNOR_2B
                     }
                 }
             }
+
+            //string coveredString = getCoveredString(essentialPrimeImplicants); 
+            ////If the covered string contains a zero, the essential prime implicants do not cover all minterms, this means more prime implicants must be 
+            ////added to complete the minimised expression. 
+            //if (coveredString.Contains('0'))
+            //{
+
+            //}
+            //else
+            //{
+            //    //All minterms are covered so all implicants in final expression have been found. 
+            //    return essentialPrimeImplicants;
+            //}
+
             return essentialPrimeImplicants;
         }
 

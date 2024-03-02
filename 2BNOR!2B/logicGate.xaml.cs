@@ -23,11 +23,13 @@ namespace _2BNOR_2B
     {
         private element gate;
         private double labelWidth;
+        private int connectedWires = 0; 
 
         public logicGate(element gate)
         {
             InitializeComponent();
             this.gate = gate;
+            //connectedWires = gate.getInstances(); 
             setImage();
             this.PreviewMouseDown += LogicGate_PreviewMouseDown;
             this.MouseMove += LogicGate_MouseMove;
@@ -38,6 +40,16 @@ namespace _2BNOR_2B
             Mouse.SetCursor(Cursors.Hand);
         }
 
+
+        public void addWire()
+        {
+            connectedWires++;
+        }
+
+        public int getConnectedWires()
+        {
+            return connectedWires;
+        }
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {

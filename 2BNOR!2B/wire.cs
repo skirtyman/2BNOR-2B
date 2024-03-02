@@ -13,11 +13,12 @@ namespace _2BNOR_2B
 {
     public class wire
     {
-        private int state;
+        private bool repeated; 
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
         private Line[] lines = new Line[3];
+        private Ellipse e; 
         private logicGate inputGate; 
         private Brush colour = Brushes.Black; 
         private Canvas c; 
@@ -32,6 +33,11 @@ namespace _2BNOR_2B
             this.inputPoint = inputPoint;
             this.outputPoint = outputPoint;
             this.c = c;
+        }
+
+        public void setRepeated(bool repeated)
+        {
+            this.repeated = repeated;
         }
 
         public void setStart(Point inputPoint)
@@ -62,13 +68,19 @@ namespace _2BNOR_2B
             {
                 line.Stroke = colour;
             }
+
+            if (repeated)
+            {
+                e.Fill = colour;
+                e.Stroke = colour;
+            }
         }
 
         private List<Point> calculatePoints(int shift = 0)
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
-            double midpointX = ((inputPoint.X + outputPoint.X) / 2) + (shift * 10); 
+            double midpointX = ((inputPoint.X + outputPoint.X) / 2) - (shift * 15); 
             Point midpoint = new Point(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
@@ -77,7 +89,19 @@ namespace _2BNOR_2B
             return points;
         }
 
-        public void draw(int shift = 0)
+        private void addCircle()
+        {
+            e = new Ellipse();
+            e.Width = 10;
+            e.Height = 10;
+            e.Fill = colour; 
+            e.Stroke = colour;
+            Canvas.SetTop(e, lines[2].Y2-5);
+            Canvas.SetLeft(e, lines[2].X1-5);
+            c.Children.Add(e);
+        }
+
+        public void draw(int shift = 0, bool isRepeatWire = false)
         {
             //Adjust for two shift params, xshift and yshift.
             //xshift adjusts the position of the vertical line within the wire. 
@@ -103,6 +127,10 @@ namespace _2BNOR_2B
                 l.X2 = points[i + 1].X;
                 l.Y2 = points[i + 1].Y;
                 c.Children.Add(l);
+            }
+            if (isRepeatWire)
+            {
+                addCircle(); 
             }
         }
 
