@@ -5,8 +5,6 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 
 ### Todo
 diagram drawing 
-- [ ] offset of the vertical wires for the repeated input case
-- [ ] draw circles in connected wires 
 - [ ] draw circular brigdes for wires. 
 - [ ] diagrams can be created only with NAND and NOR, (ask for this with a dialog)
 
@@ -18,8 +16,7 @@ truth tables
 
 minimisation 
 - [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. 
-- [ ] Reformat the brackets with expressions 
-- [ ] write a display for the minimisation code. Showing the implicants etc. 
+- [ ] Reformat the brackets with expressions
 
 odd jobs 
 - [ ] write the help pages for the program 
