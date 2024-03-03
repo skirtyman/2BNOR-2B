@@ -17,10 +17,10 @@ namespace _2BNOR_2B
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
-        private Line[] lines = new Line[3];
+        private List<Line> lines = new List<Line>();
         private Ellipse e; 
         private logicGate inputGate; 
-        private Brush colour = Brushes.Black; 
+        private Brush colour = Brushes.Red; 
         private Canvas c; 
         
         public wire(Canvas c)
@@ -61,6 +61,35 @@ namespace _2BNOR_2B
             return inputGate;
         }
 
+
+        //Returns list of lines depending on orientation. Or all lines if not specificed.
+        public List<Line> getLines(bool? isHorizontal)
+        {
+            if (isHorizontal != null)
+            {
+                return lines.Where(l => determineOrientation(l) == isHorizontal).ToList();
+            }
+            else
+            {
+                return lines; 
+            }
+
+        }
+
+        private bool determineOrientation(Line l)
+        {
+            if (l.Y1 == l.Y2)
+            {
+                //Horizontal line
+                return true;
+            }
+            else
+            {
+                //Vertical line
+                return false;
+            }
+        }
+
         public void setColour(Brush colour)
         {
             this.colour = colour;
@@ -80,7 +109,7 @@ namespace _2BNOR_2B
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
-            double midpointX = ((inputPoint.X + outputPoint.X) / 2) - (shift * 15); 
+            double midpointX = ((inputPoint.X + outputPoint.X) / 2) - (shift * 10); 
             Point midpoint = new Point(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
@@ -101,15 +130,47 @@ namespace _2BNOR_2B
             c.Children.Add(e);
         }
 
+        //Splits the line segment, adds a curved bridge for the wire intersection. 
+        public void addBridge(Line segment, Point bridgeLocation)
+        {
+            //segment.Stroke = Brushes.Blue; 
+            e = new Ellipse();
+            e.Width = 10;
+            e.Height = 10;
+            e.Fill = colour;
+            e.Stroke = colour;
+            Canvas.SetTop(e, bridgeLocation.Y);
+            Canvas.SetLeft(e, bridgeLocation.X);
+            c.Children.Add(e);
+
+            //for (int i = 0; i < lines.Count; i++)
+            //{
+            //    if (lines[i] == segment)
+            //    {
+            //        //lines.RemoveAt(i);
+            //        lines[i].Stroke = Brushes.Blue; 
+            //    }
+            //}
+
+            //Line line = new Line();
+            //lines.Add(line);
+            //line.X1 = segment.X1;
+            //line.Y1 = segment.Y1;
+            //line.X2 = bridgeLocation.X;
+            //line.Y2 = bridgeLocation.Y + 10;
+            //line.Stroke = Brushes.Blue;
+            //line.StrokeThickness = 2; 
+            //c.Children.Add(line);
+
+
+
+
+
+
+        }
+
         public void draw(int shift = 0, bool isRepeatWire = false)
         {
-            //Adjust for two shift params, xshift and yshift.
-            //xshift adjusts the position of the vertical line within the wire. 
-            //  dependent on the number of parents nodes. (how many nodes the input connects too) 
-            //yshift adjusts the position of the line connecting the child to the vertical line. 
-            //  dependent on the number of parents nodes.
-            // use expression to calculate spacings based off of number of times input appears? 
-
             points.Clear(); 
             points = calculatePoints(shift);
             Line l;
@@ -118,7 +179,7 @@ namespace _2BNOR_2B
                 l = new Line();
                 if (i <= 2)
                 {
-                    lines[i] = l; 
+                    lines.Add(l);  
                 }
                 l.StrokeThickness = 2;
                 l.Stroke = colour;
