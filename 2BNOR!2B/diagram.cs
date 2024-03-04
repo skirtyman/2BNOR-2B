@@ -441,7 +441,7 @@ namespace _2BNOR_2B
                         foreach (Line l1 in verticalSegments)
                         {
                             //check and if true then draw intersection.
-                            if ((l.X1 <= l1.X2 || l.X1 >= l1.X1) && (l1.Y1 >= l.Y1 || l1.Y1 <= l.Y2))
+                            if ((l.X1 <= l1.X2 || l.X1 >= l1.X1) && (l1.Y1 >= l.Y1 || l1.Y1 <= l.Y2) && wires[i] != currentlyDrawn)
                             {
                                 tmp = new Point(l.X1 , l1.Y1);
                                 //draw intersection
@@ -458,7 +458,7 @@ namespace _2BNOR_2B
                         foreach (Line l2 in horizontalSegments)
                         {
                             //check and if true then draw intersection.
-                            if (!(l2.X1 <= l.X2 || l2.X2 >= l.X1) && (l.Y1 >= l2.Y1 || l.Y1 <= l2.Y2))
+                            if ((l2.X1 <= l.X2 || l2.X2 >= l.X1) && (l.Y1 >= l2.Y1 || l.Y1 <= l2.Y2) && wires[j] != currentlyDrawn)
                             {
                                 tmp = new Point(l2.X1, l.Y1);
                                 //draw intersection. 
