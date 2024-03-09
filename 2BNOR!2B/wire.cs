@@ -17,22 +17,33 @@ namespace _2BNOR_2B
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
-        private List<Line> lines = new List<Line>();
         private Ellipse e; 
         private logicGate inputGate; 
         private Brush colour = Brushes.Red; 
-        private Canvas c; 
-        
+        private Canvas c;
+        private string wireString = "lll";
+        private int shift = 0; 
+
+
+        Path p = new Path();
+        PathGeometry pg = new PathGeometry();
+        PathFigureCollection pfc = new PathFigureCollection();
+
+
         public wire(Canvas c)
         {
-            this.c = c; 
+            this.c = c;
+            p.Stroke = this.colour;
+            p.StrokeThickness = 2;
         }
-        
+
         public wire(Point inputPoint, Point outputPoint, Canvas c)
         {
             this.inputPoint = inputPoint;
             this.outputPoint = outputPoint;
             this.c = c;
+            p.Stroke = this.colour;
+            p.StrokeThickness = 2;
         }
 
         public void setRepeated(bool repeated)
@@ -56,47 +67,66 @@ namespace _2BNOR_2B
             
         }
 
+        public void setShift(int shift)
+        {
+            this.shift = shift;
+        }
+
+
         public logicGate getGate()
         {
             return inputGate;
         }
 
-
         //Returns list of lines depending on orientation. Or all lines if not specificed.
-        public List<Line> getLines(bool? isHorizontal)
+        public List<Point> getPoints(bool? isHorizontal)
         {
-            if (isHorizontal != null)
+            if (isHorizontal == true)
             {
-                return lines.Where(l => determineOrientation(l) == isHorizontal).ToList();
+                return getHorizontalPoints();
+            }
+            else if (isHorizontal == false)
+            {
+                return getVerticalPoints();
             }
             else
             {
-                return lines; 
+                return points;
             }
-
         }
 
-        private bool determineOrientation(Line l)
+        private List<Point> getHorizontalPoints()
         {
-            if (l.Y1 == l.Y2)
+            List<Point> p = new List<Point>();
+            for (int i = 0; i < points.Count - 1; i++)
             {
-                //Horizontal line
-                return true;
+                if (points[i].Y == points[i + 1].Y)
+                {
+                    p.Add(points[i]);
+                    p.Add(points[i + 1]);
+                }
             }
-            else
+            return p;
+        }
+
+        private List<Point> getVerticalPoints()
+        {
+            List<Point> p = new List<Point>();
+            for (int i = 0; i < points.Count - 1; i++)
             {
-                //Vertical line
-                return false;
+                if (points[i].X == points[i + 1].X)
+                {
+                    p.Add(points[i]);
+                    p.Add(points[i + 1]);
+                }
             }
+            return p;
         }
 
         public void setColour(Brush colour)
         {
             this.colour = colour;
-            foreach (Line line in lines)
-            {
-                line.Stroke = colour;
-            }
+            p.Stroke = colour;
 
             if (repeated)
             {
@@ -105,7 +135,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private List<Point> calculatePoints(int shift = 0)
+        public void setPoints()
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
@@ -115,85 +145,71 @@ namespace _2BNOR_2B
             midpoint.Y = outputPoint.Y;
             points.Add(midpoint);
             points.Add(outputPoint);
-            return points;
+            //if (points.Contains(inputPoint))
+            //{
+            //    MessageBox.Show("Shtuff");
+            //}
+            //else
+            //{
+            //    MessageBox.Show("What the fuck is actually happening :("); 
+            //}
+            //return points;
         }
 
-        private void addCircle()
-        {
-            e = new Ellipse();
-            e.Width = 10;
-            e.Height = 10;
-            e.Fill = colour; 
-            e.Stroke = colour;
-            Canvas.SetTop(e, lines[2].Y2-5);
-            Canvas.SetLeft(e, lines[2].X1-5);
-            c.Children.Add(e);
-        }
 
         //Splits the line segment, adds a curved bridge for the wire intersection. 
-        public void addBridge(Line segment, Point bridgeLocation)
+        public void addBridge(Point? bridgeLocation)
         {
-            //segment.Stroke = Brushes.Blue; 
-            e = new Ellipse();
-            e.Width = 10;
-            e.Height = 10;
-            e.Fill = colour;
-            e.Stroke = colour;
-            Canvas.SetTop(e, bridgeLocation.Y);
-            Canvas.SetLeft(e, bridgeLocation.X);
-            c.Children.Add(e);
-
-            //for (int i = 0; i < lines.Count; i++)
-            //{
-            //    if (lines[i] == segment)
-            //    {
-            //        //lines.RemoveAt(i);
-            //        lines[i].Stroke = Brushes.Blue; 
-            //    }
-            //}
-
-            //Line line = new Line();
-            //lines.Add(line);
-            //line.X1 = segment.X1;
-            //line.Y1 = segment.Y1;
-            //line.X2 = bridgeLocation.X;
-            //line.Y2 = bridgeLocation.Y + 10;
-            //line.Stroke = Brushes.Blue;
-            //line.StrokeThickness = 2; 
-            //c.Children.Add(line);
-
-
-
-
-
-
+            points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - 10));
+            points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + 10));
+            wireString = wireString.Insert(wireString.Length - 1, "bl");
         }
 
-        public void draw(int shift = 0, bool isRepeatWire = false)
+        //renders the points list so that the wire is displayed to the canvas.
+        //Takes the list of points and adds the relative shapes to the geometry group
+        public void renderLine()
         {
-            points.Clear(); 
-            points = calculatePoints(shift);
-            Line l;
-            for (int i = 0; i < points.Count - 1; i++)
+            c.Children.Remove(p);
+            pg.Clear();
+            pfc.Clear();
+            PathFigure pf;
+            //int index = (repeated) ? wireString.Length + 1 : wireString.Length;
+            for (int i = 0; i < wireString.Length; i++)
             {
-                l = new Line();
-                if (i <= 2)
+                pf = new PathFigure();
+                pf.StartPoint = points[i];
+                if (wireString[i] == 'l')
                 {
-                    lines.Add(l);  
+                    //draw a line
+                    LineSegment line = new LineSegment();
+                    line.Point = points[i + 1];
+                    line.IsStroked = true;
+                    pf.Segments.Add(line);
                 }
-                l.StrokeThickness = 2;
-                l.Stroke = colour;
-                l.X1 = points[i].X;
-                l.Y1 = points[i].Y;
-                l.X2 = points[i + 1].X;
-                l.Y2 = points[i + 1].Y;
-                c.Children.Add(l);
+                //else if (wireString[i] == 'b')
+                else
+                {
+                    ArcSegment arc = new ArcSegment(points[i + 1], new Size(5, 5), 180, true, SweepDirection.Clockwise, true);
+                    pf.Segments.Add(arc);
+                }
+                pfc.Add(pf);
             }
-            if (isRepeatWire)
+            pg.Figures = pfc;
+            p.Data = pg;
+            p.Stroke = Brushes.Green;
+            c.Children.Add(p);
+
+            if (repeated)
             {
-                addCircle(); 
+                e = new Ellipse();
+                e.Width = 10;
+                e.Height = 10;
+                e.Fill = Brushes.Black;
+                e.Stroke = Brushes.Black;
+                Canvas.SetTop(e, points[points.Count-2].Y - 5);
+                Canvas.SetLeft(e, points[points.Count-2].X - 5);
+                c.Children.Add(e);
             }
         }
-
     }
 }

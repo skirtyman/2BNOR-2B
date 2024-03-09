@@ -383,7 +383,9 @@ namespace _2BNOR_2B
                 w.setRepeated(false);
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
-                w.draw(leftchildLogicGate.getConnectedWires());
+                //w.draw(leftchildLogicGate.getConnectedWires());
+                w.setShift(leftchildLogicGate.getConnectedWires());
+                w.setPoints();
             }
             else
             {
@@ -393,7 +395,9 @@ namespace _2BNOR_2B
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
                 input.getLogicGate().addWire();
-                w.draw(input.getLogicGate().getConnectedWires(), true);
+                //w.draw(input.getLogicGate().getConnectedWires(), true);
+                w.setShift(input.getLogicGate().getConnectedWires());
+                w.setPoints(); 
             }
             return w;
         }
@@ -410,7 +414,9 @@ namespace _2BNOR_2B
                 w.setRepeated(false);
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
-                w.draw(rightchildLogicGate.getConnectedWires()); 
+                //w.draw(rightchildLogicGate.getConnectedWires()); 
+                w.setShift(rightchildLogicGate.getConnectedWires());
+                w.setPoints();
             }
             else
             {
@@ -419,65 +425,100 @@ namespace _2BNOR_2B
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
                 input.getLogicGate().addWire();
-                w.draw(input.getLogicGate().getConnectedWires(), true);
+                //w.draw(input.getLogicGate().getConnectedWires(), true);
+                w.setShift(input.getLogicGate().getConnectedWires()); 
+                w.setPoints();
             }
             return w;
         }
 
-        private void drawIntersection(wire currentlyDrawn)
+        private Point? findIntersection(Point p0, Point p1, Point p2, Point p3)
         {
-            List<Line> currentWireSegments = currentlyDrawn.getLines(null);
-            List<Line> verticalSegments; 
-            List<Line> horizontalSegments;
-            Point tmp; 
-            foreach(Line l in currentWireSegments)
-            {
-                if (l.X1 == l.X2)
-                {
-                    for (int i = 0; i < wires.Length -1; i++)
-                    {
-                        verticalSegments = wires[i].getLines(false);
-                        //check each segment with l for intersection.
-                        foreach (Line l1 in verticalSegments)
-                        {
-                            //check and if true then draw intersection.
-                            if ((l.X1 <= l1.X2 || l.X1 >= l1.X1) && (l1.Y1 >= l.Y1 || l1.Y1 <= l.Y2) && wires[i] != currentlyDrawn)
-                            {
-                                tmp = new Point(l.X1 , l1.Y1);
-                                //draw intersection
-                                currentlyDrawn.addBridge(l, tmp);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for(int j = 0; j < wires.Length - 1; j++)
-                    {
-                        horizontalSegments = wires[j].getLines(true);
-                        foreach (Line l2 in horizontalSegments)
-                        {
-                            //check and if true then draw intersection.
-                            if ((l2.X1 <= l.X2 || l2.X2 >= l.X1) && (l.Y1 >= l2.Y1 || l.Y1 <= l2.Y2) && wires[j] != currentlyDrawn)
-                            {
-                                tmp = new Point(l2.X1, l.Y1);
-                                //draw intersection. 
-                                currentlyDrawn.addBridge(l, tmp);
-                            }
-                        }
-                    }
+            double s_x = p1.X - p0.X;
+            double s_y = p1.Y - p0.Y;
+            double s2_x = p3.X - p2.X;
+            double s2_y = p3.Y - p2.Y;
+            double denom = s_x * s2_y - s2_x * s_y;
 
+            if (denom == 0)
+            {
+                //Lines are collinear. 
+                return null;
+            }
+            bool isDenomPositive = denom > 0;
+
+            double s3_x = p0.X - p2.X;
+            double s3_y = p0.Y - p2.Y;
+            double s_numer = s_x * s3_y - s_y * s3_x;
+
+
+            if ((s_numer < 0) == isDenomPositive)
+            {
+                return null;
+            }
+
+            double t_numer = s2_x * s3_y - s_x * s3_y;
+
+            if ((t_numer < 0) == isDenomPositive)
+            {
+                return null;
+            }
+
+            if (((s_numer > denom) == isDenomPositive) || ((t_numer > denom) == isDenomPositive))
+            {
+                return null;
+            }
+
+            double t = t_numer / denom;
+            Point? result = new Point(p0.X + (t * s_x), p0.Y + (t * s_y));
+            //MessageBox.Show(result.Value.X.ToString() + "," + result.Value.Y.ToString());
+            return result;
+        }
+
+        private void drawIntersections()
+        {
+            List<Point> horizontalLines = new List<Point>();
+            List<Point> verticalLines = new List<Point>();
+            Point? intersection;
+            wire tmp;
+            for (int j = 0; j < wires.Length - 1; j++)
+            {
+                horizontalLines.AddRange(wires[j].getPoints(true));
+                verticalLines.AddRange(wires[j].getPoints(false)); 
+            }
+
+
+            for (int i = 0; i < verticalLines.Count - 1; i = i + 2)
+            {
+                //first point of line = i, second point = i + 1. These form a line pair; 
+                for (int c = 0; c < horizontalLines.Count - 1; c = c + 2)
+                {
+                    //again c and c + 1 form the line pair of horzontal to vertical
+                    intersection = findIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
+                    if (intersection != null && (findWire(verticalLines[i]) != findWire(horizontalLines[c])))
+                    {
+                        //MessageBox.Show($"Found at {intersection.Value.X}, {intersection.Value.Y}");
+                        tmp = findWire(verticalLines[i]);
+                        tmp.addBridge(intersection);
+                        //tmp.renderLine();
+                    }
                 }
             }
         }
 
-        //private void drawIntersections()
-        //{
-        //    for(int i = 0; i < wires.Length-1; i++)
-        //    {
-        //        drawIntersection(wires[i]); 
-        //    }
-        //}
+        private wire findWire(Point p)
+        {
+            List<Point> points; 
+            foreach (wire w in wires)
+            {
+                points = w.getPoints(null); 
+                if (points.Contains(p))
+                {
+                    return w;
+                }
+            }
+            throw new Exception("Could not find wire.");
+        }
 
         private void drawWires(element root)
         {
@@ -486,7 +527,6 @@ namespace _2BNOR_2B
             wires = new wire[getNumberOfNodes(root)];
             element tmp;
             int i = 0;
-            int deb = 0;
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
             while (q.Count != 0)
@@ -506,11 +546,10 @@ namespace _2BNOR_2B
                     q.Enqueue(tmp.rightChild);
                 }
             }
-
-
+            drawIntersections(); 
             for (int j = 0; j < wires.Length - 1; j++)
             {
-                drawIntersection(wires[j]); 
+                wires[j].renderLine(); 
             }
         }
 
@@ -642,7 +681,8 @@ namespace _2BNOR_2B
             w.setStart(outputNode.getLogicGate().getInputForOutput());
             w.setEnd(rootNode.getLogicGate().getOutputPoint());
             w.setGate(rootNode.getLogicGate());
-            w.draw();
+            w.setPoints();
+            w.renderLine(); 
 
             wires[wires.Length - 1] = w;
         }

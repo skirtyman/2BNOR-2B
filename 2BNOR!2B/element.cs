@@ -80,16 +80,6 @@ namespace _2BNOR_2B
             return logicGate; 
         }
 
-        //public bool getUniqueness()
-        //{
-        //    return uniqueness;
-        //}
-
-        //public void setUniqueness(bool unique)
-        //{
-        //    this.uniqueness = unique;
-        //}
-
         public int getInstances()
         {
             return instances;
