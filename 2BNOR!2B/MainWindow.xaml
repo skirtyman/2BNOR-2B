@@ -132,21 +132,6 @@
                                 </StackPanel>
                             </ListViewItem>
 
-                            <ListViewItem>
-                                <Button Width="150" Height="80" Background="#eeefed"
-                        Click="componentSidePanel_AddBuiltinCircuit">
-                                    <Button.Content>
-                                        <StackPanel>
-                                            <Image/>
-                                            <TextBlock TextAlignment="Center" FontFamily="Consolas"
-                                       FontSize="18">
-                                Add built-in <LineBreak/> circuit
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </Button.Content>
-                                </Button>
-                            </ListViewItem>
-
                             <!--Debug button need to remove-->
                             <ListViewItem>
                                 <Button Width="150" Height="100" Click="Button_Click">

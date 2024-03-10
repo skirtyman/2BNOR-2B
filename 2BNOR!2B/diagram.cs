@@ -1,24 +1,16 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
-using System.Security.RightsManagement;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Shapes;
 
 namespace _2BNOR_2B
 {
-    class diagram
+    class Diagram
     {
         private static Regex r = new Regex(@"\s+");
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
@@ -30,12 +22,12 @@ namespace _2BNOR_2B
         private string infixExpression = "";
         private string inputStates = "";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
-        private element rootNode;
-        private element outputNode;
+        private Element rootNode;
+        private Element outputNode;
         //Array to store the input elements within the tree. This is set when the wires are being drawn within the diagram. 
-        private element[] elements;
-        private element[] inputs;
-        private wire[] wires;
+        private Element[] elements;
+        private Element[] inputs;
+        private Wire[] wires;
         private Canvas c;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
@@ -44,18 +36,23 @@ namespace _2BNOR_2B
         int pixelsPerSquare = 15;
         double canvasWidth, canvasHeight;
 
-        public diagram(Canvas c)
+        public Diagram(Canvas c)
         {
             this.c = c;
         }
 
+        //returns the binary tree representing the logic diagram 
+        public Element GetTree()
+        {
+            return rootNode;
+        }
 
-        private string removeWhitespace(string input, string replacement)
+        private string RemoveWhitespace(string input, string replacement)
         {
             return r.Replace(input, replacement);
         }
 
-        public void clearDiagram()
+        public void ClearDiagram()
         {
             rootNode = null;
             outputNode = null;
@@ -71,7 +68,7 @@ namespace _2BNOR_2B
         private string ConvertInfixtoPostfix(string infixExpression)
         {
             //removing the compound gates from the expression (NAND and NOR) because they do not have operator precedence.  Also removing whitespace for ease. 
-            infixExpression = removeCompoundGates(removeWhitespace(infixExpression, ""));
+            infixExpression = RemoveCompoundGates(RemoveWhitespace(infixExpression, ""));
             Stack<char> operatorStack = new Stack<char>();
             string postfixExpression = "";
             int operatorPrecedence;
@@ -118,7 +115,7 @@ namespace _2BNOR_2B
 
         //Removes the compound gates from an expression. This is so precedence can be observed within the shunting yard. This is because NAND and NOR are
         //not in the order of precedence for boolean operators. 
-        private string removeCompoundGates(string booleanExpression)
+        private static string RemoveCompoundGates(string booleanExpression)
         {
             char operand1;
             char operand2;
@@ -140,7 +137,7 @@ namespace _2BNOR_2B
                     operand2 = booleanExpression[i + 1];
                     //removing the first operand from the flattened expression to remove duplication.
                     flattenedExpression = flattenedExpression.Substring(0, i - 1);
-                    subExpression = "!(" + operand1 + "." + operand2 + ")";
+                    subExpression = $"!({operand1}.{operand2})"; 
                     flattenedExpression += subExpression;
                     //incrementing the counter (token in the expression) to 'skip' the second operand -> remove duplicate operands
                     i++;
@@ -151,7 +148,7 @@ namespace _2BNOR_2B
                     operand1 = flattenedExpression[i - 1];
                     operand2 = booleanExpression[i + 1];
                     flattenedExpression = flattenedExpression.Substring(0, i - 1);
-                    subExpression = "!(" + operand1 + "+" + operand2 + ")";
+                    subExpression = $"!({operand1}+{operand2})";
                     flattenedExpression += subExpression;
                     i++;
                 }
@@ -167,39 +164,36 @@ namespace _2BNOR_2B
         }
 
         //Whenever the canvas is clicked. Rerun the colouring to ensure the diagram reflects the new state of the diagram. 
-        public void updateWires()
+        public void UpdateWires()
         {
             inputStates = "";
-            if (rootNode != null)
-            {
-                getInputStates(rootNode);
-                assignGateStates(rootNode);
-                colourWires();
-            }
+            GetInputStates(rootNode);
+            AssignGateStates(rootNode);
+            ColourWires();
         }
 
         #region diagram drawing
 
         //Recursive inorder traversal to get the states of the inputs. A state is added only when the element has the correct name. 
-        private void getInputStates(element root)
+        private void GetInputStates(Element root)
         {
             if (root.leftChild != null)
             {
-                getInputStates(root.leftChild);
+                GetInputStates(root.leftChild);
             }
 
-            if (root.getElementName() == "input_pin")
+            if (root.GetElementName() == "input_pin")
             {
-                inputStates += root.getState();
+                inputStates += root.GetState();
             }
 
             if (root.rightChild != null)
             {
-                getInputStates(root.rightChild);
+                GetInputStates(root.rightChild);
             }
         }
 
-        private int getHeightOfTree(element root)
+        private int GetHeightOfTree(Element root)
         {
             //If the root doesn't exist, height must be 0. 
             if (root == null)
@@ -207,8 +201,8 @@ namespace _2BNOR_2B
                 return 0;
             }
 
-            int leftChildHeight = getHeightOfTree(root.leftChild);
-            int rightChildHeight = getHeightOfTree(root.rightChild);
+            int leftChildHeight = GetHeightOfTree(root.leftChild);
+            int rightChildHeight = GetHeightOfTree(root.rightChild);
 
             if (leftChildHeight > rightChildHeight)
             {
@@ -222,11 +216,11 @@ namespace _2BNOR_2B
 
         //Linear search that returns the first input that contains the same label as the one being searched before. 
         //This always works as the unique input is always deeper within the tree than the duplicate.
-        private element getInputWithSameLabel(char label)
+        private Element GetInputWithSameLabel(char label)
         {
-            foreach (element e in elements)
+            foreach (Element e in elements)
             {
-                if (e.getLabel() == label)
+                if (e.GetLabel() == label)
                 {
                     return e;
                 }
@@ -234,25 +228,25 @@ namespace _2BNOR_2B
             return null;
         }
 
-        private int getNumberOfNodes(element root)
+        private int GetNumberOfNodes(Element root)
         {
             if (root == null)
             {
                 return 0;
             }
-            return 1 + getNumberOfNodes(root.leftChild) + getNumberOfNodes(root.rightChild);
+            return 1 + GetNumberOfNodes(root.leftChild) + GetNumberOfNodes(root.rightChild);
         }
 
-        private void generateBinaryTreeFromExpression(string inputExpression)
+        private void GenerateBinaryTreeFromExpression(string inputExpression)
         {
             string postfixExpression = ConvertInfixtoPostfix(inputExpression);
-            inputs = new element[getNumberOfInputs(inputExpression, false)];
-            Stack<element> nodeStack = new Stack<element>();
-            elements = new element[inputExpression.Length + 1];
-            element nodeToAdd;
-            element leftChild;
-            element rightChild;
-            element tmp;
+            inputs = new Element[GetNumberOfInputs(inputExpression, false)];
+            Stack<Element> nodeStack = new Stack<Element>();
+            elements = new Element[inputExpression.Length + 1];
+            Element nodeToAdd;
+            Element leftChild;
+            Element rightChild;
+            Element tmp;
             //The ID of the node within the tree. This is also the same as the position within the input string. 
             int elementID = 0;
             int i = 0;
@@ -266,25 +260,25 @@ namespace _2BNOR_2B
                 if ((char.IsLetter(c) && char.IsUpper(c)) || char.IsNumber(c))
                 {
                     //creating an input pin
-                    nodeToAdd = new element(elementID, c);
+                    nodeToAdd = new Element(elementID, c);
                     inputs[i] = nodeToAdd;
                     i++;
                     //If the input is a number then the state can already by set. 
                     if (char.IsNumber(c))
                     {
-                        nodeToAdd.setState(c - 48);
+                        nodeToAdd.SetState(c - 48);
                     }
 
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
-                        nodeToAdd.setInstances(1);
+                        nodeToAdd.SetInstances(1);
                         inputsAdded += c;
                     }
                     else
                     {
                         tmp = inputs[c - 65];
-                        tmp.addInstance();
+                        tmp.AddInstance();
                     }
                 }
                 //One operand must be popped for a NOT gate, this means it must be considered separately to the other gates. 
@@ -292,8 +286,8 @@ namespace _2BNOR_2B
                 {
                     rightChild = nodeStack.Pop();
                     //create a logic gate
-                    nodeToAdd = new element("not_gate", elementID, null, rightChild);
-                    nodeToAdd.setInstances(1);
+                    nodeToAdd = new Element("not_gate", elementID, null, rightChild);
+                    nodeToAdd.SetInstances(1);
                     rightChild.parent = nodeToAdd;
                 }
                 //Gate has been found, form the higher level within the tree. 
@@ -304,8 +298,8 @@ namespace _2BNOR_2B
                     leftChild = nodeStack.Pop();
                     //create a logic gate
                     elementName = gateNames[Array.IndexOf(booleanOperators, c)];
-                    nodeToAdd = new element(elementName, elementID, leftChild, rightChild);
-                    nodeToAdd.setInstances(1);
+                    nodeToAdd = new Element(elementName, elementID, leftChild, rightChild);
+                    nodeToAdd.SetInstances(1);
                     leftChild.parent = nodeToAdd;
                     rightChild.parent = nodeToAdd;
                 }
@@ -320,132 +314,129 @@ namespace _2BNOR_2B
         //Method that calculates the spacing of the nodes within a binary tree based off of the height and depth within the tree. 
         //This is also the y-position of the left-most node within the logic diagram. The position within layer parameter can act as a multiplier to find the positions of the other 
         //nodes within the same column. 
-        private double calculateNodeYposition(int heightOfTree, int depthWithinTree, int positionWithinLayer)
+        private double CalculateNodeYposition(int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
             double initialY = (Math.Pow(2, heightOfTree) / Math.Pow(2, depthWithinTree)) * pixelsPerSquare;
             return initialY + (initialY * positionWithinLayer * 2);
         }
 
-        private double calculateXposition(int depthWithinTree)
+        private double CalculateXposition(int depthWithinTree)
         {
             return canvasWidth - ((((pixelsPerSquare - 7) * elementWidth) + ((pixelsPerSquare - 7) * xOffset)) * depthWithinTree);
         }
 
-        private double translateNode(double startX, int heightOfTree)
+        private double TranslateNode(double startX, int heightOfTree)
         {
-            double maxX = calculateXposition(heightOfTree);
+            double maxX = CalculateXposition(heightOfTree);
             //initial offset of 50 pixels for a better placed diagram. 
             return startX - maxX + 50;
         }
 
-        private double calculateNodeXposition(element node, int heightOfTree, int depthWithinTree)
+        private double CalculateNodeXposition(Element node, int heightOfTree, int depthWithinTree)
         {
             double x;
             //Inputs (leaf nodes) should be drawn at minimum x position within the canvas. 
             if ((node.leftChild == null) && (node.rightChild == null))
             {
-                x = calculateXposition(heightOfTree);
+                x = CalculateXposition(heightOfTree);
             }
             else
             {
-                x = calculateXposition(depthWithinTree);
+                x = CalculateXposition(depthWithinTree);
             }
-            return translateNode(x, heightOfTree);
+            return TranslateNode(x, heightOfTree);
         }
 
         //Used for exporting diagram. This is used to find the y dimensions of the exported image. 
-        private logicGate getWidestGate(element root)
+        private LogicGate GetWidestGate(Element root)
         {
-            
-            element tmp = new element();
-            Queue<element> q = new Queue<element> ();
+
+            Element tmp = new Element();
+            Queue<Element> q = new Queue<Element>();
             q.Enqueue(root);
             //Carrying out a traversal on only the right children of the root node. This is because the rightmost node will be the furthese down the screen
             //and so the whole the diagram will be in the exported image if this node is within the export. 
             while (q.Count > 0)
             {
                 tmp = q.Dequeue();
-                if (tmp.rightChild != null && tmp.rightChild.getLogicGate() != null)
+                if (tmp.rightChild != null && tmp.rightChild.GetLogicGate() != null)
                 {
                     q.Enqueue(tmp.rightChild);
                 }
             }
-            return tmp.getLogicGate(); 
-
-
-            throw new Exception("Could not find gate"); 
+            return tmp.GetLogicGate();
         }
 
-        public Rect getBoundsOfDiagram()
+        public Rect GetBoundsOfDiagram()
         {
-            int heightOfTree = getHeightOfTree(rootNode);
-            element current = rootNode;
-            logicGate l = getWidestGate(rootNode);
-            double maxX = Canvas.GetRight(outputNode.getLogicGate())+75;
-            double maxY = Canvas.GetBottom(l)+25;
+            int heightOfTree = GetHeightOfTree(rootNode);
+            Element current = rootNode;
+            LogicGate l = GetWidestGate(rootNode);
+            double maxX = Canvas.GetRight(outputNode.GetLogicGate()) + 75;
+            double maxY = Canvas.GetBottom(l) + 25;
             return new Rect(new Size(maxX, maxY));
         }
 
-        private wire drawWiresForLeftChildren(element root)
+        private Wire DrawWiresForLeftChildren(Element root)
         {
-            wire w = new wire(c);
-            logicGate rootLogicGate = root.getLogicGate();
-            logicGate leftchildLogicGate = root.leftChild.getLogicGate();
-            element input;
-            w.setStart(rootLogicGate.getInputPoint1());
+            Wire w = new Wire(c);
+            LogicGate rootLogicGate = root.GetLogicGate();
+            LogicGate leftchildLogicGate = root.leftChild.GetLogicGate();
+            Element input;
+            w.SetStart(rootLogicGate.GetInputPoint1());
             //If the left child gate exists then draw normally. 
             if (leftchildLogicGate != null)
             {
-                w.setRepeated(false);
-                w.setEnd(leftchildLogicGate.getOutputPoint());
-                w.setGate(leftchildLogicGate);
-                w.setShift(leftchildLogicGate.getConnectedWires());
-                w.setPoints();
+                w.SetRepeated(false);
+                w.SetEnd(leftchildLogicGate.GetOutputPoint());
+                w.SetGate(leftchildLogicGate);
+                w.SetShift(leftchildLogicGate.GetConnectedWires());
+                w.SetPoints();
             }
             else
             {
-                w.setRepeated(true);
+                w.SetRepeated(true);
                 //Searching for the input with the same label as the left child node does exist but doesnt have a logic gate, therefore it is not a unique input. 
-                input = getInputWithSameLabel(root.leftChild.getLabel());
-                w.setEnd(input.getLogicGate().getOutputPoint());
-                w.setGate(input.getLogicGate());
-                input.getLogicGate().addWire();
-                w.setShift(input.getLogicGate().getConnectedWires());
-                w.setPoints(); 
+                input = GetInputWithSameLabel(root.leftChild.GetLabel());
+                w.SetEnd(input.GetLogicGate().GetOutputPoint());
+                w.SetGate(input.GetLogicGate());
+                input.GetLogicGate().AddWire();
+                w.SetShift(input.GetLogicGate().GetConnectedWires());
+                w.SetPoints();
             }
             return w;
         }
 
-        private wire drawWiresForRightChildren(element root)
+        private Wire DrawWiresForRightChildren(Element root)
         {
-            wire w = new wire(c);
-            logicGate rootLogicGate = root.getLogicGate();
-            logicGate rightchildLogicGate = root.rightChild.getLogicGate();
-            element input;
-            w.setStart(rootLogicGate.getInputPoint2());
+            Wire w = new Wire(c);
+            LogicGate rootLogicGate = root.GetLogicGate();
+            LogicGate rightchildLogicGate = root.rightChild.GetLogicGate();
+            Element input;
+            w.SetStart(rootLogicGate.GetInputPoint2());
             if (rightchildLogicGate != null)
             {
-                w.setRepeated(false);
-                w.setEnd(rightchildLogicGate.getOutputPoint());
-                w.setGate(rightchildLogicGate);
-                w.setShift(rightchildLogicGate.getConnectedWires());
-                w.setPoints();
+                w.SetRepeated(false);
+                w.SetEnd(rightchildLogicGate.GetOutputPoint());
+                w.SetGate(rightchildLogicGate);
+                w.SetShift(rightchildLogicGate.GetConnectedWires());
+                w.SetPoints();
             }
             else
             {
-                w.setRepeated(true);
-                input = getInputWithSameLabel(root.rightChild.getLabel());
-                w.setEnd(input.getLogicGate().getOutputPoint());
-                w.setGate(input.getLogicGate());
-                input.getLogicGate().addWire();
-                w.setShift(input.getLogicGate().getConnectedWires()); 
-                w.setPoints();
+                w.SetRepeated(true);
+                input = GetInputWithSameLabel(root.rightChild.GetLabel());
+                w.SetEnd(input.GetLogicGate().GetOutputPoint());
+                w.SetGate(input.GetLogicGate());
+                input.GetLogicGate().AddWire();
+                w.SetShift(input.GetLogicGate().GetConnectedWires());
+                w.SetPoints();
             }
             return w;
         }
 
         //Finds the intersection between 4 points representing 2 lines if one exists, otherwise return null. 
-        private Point? findIntersection(Point p0, Point p1, Point p2, Point p3)
+        private Point? FindIntersection(Point p0, Point p1, Point p2, Point p3)
         {
             double s_x = p1.X - p0.X;
             double s_y = p1.Y - p0.Y;
@@ -484,21 +475,20 @@ namespace _2BNOR_2B
 
             double t = t_numer / denom;
             Point? result = new Point(p0.X + (t * s_x), p0.Y + (t * s_y));
-            //MessageBox.Show(result.Value.X.ToString() + "," + result.Value.Y.ToString());
             return result;
         }
 
         //Searches through all points to find the intersections. 
-        private void drawIntersections()
+        private void DrawIntersections()
         {
             List<Point> horizontalLines = new List<Point>();
             List<Point> verticalLines = new List<Point>();
             Point? intersection;
-            wire tmp;
+            Wire tmp;
             for (int j = 0; j < wires.Length - 1; j++)
             {
-                horizontalLines.AddRange(wires[j].getPoints(true));
-                verticalLines.AddRange(wires[j].getPoints(false)); 
+                horizontalLines.AddRange(wires[j].GetPoints(true));
+                verticalLines.AddRange(wires[j].GetPoints(false));
             }
 
 
@@ -508,22 +498,22 @@ namespace _2BNOR_2B
                 for (int c = 0; c < horizontalLines.Count - 1; c = c + 2)
                 {
                     //again c and c + 1 form the horizontal line being checked. 
-                    intersection = findIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
-                    if (intersection != null && (findWire(verticalLines[i]) != findWire(horizontalLines[c])))
+                    intersection = FindIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
+                    if (intersection != null && (FindWire(verticalLines[i]) != FindWire(horizontalLines[c])))
                     {
-                        tmp = findWire(verticalLines[i]);
-                        tmp.addBridge(intersection);
+                        tmp = FindWire(verticalLines[i]);
+                        tmp.AddBridge(intersection);
                     }
                 }
             }
         }
 
-        private wire findWire(Point p)
+        private Wire FindWire(Point p)
         {
-            List<Point> points; 
-            foreach (wire w in wires)
+            List<Point> points;
+            foreach (Wire w in wires)
             {
-                points = w.getPoints(null); 
+                points = w.GetPoints(null);
                 if (points.Contains(p))
                 {
                     return w;
@@ -532,12 +522,12 @@ namespace _2BNOR_2B
             throw new Exception("Could not find wire.");
         }
 
-        private void drawWires(element root)
+        private void DrawWires(Element root)
         {
-            Queue<element> q = new Queue<element>();
-            Queue<wire> intersectionq = new Queue<wire>();
-            wires = new wire[getNumberOfNodes(root)];
-            element tmp;
+            Queue<Element> q = new Queue<Element>();
+            Queue<Wire> intersectionq = new Queue<Wire>();
+            wires = new Wire[GetNumberOfNodes(root)];
+            Element tmp;
             int i = 0;
             //Using a breadth first traversal to reach all nodes within the tree. Includes nodes without gates because the child wires must also be drawn to an input. 
             q.Enqueue(root);
@@ -546,95 +536,95 @@ namespace _2BNOR_2B
                 tmp = q.Dequeue();
                 if (tmp.leftChild != null)
                 {
-                    wires[i] = drawWiresForLeftChildren(tmp);
+                    wires[i] = DrawWiresForLeftChildren(tmp);
                     i++;
                     q.Enqueue(tmp.leftChild);
                 }
 
                 if (tmp.rightChild != null)
                 {
-                    wires[i] = drawWiresForRightChildren(tmp); 
+                    wires[i] = DrawWiresForRightChildren(tmp);
                     i++;
                     q.Enqueue(tmp.rightChild);
                 }
             }
-            drawIntersections(); 
+            DrawIntersections();
             for (int j = 0; j < wires.Length - 1; j++)
             {
-                wires[j].renderLine(); 
+                wires[j].RenderLine();
             }
         }
 
         //Sets the colours of the wires within the diagram. 
-        private void colourWires()
+        private void ColourWires()
         {
             //As the wires have gates assigned to them, the wire can simply assume the state of the deepest node it connects in the tree. 
-            foreach (wire w in wires)
+            foreach (Wire w in wires)
             {
-                logicGate l = w.getGate();
-                element node = l.getGate();
-                if (node.getState() == 1)
+                LogicGate l = w.GetGate();
+                Element node = l.GetGate();
+                if (node.GetState() == 1)
                 {
-                    w.setColour(Brushes.Green);
+                    w.SetColour(Brushes.Green);
                 }
                 else
                 {
-                    w.setColour(Brushes.Red);
+                    w.SetColour(Brushes.Red);
                 }
             }
         }
 
         //Adds nodes to the canvas by finding their position and then placing them. This only adds gates to nodes that are either unique inputs or boolean operators. 
-        private void drawNode(element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
+        private void DrawNode(Element currentNode, int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
-            logicGate logicGate;
+            LogicGate logicGate;
             //Position of the node within the canvas. 
             double x, y;
             //checking if a node is not a repeated input. If it is then a logic gate doesn't have to be drawn. 
-            if (currentNode.getInstances() != 0)
+            if (currentNode.GetInstances() != 0)
             {
-                x = calculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
+                x = CalculateNodeXposition(currentNode, heightOfTree, depthWithinTree);
                 //Gates are not being drawn in parallel to preserve the look of the tree. 
-                if (currentNode.parent != null && currentNode.parent.getElementName() == "not_gate" && currentNode.getElementName() == "input_pin")
+                if (currentNode.parent != null && currentNode.parent.GetElementName() == "not_gate" && currentNode.GetElementName() == "input_pin")
                 {
                     //If the nodes parent is a not gate then the child should be drawn in parallel. So the Y-coord of the NOT gate can be used 
                     //and so does not have to be calculated. 
-                    y = Canvas.GetTop(currentNode.parent.getLogicGate());
+                    y = Canvas.GetTop(currentNode.parent.GetLogicGate());
                 }
                 else
                 {
                     //Otherwise, calculate the Y-coord of the node according to the location within the tree. 
-                    y = calculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
+                    y = CalculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
                 }
-                logicGate = new logicGate(currentNode);
+                logicGate = new LogicGate(currentNode);
                 //Adding the link between the tree and the visual diagram. 
-                currentNode.setLogicGate(logicGate);
+                currentNode.SetLogicGate(logicGate);
                 Canvas.SetLeft(logicGate, x);
                 Canvas.SetTop(logicGate, y);
                 //set the other position for saving and exporting. 
-                double p = logicGate.getInputPoint2().Y + 50;
+                double p = logicGate.GetInputPoint2().Y + 50;
                 Canvas.SetBottom(logicGate, p);
-                Canvas.SetRight(logicGate, logicGate.getInputPoint2().X); 
+                Canvas.SetRight(logicGate, logicGate.GetInputPoint2().X);
                 c.Children.Add(logicGate);
             }
         }
 
         //Breadth first traversal that is used to place all of the nodes within the tree onto the canvas. 
-        private void drawNodes(element root, int heightOfTree)
+        private void DrawNodes(Element root, int heightOfTree)
         {
-            Queue<element> q = new Queue<element>();
+            Queue<Element> q = new Queue<Element>();
             q.Enqueue(root);
             int depthWithinTree = 0;
             int positionWithinLayer = 0;
             int sizeOfQ = 0;
-            element currentNode;
+            Element currentNode;
             while (q.Count != 0)
             {
                 sizeOfQ = q.Count;
                 while (sizeOfQ != 0)
                 {
                     currentNode = q.Peek();
-                    drawNode(currentNode, heightOfTree, depthWithinTree, positionWithinLayer);
+                    DrawNode(currentNode, heightOfTree, depthWithinTree, positionWithinLayer);
                     q.Dequeue();
                     positionWithinLayer++;
                     if (currentNode.leftChild != null)
@@ -655,11 +645,11 @@ namespace _2BNOR_2B
 
         //Iterative postorder traversal. Traverses the tree and assigns the gates a state corresponding to the row  the row in the truth table
         //which is also in postorder. 
-        private void assignGateStates(element root)
+        private void AssignGateStates(Element root)
         {
             //A singular row of the truth table. Using the input states to find the correct row. 
-            string tableRow = getTruthTableRow(inputStates);
-            Stack<element> s = new Stack<element>();
+            string tableRow = GetTruthTableRow();
+            Stack<Element> s = new Stack<Element>();
             int i = 0;
             while (true)
             {
@@ -683,7 +673,7 @@ namespace _2BNOR_2B
                 {
                     //set the state of the gate to the corresponding position within table row.
                     int state = tableRow[i] - 48;
-                    root.setState(state);
+                    root.SetState(state);
                     i++;
                     root = null;
                 }
@@ -691,28 +681,28 @@ namespace _2BNOR_2B
         }
 
         //Small function for drawing the wire that connects the input to the root node of the binary tree. 
-        private void drawOutputWire()
+        private void DrawOutputWire()
         {
-            wire w = new wire(c);
-            w.setStart(outputNode.getLogicGate().getInputForOutput());
-            w.setEnd(rootNode.getLogicGate().getOutputPoint());
-            w.setGate(rootNode.getLogicGate());
-            w.setPoints();
-            w.renderLine(); 
+            Wire w = new Wire(c);
+            w.SetStart(outputNode.GetLogicGate().GetInputForOutput());
+            w.SetEnd(rootNode.GetLogicGate().GetOutputPoint());
+            w.SetGate(rootNode.GetLogicGate());
+            w.SetPoints();
+            w.RenderLine();
             wires[wires.Length - 1] = w;
         }
 
         //Method that draws the output pin for the diagram. 
-        private void drawOutput(int heightOfTree)
+        private void DrawOutput(int heightOfTree)
         {
             //Creating an element to represent the output. Unique elementID of -1. 
             //Limitation of program can only draw single input gates. 
-            outputNode = new element(-1);
-            logicGate logicGate = new logicGate(outputNode);
-            outputNode.setLogicGate(logicGate);
+            outputNode = new Element(-1);
+            LogicGate logicGate = new LogicGate(outputNode);
+            outputNode.SetLogicGate(logicGate);
             //The position of the output node is the same y-position as the root node and a small shift from the root node. 
-            double x = translateNode(calculateXposition(0), heightOfTree) + (pixelsPerSquare * 10);
-            double y = calculateNodeYposition(heightOfTree, 0, 0);
+            double x = TranslateNode(CalculateXposition(0), heightOfTree) + (pixelsPerSquare * 10);
+            double y = CalculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x);
             Canvas.SetRight(logicGate, x + logicGate.ActualWidth);
@@ -720,20 +710,20 @@ namespace _2BNOR_2B
         }
 
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
-        public void drawDiagram(string inputExpression)
+        public void DrawDiagram(string inputExpression)
         {
             canvasHeight = c.ActualHeight;
             canvasWidth = c.ActualWidth;
-            generateBinaryTreeFromExpression(inputExpression);
-            inputMap = generateInputMap(inputExpression, false);
-            headers = getHeaders(inputExpression, false);
-            outputMap = generateOutputMap(inputExpression, headers, false);
-            int heightOfTree = getHeightOfTree(rootNode);
-            drawNodes(rootNode, heightOfTree);
-            drawWires(rootNode);
-            drawOutput(heightOfTree);
-            drawOutputWire();
-            updateWires();
+            GenerateBinaryTreeFromExpression(inputExpression);
+            inputMap = GenerateInputMap(inputExpression, false);
+            headers = GetHeaders(inputExpression, false);
+            outputMap = GenerateOutputMap(inputExpression, headers, false);
+            int heightOfTree = GetHeightOfTree(rootNode);
+            DrawNodes(rootNode, heightOfTree);
+            DrawWires(rootNode);
+            DrawOutput(heightOfTree);
+            DrawOutputWire();
+            UpdateWires();
         }
 
         #endregion
@@ -741,15 +731,15 @@ namespace _2BNOR_2B
         #region Truth table generation
 
         //Gives the result of the fully evaluated expression. 
-        private int evaluateBooleanExpression(string binaryCombination, string inputExpression)
+        private int EvaluateBooleanExpression(string binaryCombination, string inputExpression)
         {
             //Removing compound gates so that the expression can be evaluated properly.
-            string flattenedExpression = removeCompoundGates(inputExpression);
+            string flattenedExpression = RemoveCompoundGates(inputExpression);
             string postfix = ConvertInfixtoPostfix(flattenedExpression);
             int operand1;
             int operand2;
             int tmp;
-            postfix = subsituteIntoExpression(binaryCombination, postfix);
+            postfix = SubsituteIntoExpression(binaryCombination, postfix);
             Stack<int> evaluatedStack = new Stack<int>();
             foreach (char c in postfix)
             {
@@ -767,14 +757,14 @@ namespace _2BNOR_2B
                 {
                     operand1 = evaluatedStack.Pop();
                     operand2 = evaluatedStack.Pop();
-                    tmp = evaluateSingleOperator(operand1, operand2, c);
+                    tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp + 48);
                 }
                 else
                 {
                     operand1 = evaluatedStack.Pop();
                     operand2 = evaluatedStack.Pop();
-                    tmp = evaluateSingleOperator(operand1, operand2, c);
+                    tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp);
                 }
             }
@@ -783,7 +773,7 @@ namespace _2BNOR_2B
         }
 
         //Returns the result of the operation of a boolean operation with two operands. 
-        private int evaluateSingleOperator(int o1, int o2, char operation)
+        private int EvaluateSingleOperator(int o1, int o2, char operation)
         {
             //do not need to consider NAND and NOR as they can be flattened and removed from the expression. 
             //does not include NOT as it only takes one operand.
@@ -803,7 +793,7 @@ namespace _2BNOR_2B
             return result;
         }
 
-        private string subsituteIntoExpression(string binaryCombination, string inputExpression)
+        private string SubsituteIntoExpression(string binaryCombination, string inputExpression)
         {
             string binaryDigit;
             foreach (char c in inputExpression)
@@ -823,20 +813,18 @@ namespace _2BNOR_2B
         //Converts an int into binary string. This can be used to generate the input combinations for truth tables. 
         private string ConvertIntintoBinaryString(int n, string booleanExpression, bool isUnique)
         {
-            return Convert.ToString(n, 2).PadLeft(getNumberOfInputs(booleanExpression, isUnique), '0');
+            return Convert.ToString(n, 2).PadLeft(GetNumberOfInputs(booleanExpression, isUnique), '0');
         }
 
         //Gets the respective string value of the truth table based off of its input. 
-        private string getTruthTableRow(string expression)
+        private string GetTruthTableRow()
         {
-            int samerow = Array.IndexOf(inputMap, inputStates);
-            return outputMap[samerow];
-            //return the same row as the input map
-            //return generateOutputMap(expression)[Array.IndexOf(inputMap, inputStates)];
+            //return the same row as the input map for a given set of inputs
+            return outputMap[Array.IndexOf(inputMap, inputStates)];
         }
 
         //counts the number of unique inputs within a boolean expression
-        private int getNumberOfInputs(string booleanExpression, bool isUnique)
+        private int GetNumberOfInputs(string booleanExpression, bool isUnique)
         {
             int numberOfInputs = 0;
             string alreadyCounted = "";
@@ -863,7 +851,7 @@ namespace _2BNOR_2B
         }
 
         //counts the number of operators within a boolean expression
-        private int getNumberOfOperators(string booleanExpression)
+        private int GetNumberOfOperators(string booleanExpression)
         {
             char[] booleanOperators = { '.', '^', '+', '!' };
             int numberOfOperators = 0;
@@ -877,9 +865,9 @@ namespace _2BNOR_2B
             return numberOfOperators;
         }
 
-        private string[] generateInputMap(string inputExpression, bool isUnique)
+        private string[] GenerateInputMap(string inputExpression, bool isUnique)
         {
-            int numberOfInputs = getNumberOfInputs(inputExpression, isUnique);
+            int numberOfInputs = GetNumberOfInputs(inputExpression, isUnique);
             // 2^n is the number of possible binary combinations hence number of rows within table. 
             int numberOfRows = (int)Math.Pow(2, numberOfInputs);
             //the input map of the truth table. Stores the input columns of the truth table. 
@@ -891,12 +879,12 @@ namespace _2BNOR_2B
             return inputMap;
         }
 
-        private string[] generateOutputMap(string inputExpression, string[] headers, bool isUnique)
+        private string[] GenerateOutputMap(string inputExpression, string[] headers, bool isUnique)
         {
-            string[] inputMap = generateInputMap(inputExpression, isUnique);
-            int numberOfRows = (int)Math.Pow(2, getNumberOfInputs(inputExpression, isUnique));
+            string[] inputMap = GenerateInputMap(inputExpression, isUnique);
+            int numberOfRows = (int)Math.Pow(2, GetNumberOfInputs(inputExpression, isUnique));
             //Number of columns within the table is always the number of inputs and number of operators. 
-            int numberOfColumns = getNumberOfInputs(inputExpression, isUnique) + getNumberOfOperators(inputExpression);
+            int numberOfColumns = GetNumberOfInputs(inputExpression, isUnique) + GetNumberOfOperators(inputExpression);
             string inputCombination;
             //array that handles only the output portion of the truth, this can be put together with the input map to form a complete table
             string[] outputMap = new string[inputMap.Length];
@@ -905,54 +893,54 @@ namespace _2BNOR_2B
             for (int i = 0; i < numberOfRows; i++)
             {
                 inputCombination = inputMap[i];
-                outputMap[i] += getOutputRow(headers, inputCombination);
+                outputMap[i] += GetOutputRow(headers, inputCombination);
             }
             return outputMap;
         }
 
-        private string getOutputRow(string[] headers, string inputCombination)
+        private string GetOutputRow(string[] headers, string inputCombination)
         {
             string outputRow = "";
             foreach (string header in headers)
             {
-                outputRow += evaluateBooleanExpression(inputCombination, header) - 48;
+                outputRow += EvaluateBooleanExpression(inputCombination, header) - 48;
             }
             return outputRow;
         }
 
         //function that takes an inputted expression and produces a series of headers either for display (inputs sorted to beginning)
         //or for colouring wires (postorder). 
-        private string[] getHeaders(string inputExpression, bool isDisplay)
+        private string[] GetHeaders(string inputExpression, bool isDisplay)
         {
             string postfix = ConvertInfixtoPostfix(inputExpression);
             string[] headers;
-            int numberOfInputs = getNumberOfInputs(postfix, false);
-            int numberOfOperators = getNumberOfOperators(postfix);
+            int numberOfInputs = GetNumberOfInputs(postfix, false);
+            int numberOfOperators = GetNumberOfOperators(postfix);
             if (isDisplay)
             {
                 //numberOfInputs = getNumberOfInputs(postfix, true);
-                headers = generateDisplayOperatorHeaders(postfix, numberOfInputs, numberOfOperators);
+                headers = GenerateDisplayOperatorHeaders(postfix, numberOfInputs, numberOfOperators);
             }
             else
             {
                 //numberOfInputs = getNumberOfInputs(postfix, false);
-                headers = generatePostOrderHeaders(postfix, numberOfInputs, numberOfOperators);
+                headers = GeneratePostOrderHeaders(postfix, numberOfInputs, numberOfOperators);
             }
             return headers;
         }
 
         //function that takes a postfix expression and produces truth table headers that being displayed to the user. (original function). 
-        private string[] generateDisplayOperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
+        private string[] GenerateDisplayOperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
         {
-            string[] postorderHeaders = generatePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
-            string[] displayHeaders = new string[getNumberOfInputs(inputExpression, true) + numberOfOperators];
+            string[] postorderHeaders = GeneratePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
+            string[] displayHeaders = new string[GetNumberOfInputs(inputExpression, true) + numberOfOperators];
             Array.Sort(postorderHeaders, (x, y) => x.Length.CompareTo(y.Length));
             postorderHeaders = postorderHeaders.Distinct().ToArray();
             Array.Copy(postorderHeaders, displayHeaders, displayHeaders.Length);
             return displayHeaders;
         }
 
-        private string[] generatePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
+        private string[] GeneratePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
         {
             Stack<string> subExpressionStack = new Stack<string>();
             string[] headers = new string[numberOfOperators + numberOfInputs];
@@ -973,13 +961,13 @@ namespace _2BNOR_2B
                     if (c == '!')
                     {
                         operand1 = subExpressionStack.Pop();
-                        subexpression = "(" + c + operand1 + ")";
+                        subexpression = $"({c}{operand1})"; 
                     }
                     else
                     {
                         operand1 = subExpressionStack.Pop();
                         operand2 = subExpressionStack.Pop();
-                        subexpression = "(" + operand2 + c + operand1 + ")";
+                        subexpression = $"({operand2}{c}{operand1})";
                     }
                     subExpressionStack.Push(subexpression);
                     headers[i] = subexpression;
@@ -989,7 +977,7 @@ namespace _2BNOR_2B
             return headers;
         }
 
-        private void drawTruthTableHeaders(Canvas c, string[] headers)
+        private void DrawTruthTableHeaders(Canvas c, string[] headers)
         {
             Label cell;
             Thickness border = new Thickness(2);
@@ -1019,7 +1007,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private void drawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
+        private void DrawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
         {
             Label cell;
             Thickness border = new Thickness(2);
@@ -1059,7 +1047,7 @@ namespace _2BNOR_2B
         }
 
         //Links class to UI, used to draw the truth tables to the canvas. 
-        public void drawTruthTable(Canvas c, string inputExpression, bool isSteps)
+        public void DrawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
             //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", true).ToString());
             //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", false).ToString());
@@ -1068,13 +1056,13 @@ namespace _2BNOR_2B
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear();
             //headers = generateTruthTableHeadersWithSteps(inputExpression);
-            headers = getHeaders(inputExpression, true);
-            outputMap = generateOutputMap(inputExpression, headers, true);
+            headers = GetHeaders(inputExpression, true);
+            outputMap = GenerateOutputMap(inputExpression, headers, true);
             if (isSteps)
             {
                 //drawTruthTable(c, headers, outputMap);
-                drawTruthTableHeaders(c, headers);
-                drawTruthTableBody(c, headers, outputMap);
+                DrawTruthTableHeaders(c, headers);
+                DrawTruthTableBody(c, headers, outputMap);
             }
             else
             {
@@ -1084,11 +1072,8 @@ namespace _2BNOR_2B
         #endregion
 
         #region Minimisation
-        //B(\overline{DD}+CB)+\overline{B}A
-
-
         //Adds and gates to consecutive inputs (ie A!B -> (A.!B))
-        private string addANDGates(string epi)
+        private string AddANDGates(string epi)
         {
             string tmp = epi;
             char last = epi[0];
@@ -1099,22 +1084,22 @@ namespace _2BNOR_2B
                     tmp = tmp.Insert(i, ".");
                 }
             }
-            return "(" + tmp + ")";
+            return $"({tmp})";
         }
 
 
         //Produces the final minimised expression from the essential prime implicants.
-        private string convertEPIsToExpression(List<string> essentialPrimeImplicants)
+        private string ConvertEPIsToExpression(List<string> essentialPrimeImplicants)
         {
             //Converting each implicant into input form. Ie (-100 becomes B!C!D)
-            essentialPrimeImplicants = essentialPrimeImplicants.ConvertAll(new Converter<string, string>(convertImplicantToExpression));
+            essentialPrimeImplicants = essentialPrimeImplicants.ConvertAll(new Converter<string, string>(ConvertImplicantToExpression));
             //Each implicant is separated by OR gates. 
             string expression = string.Join("+", essentialPrimeImplicants);
             return expression;
         }
 
         //Replaces the binary form into the input form so that a complete boolean expression can be created. 
-        private string convertImplicantToExpression(string epi)
+        private string ConvertImplicantToExpression(string epi)
         {
             //Removing regex characters to make conversion easier (due to "\d" being two characters long). 
             epi = epi.Replace(@"\d", "-");
@@ -1131,15 +1116,15 @@ namespace _2BNOR_2B
                 //If 0 in implicant then the input is the complement (Ie, NOT gate). 
                 else if (epi[i] == '0')
                 {
-                    tmp += "!" + input;
+                    tmp += $"!{input}";
                 }
             }
-            tmp = addANDGates(tmp);
+            tmp = AddANDGates(tmp);
             return tmp;
         }
 
         //Evaluates the minterms to the prime implicants. This forms the basis of the prime implicant chart.
-        private void setRegexPatterns(Dictionary<string, string> regex, List<string> minterms)
+        private void SetRegexPatterns(Dictionary<string, string> regex, List<string> minterms)
         {
             Match res;
             foreach (string regexPattern in regex.Keys.ToList())
@@ -1161,7 +1146,7 @@ namespace _2BNOR_2B
 
         //Replaces the dashes within the prime implicants with "\d", this allows the prime implicants to form regex pattern. 
         //Replacing "\d" indicating it doesnt matter which digit is present in this position. 
-        private void convertImplicantsIntoRegex(Dictionary<string, string> regex, List<string> primeImplicants)
+        private void ConvertImplicantsIntoRegex(Dictionary<string, string> regex, List<string> primeImplicants)
         {
             string tmp = "";
             string value = "";
@@ -1185,7 +1170,7 @@ namespace _2BNOR_2B
         }
 
         //Carries out the merge between minterms, replacing bits that do not matter with a dash. 
-        private string mergeMinterms(string m1, string m2)
+        private string MergeMinterms(string m1, string m2)
         {
             string mergedMinterm = "";
             //If the minterms are not the same length then a merge cannot occur. 
@@ -1212,7 +1197,7 @@ namespace _2BNOR_2B
         }
 
         //For a merge to happen, the dashes within the minterms must align within both minterms. 
-        private bool checkDashesAlign(string m1, string m2)
+        private bool CheckDashesAlign(string m1, string m2)
         {
             //If the lengths of the minterms are not the same then the comparison cannot be done. 
             if (m1.Length != m2.Length)
@@ -1233,28 +1218,28 @@ namespace _2BNOR_2B
         }
 
         //Returns true if the minterms only differ by 1 bit. 
-        private bool checkMintermDifference(string m1, string m2)
+        private bool CheckMintermDifference(string m1, string m2)
         {
-            int minterm1 = removeDashes(m1);
-            int minterm2 = removeDashes(m2);
+            int minterm1 = RemoveDashes(m1);
+            int minterm2 = RemoveDashes(m2);
             int res = minterm1 ^ minterm2;
             return (res != 0 && ((res & (res - 1)) == 0));
         }
 
         //Utilty function that temporarily removes the dashes from a binary pattern so that it can be compared. 
-        private int removeDashes(string minterm)
+        private int RemoveDashes(string minterm)
         {
             return Convert.ToInt32(minterm.Replace('-', '0'), 2);
         }
 
-        private List<string> getMinterms(string expression)
+        private List<string> GetMinterms(string expression)
         {
             List<string> minterms = new List<string>();
-            string[] inputMap = generateInputMap(expression, true);
+            string[] inputMap = GenerateInputMap(expression, true);
             foreach (string input in inputMap)
             {
                 //A minterm has been found if input results in the expresion evaluating to true. 
-                if (evaluateBooleanExpression(input, expression) - 48 == 1)
+                if (EvaluateBooleanExpression(input, expression) - 48 == 1)
                 {
                     minterms.Add(input);
                 }
@@ -1264,7 +1249,7 @@ namespace _2BNOR_2B
 
         //Counts the number of 1's within each place value of the values in the dictionary.
         //Frequency table is used to find the essential prime implicants. 
-        private int[] getFrequencyTable(Dictionary<string, string> regex, List<string> minterms)
+        private int[] GetFrequencyTable(Dictionary<string, string> regex, List<string> minterms)
         {
             int[] sums = new int[minterms.Count];
             foreach (string s in regex.Values.ToList())
@@ -1281,7 +1266,7 @@ namespace _2BNOR_2B
         }
 
         //Finds the prime implicant that is essential within the key list. Ie The bit set that results in a frequency of 1.
-        private string getEssentialPrimeImplicant(Dictionary<string, string> regex, int pos)
+        private string GetEssentialPrimeImplicant(Dictionary<string, string> regex, int pos)
         {
             string[] essentialPrimes = regex.Values.ToArray();
             string[] keys = regex.Keys.ToArray();
@@ -1298,10 +1283,10 @@ namespace _2BNOR_2B
             throw new Exception("Item could be found");
         }
 
-        private List<string> getEssentialPrimeImplicants(Dictionary<string, string> regex, List<string> minterms, List<string> pis)
+        private List<string> GetEssentialPrimeImplicants(Dictionary<string, string> regex, List<string> minterms, List<string> pis)
         {
             //Calculating the number of 1's within each column of the values in the dictionary. 
-            int[] bitFrequencyTable = getFrequencyTable(regex, minterms);
+            int[] bitFrequencyTable = GetFrequencyTable(regex, minterms);
             List<string> essentialPrimeImplicants = new List<string>();
             string epi = "";
             for (int i = 0; i < bitFrequencyTable.Length; i++)
@@ -1309,7 +1294,7 @@ namespace _2BNOR_2B
                 //If the total number of bits in one column of the values is 1, then only one prime implicant covers that minterm and hence it is an essential prime implicant. 
                 if (bitFrequencyTable[i] == 1)
                 {
-                    epi = getEssentialPrimeImplicant(regex, i);
+                    epi = GetEssentialPrimeImplicant(regex, i);
                     //Removing repeats to avoid cases such as "A+A" which can be further simplified. 
                     if (!essentialPrimeImplicants.Contains(epi))
                     {
@@ -1318,12 +1303,12 @@ namespace _2BNOR_2B
                 }
             }
 
-            string coveredString = getCoveredString(essentialPrimeImplicants);
+            string coveredString = GetCoveredString(essentialPrimeImplicants);
             //If the covered string contains a zero, the essential prime implicants do not cover all minterms, this means more prime implicants must be 
             //added to complete the minimised expression. 
             if (coveredString.Contains('0'))
             {
-                addPIsToFinalExpression(essentialPrimeImplicants, pis);
+                AddPIsToFinalExpression(essentialPrimeImplicants, pis);
             }
             else
             {
@@ -1336,7 +1321,7 @@ namespace _2BNOR_2B
 
         //The following function carries out a recursive merging process where a merge can take place if dashes align and 1 bit differs between the two minterms. 
         //Any term that cannot be merged is a prime implicant and can be added to the return list. 
-        private List<string> getPrimeImplicants(List<string> mintermList)
+        private List<string> GetPrimeImplicants(List<string> mintermList)
         {
             //Stores the prime implicants that are within the list of minterms.
             List<string> primeImplicants = new List<string>();
@@ -1354,10 +1339,10 @@ namespace _2BNOR_2B
                     m1 = mintermList[i];
                     m2 = mintermList[c];
                     //Merge can only be done if the dashes align and one bit differs between the minterms. 
-                    if (checkDashesAlign(m1, m2) && checkMintermDifference(m1, m2))
+                    if (CheckDashesAlign(m1, m2) && CheckMintermDifference(m1, m2))
                     {
                         //merge minterms
-                        mergedMinterm = mergeMinterms(m1, m2);
+                        mergedMinterm = MergeMinterms(m1, m2);
                         //add result to list. 
                         primeImplicants.Add(mergedMinterm);
                         numberOfMerges++;
@@ -1383,27 +1368,27 @@ namespace _2BNOR_2B
             else
             {
                 //If merges have been made then recursive because more prime implicants could be found. 
-                return getPrimeImplicants(primeImplicants);
+                return GetPrimeImplicants(primeImplicants);
             }
         }
 
         //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. Returns the minised expression by finding prime and essential prime implicants from merged minterms. 
-        public string minimiseExpression(string expression)
+        public string MinimiseExpression(string expression)
         {
             //Finding prime implicants to get essential prime implicants. 
-            List<string> minterms = getMinterms(expression);
-            List<string> primeImplicants = getPrimeImplicants(minterms);
+            List<string> minterms = GetMinterms(expression);
+            List<string> primeImplicants = GetPrimeImplicants(minterms);
             //Creating the prime-implicant chart which is used to find the essential prime implicants. 
             Dictionary<string, string> PIchart = new Dictionary<string, string>();
-            convertImplicantsIntoRegex(PIchart, primeImplicants);
-            setRegexPatterns(PIchart, minterms);
-            List<string> PIs = getEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
-            string minimisedExpression = convertEPIsToExpression(PIs);
+            ConvertImplicantsIntoRegex(PIchart, primeImplicants);
+            SetRegexPatterns(PIchart, minterms);
+            List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
+            string minimisedExpression = ConvertEPIsToExpression(PIs);
             return minimisedExpression;
         }
         #endregion
 
-        private string getCoveredString(List<string> epis)
+        private string GetCoveredString(List<string> epis)
         {
             int result = 0;
             foreach (string s in epis)
@@ -1415,10 +1400,10 @@ namespace _2BNOR_2B
             return result.ToString();
         }
 
-        private List<string> addPIsToFinalExpression(List<string> epis, List<string> pis)
+        private List<string> AddPIsToFinalExpression(List<string> epis, List<string> pis)
         {
             List<string> filtered = new List<string>();
-            foreach(string s in pis)
+            foreach (string s in pis)
             {
                 if (epis.Contains(s) == false)
                 {
@@ -1426,35 +1411,35 @@ namespace _2BNOR_2B
                 }
             }
 
-            string coveredString = getCoveredString(epis);
+            string coveredString = GetCoveredString(epis);
             string fullyCovered = new string('1', coveredString.Length);
-            while (coveredString !=  fullyCovered)
+            while (coveredString != fullyCovered)
             {
                 int[] bitfrequencies = new int[filtered.Count];
-                for(int i = 0; i < filtered.Count; i++)
+                for (int i = 0; i < filtered.Count; i++)
                 {
                     //set equal to number of 1s within string 
-                    bitfrequencies[i] = getNumberOf1s(filtered[i]);
+                    bitfrequencies[i] = GetNumberOf1s(filtered[i]);
                 }
-                string chosenImplicant = filtered[Array.IndexOf(bitfrequencies, bitfrequencies.Max())]; 
+                string chosenImplicant = filtered[Array.IndexOf(bitfrequencies, bitfrequencies.Max())];
                 epis.Add(chosenImplicant);
                 int result = Convert.ToInt32(coveredString, 2) | Convert.ToInt32(coveredString, 2);
-                coveredString = result.ToString(); 
+                coveredString = result.ToString();
             }
-            return epis; 
+            return epis;
         }
 
-        private int getNumberOf1s(string binaryValue)
+        private int GetNumberOf1s(string binaryValue)
         {
-            int total = 0; 
-            foreach(char bit in binaryValue)
+            int total = 0;
+            foreach (char bit in binaryValue)
             {
                 if (bit == '1')
                 {
                     total++;
                 }
             }
-            return total; 
+            return total;
         }
 
     }

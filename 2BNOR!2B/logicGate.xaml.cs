@@ -19,18 +19,17 @@ namespace _2BNOR_2B
     /// <summary>
     /// Interaction logic for logicGate.xaml
     /// </summary>
-    public partial class logicGate : UserControl
+    public partial class LogicGate : UserControl
     {
-        private element gate;
+        private Element gate;
         private double labelWidth;
         private int connectedWires = 0; 
 
-        public logicGate(element gate)
+        public LogicGate(Element gate)
         {
             InitializeComponent();
             this.gate = gate;
-            //connectedWires = gate.getInstances(); 
-            setImage();
+            SetImage();
             this.PreviewMouseDown += LogicGate_PreviewMouseDown;
             this.MouseMove += LogicGate_MouseMove;
         }
@@ -41,39 +40,39 @@ namespace _2BNOR_2B
         }
 
 
-        public void addWire()
+        public void AddWire()
         {
             connectedWires++;
         }
 
-        public int getConnectedWires()
+        public int GetConnectedWires()
         {
             return connectedWires;
         }
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (gate.getElementName() == "input_pin")
+            if (gate.GetElementName() == "input_pin")
             {
-                if (gate.getState() == 1)
+                if (gate.GetState() == 1)
                 {
-                    gate.setState(0);
+                    gate.SetState(0);
 
                 }
                 else
                 {
-                    gate.setState(1);
+                    gate.SetState(1);
                 }
             }
 
         }
 
-        public Point getInputPoint1()
+        public Point GetInputPoint1()
         {
             return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + 10);
         }
 
-        public Point getInputPoint2()
+        public Point GetInputPoint2()
         {
             if (gate.leftChild == null && gate.rightChild != null)
             {
@@ -86,14 +85,14 @@ namespace _2BNOR_2B
         }
 
         //Returns the point that is drawn too, for connecting the input and root node together. 
-        public Point getInputForOutput()
+        public Point GetInputForOutput()
         {
             return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + elementImage.Height / 2 - 1);
         }
 
-        public Point getOutputPoint()
+        public Point GetOutputPoint()
         {
-            if (gate.getElementName() == "input_pin")
+            if (gate.GetElementName() == "input_pin")
             {
                 return new Point(Canvas.GetLeft(this) + elementImage.Width + labelWidth - 43, Canvas.GetTop(this) + elementImage.Height / 2);
             }
@@ -103,15 +102,15 @@ namespace _2BNOR_2B
             }
         }
 
-        public element getGate()
+        public Element GetGate()
         {
             return gate; 
         }
 
-        private void setImage()
+        private void SetImage()
         {
             BitmapImage bitmap = new BitmapImage(); 
-            string imageName = gate.getElementName();
+            string imageName = gate.GetElementName();
             string filePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images", imageName+".png");
             using (FileStream stream = new FileStream(@$"C:\Users\andreas\source\repos\2BNOR!2B - Copy\2BNOR!2B\images\{imageName}.png", FileMode.Open))
             {
@@ -125,7 +124,7 @@ namespace _2BNOR_2B
             elementImage.Height = bitmap.Height / 5;
             elementImage.Width = bitmap.Width / 5;
             elementImage.Source = bitmap;
-            elementLabel.Content = gate.getLabel(); 
+            elementLabel.Content = gate.GetLabel(); 
         }
     }
 }

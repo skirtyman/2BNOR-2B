@@ -6,26 +6,26 @@ using System.Threading.Tasks;
 
 namespace _2BNOR_2B
 {
-    public class element
+    public class Element
     {
         private int elementID;
-        public element leftChild;
-        public element rightChild;
-        public element parent; 
-        private logicGate logicGate;
+        public Element leftChild;
+        public Element rightChild;
+        public Element parent; 
+        private LogicGate logicGate;
         private int state;
         private char label;
         private string elementName;
         //private bool uniqueness = false;
         private int instances = 0; 
 
-        public element()
+        public Element()
         {
 
         }
 
         //constructor for creating output pins 
-        public element(int elementID)
+        public Element(int elementID)
         {
             this.elementID = elementID;
             state = 0;
@@ -34,7 +34,7 @@ namespace _2BNOR_2B
         }
 
         //constructor for creating input pins 
-        public element(int elementID, char label)
+        public Element(int elementID, char label)
         {
             this.elementID = elementID;
             this.label = label;
@@ -46,7 +46,7 @@ namespace _2BNOR_2B
         }
 
         //constructor for logic gates
-        public element(string elementName, int elementID, element leftChild, element rightChild)
+        public Element(string elementName, int elementID, Element leftChild, Element rightChild)
         {
             this.elementID = elementID;
             this.leftChild = leftChild;
@@ -55,52 +55,52 @@ namespace _2BNOR_2B
             label = ' '; 
         }
 
-        public int getElementID()
+        public int GetElementID()
         {
             return elementID;
         }
 
-        public char getLabel()
+        public char GetLabel()
         {
             return label; 
         }
 
-        public string getElementName()
+        public string GetElementName()
         {
             return elementName;
         }
 
-        public void setLogicGate(logicGate logicGate)
+        public void SetLogicGate(LogicGate logicGate)
         {
             this.logicGate = logicGate; 
         }
 
-        public logicGate getLogicGate()
+        public LogicGate GetLogicGate()
         {
             return logicGate; 
         }
 
-        public int getInstances()
+        public int GetInstances()
         {
             return instances;
         }
 
-        public void setInstances(int instances)
+        public void SetInstances(int instances)
         {
             this.instances = instances;
         }
 
-        public void addInstance()
+        public void AddInstance()
         {
             instances++;
         }
 
-        public void setState(int state)
+        public void SetState(int state)
         {
             this.state = state; 
         }
 
-        public int getState()
+        public int GetState()
         {
             return state; 
         }

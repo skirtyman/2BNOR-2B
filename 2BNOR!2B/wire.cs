@@ -11,14 +11,14 @@ using System.Windows.Shapes;
 
 namespace _2BNOR_2B
 {
-    public class wire
+    public class Wire
     {
         private bool repeated; 
         private Point inputPoint;
         private Point outputPoint; 
         private List<Point> points = new List<Point>();
         private Ellipse e; 
-        private logicGate inputGate; 
+        private LogicGate inputGate; 
         private Brush colour = Brushes.Red; 
         private Canvas c;
         private string wireString = "lll";
@@ -30,14 +30,14 @@ namespace _2BNOR_2B
         PathFigureCollection pfc = new PathFigureCollection();
 
 
-        public wire(Canvas c)
+        public Wire(Canvas c)
         {
             this.c = c;
             p.Stroke = this.colour;
             p.StrokeThickness = 2;
         }
 
-        public wire(Point inputPoint, Point outputPoint, Canvas c)
+        public Wire(Point inputPoint, Point outputPoint, Canvas c)
         {
             this.inputPoint = inputPoint;
             this.outputPoint = outputPoint;
@@ -46,48 +46,48 @@ namespace _2BNOR_2B
             p.StrokeThickness = 2;
         }
 
-        public void setRepeated(bool repeated)
+        public void SetRepeated(bool repeated)
         {
             this.repeated = repeated;
         }
 
-        public void setStart(Point inputPoint)
+        public void SetStart(Point inputPoint)
         {
             this.inputPoint = inputPoint;
         }
 
-        public void setEnd(Point outputPoint)
+        public void SetEnd(Point outputPoint)
         {
             this.outputPoint = outputPoint;
         }
 
-        public void setGate(logicGate logicGate)
+        public void SetGate(LogicGate logicGate)
         {
             inputGate = logicGate; 
             
         }
 
-        public void setShift(int shift)
+        public void SetShift(int shift)
         {
             this.shift = shift;
         }
 
 
-        public logicGate getGate()
+        public LogicGate GetGate()
         {
             return inputGate;
         }
 
         //Returns list of lines depending on orientation. Or all lines if not specificed.
-        public List<Point> getPoints(bool? isHorizontal)
+        public List<Point> GetPoints(bool? isHorizontal)
         {
             if (isHorizontal == true)
             {
-                return getHorizontalPoints();
+                return GetHorizontalPoints();
             }
             else if (isHorizontal == false)
             {
-                return getVerticalPoints();
+                return GetVerticalPoints();
             }
             else
             {
@@ -95,7 +95,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private List<Point> getHorizontalPoints()
+        private List<Point> GetHorizontalPoints()
         {
             List<Point> p = new List<Point>();
             for (int i = 0; i < points.Count - 1; i++)
@@ -109,7 +109,7 @@ namespace _2BNOR_2B
             return p;
         }
 
-        private List<Point> getVerticalPoints()
+        private List<Point> GetVerticalPoints()
         {
             List<Point> p = new List<Point>();
             for (int i = 0; i < points.Count - 1; i++)
@@ -123,7 +123,7 @@ namespace _2BNOR_2B
             return p;
         }
 
-        public void setColour(Brush colour)
+        public void SetColour(Brush colour)
         {
             this.colour = colour;
             p.Stroke = colour;
@@ -135,7 +135,7 @@ namespace _2BNOR_2B
             }
         }
 
-        public void setPoints()
+        public void SetPoints()
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
@@ -145,20 +145,11 @@ namespace _2BNOR_2B
             midpoint.Y = outputPoint.Y;
             points.Add(midpoint);
             points.Add(outputPoint);
-            //if (points.Contains(inputPoint))
-            //{
-            //    MessageBox.Show("Shtuff");
-            //}
-            //else
-            //{
-            //    MessageBox.Show("What the fuck is actually happening :("); 
-            //}
-            //return points;
         }
 
 
         //Splits the line segment, adds a curved bridge for the wire intersection. 
-        public void addBridge(Point? bridgeLocation)
+        public void AddBridge(Point? bridgeLocation)
         {
             points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - 10));
             points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + 10));
@@ -167,7 +158,7 @@ namespace _2BNOR_2B
 
         //renders the points list so that the wire is displayed to the canvas.
         //Takes the list of points and adds the relative shapes to the geometry group
-        public void renderLine()
+        public void RenderLine()
         {
             c.Children.Remove(p);
             pg.Clear();

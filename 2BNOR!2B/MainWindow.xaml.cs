@@ -24,13 +24,13 @@ namespace _2BNOR_2B
     /// </summary>
     public partial class MainWindow : Window
     {
-        private diagram d;
+        private Diagram d;
         private string saveString = "";
 
         public MainWindow()
         {
             InitializeComponent();
-            d = new diagram(MainWindowCanvas);
+            d = new Diagram(MainWindowCanvas);
         }
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
@@ -42,26 +42,16 @@ namespace _2BNOR_2B
             if (stepsDialog.ShowDialog() == true)
             {
                 isSteps = stepsDialog.result;
-                d.drawTruthTable(TruthTableCanvas, expression, isSteps);
+                d.DrawTruthTable(TruthTableCanvas, expression, isSteps);
                 statusBar_Text.Text = "Generated Truth table from diagram: " + saveString; 
             }
 
         }
 
-        private void componentSidePanel_AddBuiltinCircuit(object sender, RoutedEventArgs e)
-        {
-            //show the built in circuit dialog
-            BuiltInCircuitDialog builtIntCircuitDialog = new BuiltInCircuitDialog();
-            if (builtIntCircuitDialog.ShowDialog() == true)
-            {
-
-            }
-        }
-
         //Debug button to remove items from the canvas. 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            d.clearDiagram(); 
+            d.ClearDiagram(); 
             MainWindowCanvas.Children.Clear();
             statusBar_Text.Text = "Cleared current diagram from the window. Diagram reset for new expression."; 
         }
@@ -94,7 +84,7 @@ namespace _2BNOR_2B
                 if (stepsDialog.ShowDialog() == true)
                 {
                     isSteps = stepsDialog.result;
-                    d.drawTruthTable(TruthTableCanvas, expression, isSteps);
+                    d.DrawTruthTable(TruthTableCanvas, expression, isSteps);
                     statusBar_Text.Text = "Generated Truth table from expression: " + expression; 
                 }
             }
@@ -114,7 +104,7 @@ namespace _2BNOR_2B
             {
                 expression = expressionInputDialog.result;
                 statusBar_Text.Text = "Generated diagram from expression: " + expression;
-                d.drawDiagram(expression); 
+                d.DrawDiagram(expression); 
                 saveString = expression; 
             }
         }
@@ -126,7 +116,7 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
-                MessageBox.Show(d.minimiseExpression(expression));
+                MessageBox.Show(d.MinimiseExpression(expression));
                 statusBar_Text.Text = "Minimised expression: " + expression; 
             }
         }
@@ -148,7 +138,7 @@ namespace _2BNOR_2B
             openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
             openFileDialog.ShowDialog();
             saveString = File.ReadAllText(openFileDialog.FileName);
-            d.drawDiagram(saveString);
+            d.DrawDiagram(saveString);
             statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
         }
 
@@ -162,7 +152,7 @@ namespace _2BNOR_2B
                 return;
             }
 
-            Rect bounds = d.getBoundsOfDiagram();
+            Rect bounds = d.GetBoundsOfDiagram();
 
             RenderTargetBitmap rtb = new RenderTargetBitmap((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
             rtb.Render(MainWindowCanvas);
@@ -190,8 +180,15 @@ namespace _2BNOR_2B
         private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //Refreshes the wire states whenever the canvas is clicked. 
-            d.updateWires();
-            statusBar_Text.Text = "Updated the state of the diagram.";
+            if (d.GetTree() != null)
+            {
+                d.UpdateWires();
+                statusBar_Text.Text = "Updated the state of the diagram.";
+            }
+            else
+            {
+                statusBar_Text.Text = "Please draw a diagram first. ";
+            }          
         }
     }
 }
