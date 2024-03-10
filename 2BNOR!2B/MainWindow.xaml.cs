@@ -162,38 +162,22 @@ namespace _2BNOR_2B
                 return;
             }
 
+            Rect bounds = d.getBoundsOfDiagram();
 
-            //Rect bounds = VisualTreeHelper.GetDescendantBounds(MainWindowCanvas);
-            Rect bounds = d.getBoundsOfDiagram(); 
-            double dpi = 96d;
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
+            rtb.Render(MainWindowCanvas);
 
-            RenderTargetBitmap rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, dpi, dpi, PixelFormats.Default);
-
-            DrawingVisual dv = new DrawingVisual();
-            using (DrawingContext dc = dv.RenderOpen())
-            {
-                VisualBrush vb = new VisualBrush(MainWindowCanvas);
-                dc.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
-            }
-
-            rtb.Render(dv);
+            CroppedBitmap crop = new CroppedBitmap(rtb, new Int32Rect(0,0, (int)bounds.Width, (int)bounds.Height));
 
             BitmapEncoder pngEncoder = new PngBitmapEncoder();
-            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
+            pngEncoder.Frames.Add(BitmapFrame.Create(crop));
 
-            try
-            {
-                MemoryStream ms = new MemoryStream();
 
-                pngEncoder.Save(ms);
-                ms.Close();
-                File.WriteAllBytes(sfd.FileName, ms.ToArray());
-            }
-            catch (Exception err)
+            using (Stream fs = File.OpenWrite(sfd.FileName))
             {
-                MessageBox.Show(err.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                pngEncoder.Save(fs);
             }
-            statusBar_Text.Text = "Exported diagram to " + sfd.FileName; 
+            statusBar_Text.Text = "Exported diagram to " + sfd.FileName;
         }
 
         private void MenuItem_CloseApp(object sender, RoutedEventArgs e)

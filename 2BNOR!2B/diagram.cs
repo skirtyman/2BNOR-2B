@@ -4,6 +4,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.RightsManagement;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -274,15 +275,6 @@ namespace _2BNOR_2B
                         nodeToAdd.setState(c - 48);
                     }
 
-                    // OLD METHOD. 
-                    ////marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
-                    //if (inputsAdded.Contains(c) == false)
-                    //{
-                    //    nodeToAdd.setUniqueness(true);
-                    //    inputsAdded += c;
-                    //}
-
-
                     //marking the node if it is not unique. This will be used when drawing diagrams with repeated inputs.  
                     if (inputsAdded.Contains(c) == false)
                     {
@@ -361,12 +353,36 @@ namespace _2BNOR_2B
             return translateNode(x, heightOfTree);
         }
 
+        //Used for exporting diagram. This is used to find the y dimensions of the exported image. 
+        private logicGate getWidestGate(element root)
+        {
+            
+            element tmp = new element();
+            Queue<element> q = new Queue<element> ();
+            q.Enqueue(root);
+            //Carrying out a traversal on only the right children of the root node. This is because the rightmost node will be the furthese down the screen
+            //and so the whole the diagram will be in the exported image if this node is within the export. 
+            while (q.Count > 0)
+            {
+                tmp = q.Dequeue();
+                if (tmp.rightChild != null && tmp.rightChild.getLogicGate() != null)
+                {
+                    q.Enqueue(tmp.rightChild);
+                }
+            }
+            return tmp.getLogicGate(); 
+
+
+            throw new Exception("Could not find gate"); 
+        }
+
         public Rect getBoundsOfDiagram()
         {
             int heightOfTree = getHeightOfTree(rootNode);
-            double maxWidth = Math.Pow(2, heightOfTree);
-            double maxY = (calculateNodeYposition(heightOfTree, heightOfTree, 0) * maxWidth) + 50;
-            double maxX = calculateNodeXposition(rootNode, heightOfTree, 0) + 50;
+            element current = rootNode;
+            logicGate l = getWidestGate(rootNode);
+            double maxX = Canvas.GetRight(outputNode.getLogicGate())+75;
+            double maxY = Canvas.GetBottom(l)+25;
             return new Rect(new Size(maxX, maxY));
         }
 
@@ -383,7 +399,6 @@ namespace _2BNOR_2B
                 w.setRepeated(false);
                 w.setEnd(leftchildLogicGate.getOutputPoint());
                 w.setGate(leftchildLogicGate);
-                //w.draw(leftchildLogicGate.getConnectedWires());
                 w.setShift(leftchildLogicGate.getConnectedWires());
                 w.setPoints();
             }
@@ -395,7 +410,6 @@ namespace _2BNOR_2B
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
                 input.getLogicGate().addWire();
-                //w.draw(input.getLogicGate().getConnectedWires(), true);
                 w.setShift(input.getLogicGate().getConnectedWires());
                 w.setPoints(); 
             }
@@ -414,7 +428,6 @@ namespace _2BNOR_2B
                 w.setRepeated(false);
                 w.setEnd(rightchildLogicGate.getOutputPoint());
                 w.setGate(rightchildLogicGate);
-                //w.draw(rightchildLogicGate.getConnectedWires()); 
                 w.setShift(rightchildLogicGate.getConnectedWires());
                 w.setPoints();
             }
@@ -425,13 +438,13 @@ namespace _2BNOR_2B
                 w.setEnd(input.getLogicGate().getOutputPoint());
                 w.setGate(input.getLogicGate());
                 input.getLogicGate().addWire();
-                //w.draw(input.getLogicGate().getConnectedWires(), true);
                 w.setShift(input.getLogicGate().getConnectedWires()); 
                 w.setPoints();
             }
             return w;
         }
 
+        //Finds the intersection between 4 points representing 2 lines if one exists, otherwise return null. 
         private Point? findIntersection(Point p0, Point p1, Point p2, Point p3)
         {
             double s_x = p1.X - p0.X;
@@ -475,6 +488,7 @@ namespace _2BNOR_2B
             return result;
         }
 
+        //Searches through all points to find the intersections. 
         private void drawIntersections()
         {
             List<Point> horizontalLines = new List<Point>();
@@ -490,17 +504,15 @@ namespace _2BNOR_2B
 
             for (int i = 0; i < verticalLines.Count - 1; i = i + 2)
             {
-                //first point of line = i, second point = i + 1. These form a line pair; 
+                //first point of line = i, second point = i + 1. These form the vertical line being checked. 
                 for (int c = 0; c < horizontalLines.Count - 1; c = c + 2)
                 {
-                    //again c and c + 1 form the line pair of horzontal to vertical
+                    //again c and c + 1 form the horizontal line being checked. 
                     intersection = findIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
                     if (intersection != null && (findWire(verticalLines[i]) != findWire(horizontalLines[c])))
                     {
-                        //MessageBox.Show($"Found at {intersection.Value.X}, {intersection.Value.Y}");
                         tmp = findWire(verticalLines[i]);
                         tmp.addBridge(intersection);
-                        //tmp.renderLine();
                     }
                 }
             }
@@ -599,6 +611,10 @@ namespace _2BNOR_2B
                 currentNode.setLogicGate(logicGate);
                 Canvas.SetLeft(logicGate, x);
                 Canvas.SetTop(logicGate, y);
+                //set the other position for saving and exporting. 
+                double p = logicGate.getInputPoint2().Y + 50;
+                Canvas.SetBottom(logicGate, p);
+                Canvas.SetRight(logicGate, logicGate.getInputPoint2().X); 
                 c.Children.Add(logicGate);
             }
         }
@@ -683,7 +699,6 @@ namespace _2BNOR_2B
             w.setGate(rootNode.getLogicGate());
             w.setPoints();
             w.renderLine(); 
-
             wires[wires.Length - 1] = w;
         }
 
@@ -700,6 +715,7 @@ namespace _2BNOR_2B
             double y = calculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x);
+            Canvas.SetRight(logicGate, x + logicGate.ActualWidth);
             c.Children.Add(logicGate);
         }
 
@@ -717,7 +733,7 @@ namespace _2BNOR_2B
             drawWires(rootNode);
             drawOutput(heightOfTree);
             drawOutputWire();
-            //updateWires();
+            updateWires();
         }
 
         #endregion
