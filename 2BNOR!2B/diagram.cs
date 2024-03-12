@@ -1046,18 +1046,24 @@ namespace _2BNOR_2B
 
         }
 
+        private string[] TrimBrackets(string[] headers)
+        {
+            for(int i = 0; i < headers.Length; i++)
+            {
+                headers[i] = headers[i].Substring(1, headers[i].Length - 2);
+            }
+            return headers;
+        } 
+
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void DrawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
-            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", true).ToString());
-            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", false).ToString());
-
-
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear();
             //headers = generateTruthTableHeadersWithSteps(inputExpression);
             headers = GetHeaders(inputExpression, true);
             outputMap = GenerateOutputMap(inputExpression, headers, true);
+            headers = TrimBrackets(headers); 
             if (isSteps)
             {
                 //drawTruthTable(c, headers, outputMap);
