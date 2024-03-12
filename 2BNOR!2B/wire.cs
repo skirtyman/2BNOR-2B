@@ -22,7 +22,9 @@ namespace _2BNOR_2B
         private Brush colour = Brushes.Red; 
         private Canvas c;
         private string wireString = "lll";
-        private int shift = 0; 
+        private int shift = 0;
+        private int radiusOfArc = 15;
+        private int radiusOfJunction = 10; 
 
 
         Path p = new Path();
@@ -151,8 +153,8 @@ namespace _2BNOR_2B
         //Splits the line segment, adds a curved bridge for the wire intersection. 
         public void AddBridge(Point? bridgeLocation)
         {
-            points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - 10));
-            points.Insert(wireString.Length - 1, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + 10));
+            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - (radiusOfArc/2)));
+            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + (radiusOfArc/2)));
             wireString = wireString.Insert(wireString.Length - 1, "bl");
         }
 
@@ -160,11 +162,13 @@ namespace _2BNOR_2B
         //Takes the list of points and adds the relative shapes to the geometry group
         public void RenderLine()
         {
+            PathFigure pf;
+            ArcSegment arc;
+            LineSegment l;
+            Size s;
             c.Children.Remove(p);
             pg.Clear();
             pfc.Clear();
-            PathFigure pf;
-            //int index = (repeated) ? wireString.Length + 1 : wireString.Length;
             for (int i = 0; i < wireString.Length; i++)
             {
                 pf = new PathFigure();
@@ -172,33 +176,34 @@ namespace _2BNOR_2B
                 if (wireString[i] == 'l')
                 {
                     //draw a line
-                    LineSegment line = new LineSegment();
-                    line.Point = points[i + 1];
-                    line.IsStroked = true;
-                    pf.Segments.Add(line);
+                    l = new LineSegment();
+                    l.Point = points[i + 1];
+                    l.IsStroked = true;
+                    pf.Segments.Add(l);
                 }
-                //else if (wireString[i] == 'b')
                 else
                 {
-                    ArcSegment arc = new ArcSegment(points[i + 1], new Size(5, 5), 180, true, SweepDirection.Clockwise, true);
+
+                    s = new Size(radiusOfArc/4, radiusOfArc/4);
+                    arc = new ArcSegment(points[i + 1], s, 180, true, SweepDirection.Clockwise, true);
                     pf.Segments.Add(arc);
                 }
                 pfc.Add(pf);
             }
             pg.Figures = pfc;
             p.Data = pg;
-            p.Stroke = Brushes.Green;
+            p.Stroke = Brushes.Black;
             c.Children.Add(p);
 
             if (repeated)
             {
                 e = new Ellipse();
-                e.Width = 10;
-                e.Height = 10;
+                e.Width = radiusOfJunction;
+                e.Height = radiusOfJunction;
                 e.Fill = Brushes.Black;
                 e.Stroke = Brushes.Black;
-                Canvas.SetTop(e, points[points.Count-2].Y - 5);
-                Canvas.SetLeft(e, points[points.Count-2].X - 5);
+                Canvas.SetTop(e, points[points.Count-2].Y - (radiusOfJunction/2));
+                Canvas.SetLeft(e, points[points.Count-2].X - (radiusOfJunction/2));
                 c.Children.Add(e);
             }
         }

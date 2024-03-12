@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -1049,10 +1050,6 @@ namespace _2BNOR_2B
         //Links class to UI, used to draw the truth tables to the canvas. 
         public void DrawTruthTable(Canvas c, string inputExpression, bool isSteps)
         {
-            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", true).ToString());
-            //MessageBox.Show(getNumberOfInputs("(A.B)^(A+A)", false).ToString());
-
-
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear();
             //headers = generateTruthTableHeadersWithSteps(inputExpression);
@@ -1308,7 +1305,8 @@ namespace _2BNOR_2B
             //added to complete the minimised expression. 
             if (coveredString.Contains('0'))
             {
-                AddPIsToFinalExpression(essentialPrimeImplicants, pis);
+                //AddPIsToFinalExpression(essentialPrimeImplicants, pis);
+                //call petriks method 
             }
             else
             {
@@ -1375,6 +1373,7 @@ namespace _2BNOR_2B
         //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. Returns the minised expression by finding prime and essential prime implicants from merged minterms. 
         public string MinimiseExpression(string expression)
         {
+            string minimisedExpression = ""; 
             //Finding prime implicants to get essential prime implicants. 
             List<string> minterms = GetMinterms(expression);
             List<string> primeImplicants = GetPrimeImplicants(minterms);
@@ -1383,7 +1382,17 @@ namespace _2BNOR_2B
             ConvertImplicantsIntoRegex(PIchart, primeImplicants);
             SetRegexPatterns(PIchart, minterms);
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
-            string minimisedExpression = ConvertEPIsToExpression(PIs);
+
+            //check that this result forms a complete string if not then call petriks method. 
+            if (GetCoveredString(PIs).Contains('0'))
+            {
+                //call petriks method. 
+                //minimisedExpression = doPetriksMethod(PIchart, primeImplicants)
+            }
+            else
+            {
+                minimisedExpression = ConvertEPIsToExpression(PIs); 
+            }
             return minimisedExpression;
         }
         #endregion
@@ -1440,6 +1449,39 @@ namespace _2BNOR_2B
                 }
             }
             return total;
+        }
+
+        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> primeImplicants)
+        {
+            string minimisedExpression = ""; 
+            //create mapping between prime implicants. 
+            Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
+            List<string> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart); 
+
+
+
+            return minimisedExpression; 
+        }
+
+        private Dictionary<char, string> MapTermsToImplicants(List<string> primeImplicants)
+        {
+            Dictionary<char, string> mapping = new Dictionary<char, string>();
+            char minChar = (char)(primeImplicants[0].Length + 65); 
+            for(int i = 0; i < primeImplicants.Count; i++)
+            {
+                mapping.Add(minChar, primeImplicants[i]);
+                minChar++; 
+            }
+            return mapping;
+
+        }
+
+        private List<string> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplcantChart)
+        {
+            List<string> productOfSums = new List<string>();
+            //int[] frequencyTable = GetFrequencyTable();
+
+            return productOfSums;  
         }
 
     }
