@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 using System.Windows.Media;
 
 namespace _2BNOR_2B
@@ -1051,7 +1055,10 @@ namespace _2BNOR_2B
         {
             for(int i = 0; i < headers.Length; i++)
             {
-                headers[i] = headers[i].Substring(1, headers[i].Length - 2);
+                if (headers[i].Length != 1)
+                {
+                    headers[i] = headers[i].Substring(1, headers[i].Length - 2);
+                }
             }
             return headers;
         } 
@@ -1093,7 +1100,6 @@ namespace _2BNOR_2B
             }
             return $"({tmp})";
         }
-
 
         //Produces the final minimised expression from the essential prime implicants.
         private string ConvertEPIsToExpression(List<string> essentialPrimeImplicants)
@@ -1461,14 +1467,12 @@ namespace _2BNOR_2B
             return total;
         }
 
-        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> primeImplicants)
+        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> primeImplicants, List<string> minterms)
         {
             string minimisedExpression = ""; 
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
             List<string> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart); 
-
-
 
             return minimisedExpression; 
         }
@@ -1486,12 +1490,176 @@ namespace _2BNOR_2B
 
         }
 
-        private List<string> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplcantChart)
+        private List<string> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplicantChart)
         {
             List<string> productOfSums = new List<string>();
-            //int[] frequencyTable = GetFrequencyTable();
-
+            List<string> sumsToAdd;
+            string primeImplicant; 
+            foreach(string key in primeImplicantChart.Keys)
+            {
+                primeImplicant = primeImplicantChart[key];
+                for (int i = 0; i < primeImplicant.Length; i++)
+                {
+                    if (primeImplicant[i] == '1')
+                    {
+                        //do the column search and get any combination of so (K+M) and (K+L) if K was a the prime implicant. 
+                        sumsToAdd = GetSumsToAdd(primeImplicantChart, termToImplicantMap, key, i);
+                        AddSumsToList(productOfSums, sumsToAdd);
+                    }
+                }
+            }
             return productOfSums;  
+        }
+
+        private void AddSumsToList(List<string> productOfSums, List<string> sumsToAdd)
+        {
+            string reverse; 
+            foreach(string s in sumsToAdd)
+            {
+                reverse = s;
+                reverse.Reverse();
+                if (productOfSums.Contains(s) == false && productOfSums.Contains(reverse)==false)
+                {
+                    productOfSums.Add(s);
+                }
+            }
+        }
+        
+        private List<string> GetSumsToAdd(Dictionary<string, string> PIchart, Dictionary<char, string> termToImplicantMap, string key, int positionWithinKey)
+        {
+            List<string> sumsToAdd = new List<string>();
+            string sum;
+            string k;
+            char term1;
+            char term2; 
+            //search through the column of the values and make a pair if the same position of the 
+            for (int i = 0; i < PIchart.Keys.Count; i++)
+            {
+                k = PIchart.Keys.ToArray()[i];
+                if (PIchart[k][positionWithinKey] == '1')
+                {
+                    term1 = GetTermFromImplicant(termToImplicantMap, key);
+                    term2 = GetTermFromImplicant(termToImplicantMap, k); 
+                    sum = $"({term1}+{term2})";
+                    sumsToAdd.Add(sum); 
+                }
+            }
+            return sumsToAdd; 
+        }
+
+        private char GetTermFromImplicant(Dictionary<char, string> termToImplicantMap, string implicant)
+        {
+            string[] values = termToImplicantMap.Values.ToArray();
+            char[] keys = termToImplicantMap.Keys.ToArray();
+            for (int i = 0; i < termToImplicantMap.Values.Count; i++)
+            {
+                if (values[i] == implicant)
+                {
+                    return keys[i]; 
+                }
+            }
+            throw new Exception("Could not map implicant to key");
+        }
+
+        //NEW PETRIKS 
+        private struct bracket
+        {
+            public bracket(string term1, string term2)
+            {
+                this.term1 = term1;
+                this.term2 = term2; 
+            }
+
+            public string term1; 
+            public string term2;
+        }
+
+        private string getSumOfProducts(List<bracket> productOfSums)
+        {
+            List<bracket> mergedList = new List<bracket>();
+            bracket b1;
+            bracket b2;
+            bracket mergedTerm;
+            bool merged; 
+            do
+            {
+                merged = false; 
+                for (int i = 0; i < productOfSums.Count - 1; i++)
+                {
+                    for (int c = i + 1; c < productOfSums.Count; c++)
+                    {
+                        b1 = productOfSums[i];
+                        b2 = productOfSums[c];
+                        if ((b1.term1 == b2.term1) != (b1.term2 == b2.term2) != (b1.term1 == b2.term2) != (b1.term2 == b2.term1))
+                        {
+                            mergedTerm = mergeBrackets(b1, b2);
+                            mergedList.Add(mergedTerm);
+                            productOfSums.Remove(b1); 
+                            productOfSums.Remove(b2);
+                            merged = true; 
+                        }
+                    }
+                }
+                productOfSums = mergedList;
+            }
+            while (merged);
+ 
+            List<List<string>> param = convertBracketsToString(productOfSums);
+
+            List<List<string>> sumOfProducts = recursiveDistributiveLaw(param);
+            return sumOfProducts[0][0].ToString(); 
+        }
+
+        private bracket mergeBrackets(bracket b1, bracket b2)
+        {
+            if (b1.term1 == b2.term1)
+            {
+                return new bracket($"{b1.term1}", $"{b1.term2 + b2.term2}");
+            }
+            else
+            {
+                return new bracket($"{b1.term1 + b2.term1}", $"{b1.term2}"); 
+            }
+        }
+
+        private List<List<string>> convertBracketsToString(List<bracket> brackets)
+        {
+            List<List<string>> result = new List<List<string>>();
+            List<string> tmp;
+            foreach(bracket b in brackets)
+            {
+                tmp = new List<string>();
+                tmp.Add(b.term1); 
+                tmp.Add(b.term2);
+                result.Add(tmp);
+            }
+            return result;
+        }
+
+
+        private List<List<string>> recursiveDistributiveLaw(List<List<string>> brackets)
+        {
+            List<List<string>> lls = new List<List<string>>();
+            if (brackets.Count > 1)
+            {
+                lls.Add(singleDistributiveLaw(brackets[0], brackets[1]));
+                brackets.RemoveAt(0);
+                brackets.RemoveAt(1);
+                lls.AddRange(brackets);
+                return recursiveDistributiveLaw(lls);
+            }
+            else
+            {
+                return brackets;
+            }
+        }
+
+        private List<string> singleDistributiveLaw(List<string> b1, List<string> b2)
+        {
+            List<string> lls = new List<string>();
+            //takes two bracket as list of strings as inputs
+            //do a single distributive law on them and return list of list of string lls
+            return lls; 
         }
 
     }
