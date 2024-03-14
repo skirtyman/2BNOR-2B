@@ -49,7 +49,7 @@ namespace _2BNOR_2B
         }
 
         //Debug button to remove items from the canvas. 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click_Diagram(object sender, RoutedEventArgs e)
         {
             d.ClearDiagram(); 
             MainWindowCanvas.Children.Clear();
@@ -189,6 +189,19 @@ namespace _2BNOR_2B
             {
                 statusBar_Text.Text = "Please draw a diagram first. ";
             }          
+        }
+
+        private void Button_Click_TT(object sender, RoutedEventArgs e)
+        {
+            if (TruthTableCanvas.Children.Count == 0)
+            {
+                statusBar_Text.Text = "Please draw a truth table first. "; 
+            }
+            else
+            {
+                TruthTableCanvas.Children.Clear();
+                statusBar_Text.Text = "Cleared the current truth table. ";
+            }
         }
     }
 }
