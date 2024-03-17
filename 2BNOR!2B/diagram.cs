@@ -1458,7 +1458,7 @@ namespace _2BNOR_2B
             string minimisedExpression = ""; 
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
-            List<string> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
+            List<Bracket> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
             string sumOfproducts = getSumOfProducts(productOfSums);
             return minimisedExpression; 
         }
