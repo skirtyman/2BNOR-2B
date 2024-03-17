@@ -51,9 +51,17 @@ namespace _2BNOR_2B
         //Debug button to remove items from the canvas. 
         private void Button_Click_Diagram(object sender, RoutedEventArgs e)
         {
-            d.ClearDiagram(); 
-            MainWindowCanvas.Children.Clear();
-            statusBar_Text.Text = "Cleared current diagram from the window. Diagram reset for new expression."; 
+            if (MainWindowCanvas.Children.Count == 0)
+            {
+                statusBar_Text.Text = "Please draw a diagram first. ";
+            }
+            else
+            {
+                d.ClearDiagram();
+                MainWindowCanvas.Children.Clear();
+                statusBar_Text.Text = "Cleared the current diagram. ";
+            }
+
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -188,7 +196,7 @@ namespace _2BNOR_2B
             else
             {
                 statusBar_Text.Text = "Please draw a diagram first. ";
-            }          
+            }    
         }
 
         private void Button_Click_TT(object sender, RoutedEventArgs e)

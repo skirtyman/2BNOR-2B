@@ -255,7 +255,7 @@ namespace _2BNOR_2B
             //The ID of the node within the tree. This is also the same as the position within the input string. 
             int elementID = 0;
             int i = 0;
-            string elementName = "";
+            string elementName;
             string inputsAdded = "";
             //Tokenising the postfix expression, each token is a node within the tree. The order of postfix is the same as
             //the arrangement of the nodes within the tree. 
@@ -374,8 +374,6 @@ namespace _2BNOR_2B
 
         public Rect GetBoundsOfDiagram()
         {
-            int heightOfTree = GetHeightOfTree(rootNode);
-            Element current = rootNode;
             LogicGate l = GetWidestGate(rootNode);
             double maxX = Canvas.GetRight(outputNode.GetLogicGate()) + 75;
             double maxY = Canvas.GetBottom(l) + 25;
@@ -497,10 +495,10 @@ namespace _2BNOR_2B
             }
 
 
-            for (int i = 0; i < verticalLines.Count - 1; i = i + 2)
+            for (int i = 0; i < verticalLines.Count - 1; i += 2)
             {
                 //first point of line = i, second point = i + 1. These form the vertical line being checked. 
-                for (int c = 0; c < horizontalLines.Count - 1; c = c + 2)
+                for (int c = 0; c < horizontalLines.Count - 1; c += 2)
                 {
                     //again c and c + 1 form the horizontal line being checked. 
                     intersection = FindIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
@@ -744,10 +742,10 @@ namespace _2BNOR_2B
             int operand1;
             int operand2;
             int tmp;
-            postfix = SubsituteIntoExpression(binaryCombination, postfix);
+            string sub = SubsituteIntoExpression(binaryCombination, postfix);
             Stack<int> evaluatedStack = new Stack<int>();
-            foreach (char c in postfix)
-            {
+            foreach (char c in sub)
+            { 
                 if (char.IsNumber(c))
                 {
                     evaluatedStack.Push(c);
@@ -771,7 +769,7 @@ namespace _2BNOR_2B
                     operand2 = evaluatedStack.Pop();
                     tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp);
-                }
+                }  
             }
             //Final item on the stack is the result of the evaluation. 
             return evaluatedStack.Pop();
@@ -994,7 +992,15 @@ namespace _2BNOR_2B
                 //Checking for inputs of the table
                 if (header.Length != 1)
                 {
-                    cellWidth = (header.Length * 10) + 10;
+                    if (header.Length > 5)
+                    {
+                        cellWidth = (header.Length * 8) + 10;
+                    }
+                    else
+                    {
+                        cellWidth = (header.Length * 10) + 20;
+                    }
+
                 }
                 cell = new Label();
                 cell.HorizontalContentAlignment = HorizontalAlignment.Center;
@@ -1027,7 +1033,15 @@ namespace _2BNOR_2B
                     //Checking for inputs of the table
                     if (headers[i].Length != 1)
                     {
-                        cellWidth = (headers[i].Length * 10) + 10;
+                        if (headers[i].Length > 5)
+                        {
+                            cellWidth = (headers[i].Length * 8) + 10;
+                        }
+                        else
+                        {
+                            cellWidth = (headers[i].Length * 10) + 20;
+                        }
+
                     }
                     cell = new Label();
                     cell.HorizontalContentAlignment = HorizontalAlignment.Center;
@@ -1068,7 +1082,6 @@ namespace _2BNOR_2B
         {
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear();
-            //headers = generateTruthTableHeadersWithSteps(inputExpression);
             headers = GetHeaders(inputExpression, true);
             outputMap = GenerateOutputMap(inputExpression, headers, true);
             headers = TrimBrackets(headers); 
@@ -1132,7 +1145,7 @@ namespace _2BNOR_2B
                     tmp += $"!{input}";
                 }
             }
-            tmp = AddANDGates(tmp);
+            //tmp = AddANDGates(tmp);
             return tmp;
         }
 
@@ -1158,7 +1171,7 @@ namespace _2BNOR_2B
         }
 
         //Replaces the dashes within the prime implicants with "\d", this allows the prime implicants to form regex pattern. 
-        //Replacing "\d" indicating it doesnt matter which digit is present in this position. 
+        //Replacing "\d" indicating it doesnt matter which digit is present in this position.
         private void ConvertImplicantsIntoRegex(Dictionary<string, string> regex, List<string> primeImplicants)
         {
             string tmp = "";
@@ -1248,12 +1261,14 @@ namespace _2BNOR_2B
         private List<string> GetMinterms(string expression)
         {
             List<string> minterms = new List<string>();
-            string[] inputMap = GenerateInputMap(expression, true);
+            inputMap = GenerateInputMap(expression, true);
             foreach (string input in inputMap)
             {
                 //A minterm has been found if input results in the expresion evaluating to true. 
-                if (EvaluateBooleanExpression(input, expression) - 48 == 1)
+                int result = EvaluateBooleanExpression(input, expression) - 48;
+                if (result == 1)
                 {
+                    //WTF, why does (!D).(!(C.!B)+(B.B))+(C.A) not work -> stupid 
                     minterms.Add(input);
                 }
             }
@@ -1315,21 +1330,6 @@ namespace _2BNOR_2B
                     }
                 }
             }
-
-            string coveredString = GetCoveredString(essentialPrimeImplicants);
-            //If the covered string contains a zero, the essential prime implicants do not cover all minterms, this means more prime implicants must be 
-            //added to complete the minimised expression. 
-            if (coveredString.Contains('0'))
-            {
-                //AddPIsToFinalExpression(essentialPrimeImplicants, pis);
-                //call petriks method 
-            }
-            else
-            {
-                //All minterms are covered so all implicants in final expression have been found. 
-                return essentialPrimeImplicants;
-            }
-
             return essentialPrimeImplicants;
         }
 
@@ -1397,13 +1397,17 @@ namespace _2BNOR_2B
             Dictionary<string, string> PIchart = new Dictionary<string, string>();
             ConvertImplicantsIntoRegex(PIchart, primeImplicants);
             SetRegexPatterns(PIchart, minterms);
+            PIchart = replaceDashesFromRegex(PIchart); 
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
-
+            string covered = GetCoveredString(PIs, PIchart);
             //check that this result forms a complete string if not then call petriks method. 
-            if (GetCoveredString(PIs).Contains('0'))
+
+            //not working: !(!B.A)+(!A.!A) because covered string is not being read properly
+
+            if (covered.Contains('0'))
             {
                 //call petriks method. 
-                //minimisedExpression = doPetriksMethod(PIchart, primeImplicants)
+                minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants);
             }
             else
             {
@@ -1413,67 +1417,49 @@ namespace _2BNOR_2B
         }
         #endregion
 
-        private string GetCoveredString(List<string> epis)
+        private Dictionary<string,string> replaceDashesFromRegex(Dictionary<string, string> PIChart)
         {
-            int result = 0;
-            foreach (string s in epis)
+            Dictionary<string, string> newKeys = new Dictionary<string, string>();
+            string tmp;  
+            foreach(string k in PIChart.Keys)
             {
+                tmp = k;
+                tmp = tmp.Replace(@"\d", "-");
+                newKeys.Add(tmp, PIChart[k]); 
+            }
+            return newKeys; 
+        }
 
-                string tmp = s.Replace(@"\d", "0");
-                result = result | Convert.ToInt32(tmp, 2);
+        private string GetCoveredString(List<string> epis, Dictionary<string, string> PIchart)
+        {
+            int result = 0; 
+            foreach(string s in PIchart.Values)
+            {
+                result |= Convert.ToInt32(s, 2);
             }
             return result.ToString();
         }
 
-        private List<string> AddPIsToFinalExpression(List<string> epis, List<string> pis)
+        private Dictionary<string, string> removeEPIs(Dictionary<string, string> PIchart, List<string> epis)
         {
-            List<string> filtered = new List<string>();
-            foreach (string s in pis)
+            foreach(string k in PIchart.Keys)
             {
-                if (epis.Contains(s) == false)
+                if (epis.Contains(k))
                 {
-                    filtered.Add(s);
+                    PIchart.Remove(k);
                 }
             }
-
-            string coveredString = GetCoveredString(epis);
-            string fullyCovered = new string('1', coveredString.Length);
-            while (coveredString != fullyCovered)
-            {
-                int[] bitfrequencies = new int[filtered.Count];
-                for (int i = 0; i < filtered.Count; i++)
-                {
-                    //set equal to number of 1s within string 
-                    bitfrequencies[i] = GetNumberOf1s(filtered[i]);
-                }
-                string chosenImplicant = filtered[Array.IndexOf(bitfrequencies, bitfrequencies.Max())];
-                epis.Add(chosenImplicant);
-                int result = Convert.ToInt32(coveredString, 2) | Convert.ToInt32(coveredString, 2);
-                coveredString = result.ToString();
-            }
-            return epis;
+            return PIchart; 
         }
 
-        private int GetNumberOf1s(string binaryValue)
+        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants)
         {
-            int total = 0;
-            foreach (char bit in binaryValue)
-            {
-                if (bit == '1')
-                {
-                    total++;
-                }
-            }
-            return total;
-        }
-
-        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> primeImplicants, List<string> minterms)
-        {
+            PIchart = removeEPIs(PIchart, epis); 
             string minimisedExpression = ""; 
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
-            List<string> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart); 
-
+            List<string> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
+            string sumOfproducts = getSumOfProducts(productOfSums);
             return minimisedExpression; 
         }
 
@@ -1490,10 +1476,10 @@ namespace _2BNOR_2B
 
         }
 
-        private List<string> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplicantChart)
+        private List<Bracket> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplicantChart)
         {
-            List<string> productOfSums = new List<string>();
-            List<string> sumsToAdd;
+            List<Bracket> productOfSums = new List<Bracket>();
+            List<Bracket> sumsToAdd;
             string primeImplicant; 
             foreach(string key in primeImplicantChart.Keys)
             {
@@ -1511,24 +1497,23 @@ namespace _2BNOR_2B
             return productOfSums;  
         }
 
-        private void AddSumsToList(List<string> productOfSums, List<string> sumsToAdd)
+        private void AddSumsToList(List<Bracket> productOfSums, List<Bracket> sumsToAdd)
         {
-            string reverse; 
-            foreach(string s in sumsToAdd)
+            Bracket reverse; 
+            foreach(Bracket s in sumsToAdd)
             {
-                reverse = s;
-                reverse.Reverse();
-                if (productOfSums.Contains(s) == false && productOfSums.Contains(reverse)==false)
+                reverse = s; 
+                if (productOfSums.Contains(s) == false)
                 {
                     productOfSums.Add(s);
                 }
             }
         }
         
-        private List<string> GetSumsToAdd(Dictionary<string, string> PIchart, Dictionary<char, string> termToImplicantMap, string key, int positionWithinKey)
+        private List<Bracket> GetSumsToAdd(Dictionary<string, string> PIchart, Dictionary<char, string> termToImplicantMap, string key, int positionWithinKey)
         {
-            List<string> sumsToAdd = new List<string>();
-            string sum;
+            List<Bracket> sumsToAdd = new List<Bracket>();
+            Bracket sum;
             string k;
             char term1;
             char term2; 
@@ -1540,7 +1525,7 @@ namespace _2BNOR_2B
                 {
                     term1 = GetTermFromImplicant(termToImplicantMap, key);
                     term2 = GetTermFromImplicant(termToImplicantMap, k); 
-                    sum = $"({term1}+{term2})";
+                    sum = new Bracket(term1, term2);    
                     sumsToAdd.Add(sum); 
                 }
             }
@@ -1562,28 +1547,36 @@ namespace _2BNOR_2B
         }
 
         //NEW PETRIKS 
-        private struct bracket
+        private struct Bracket
         {
-            public bracket(string term1, string term2)
+            public Bracket(char term1, char term2)
             {
-                this.term1 = term1;
-                this.term2 = term2; 
+                if (term1 > term2)
+                {
+                    this.term1 = term1.ToString();
+                    this.term2 = term2.ToString();  
+                }
+                else
+                {
+                    this.term1 = term2.ToString(); 
+                    this.term2 = term1.ToString();  
+                }
             }
 
-            public string term1; 
+            public string term1;
             public string term2;
         }
 
-        private string getSumOfProducts(List<bracket> productOfSums)
+        private string getSumOfProducts(List<Bracket> productOfSums)
         {
-            List<bracket> mergedList = new List<bracket>();
-            bracket b1;
-            bracket b2;
-            bracket mergedTerm;
-            bool merged; 
+            List<Bracket> mergedList = new List<Bracket>();
+            Bracket b1;
+            Bracket b2;
+            Bracket mergedTerm;
+            bool merged;
             do
             {
-                merged = false; 
+                merged = false;
                 for (int i = 0; i < productOfSums.Count - 1; i++)
                 {
                     for (int c = i + 1; c < productOfSums.Count; c++)
@@ -1594,48 +1587,60 @@ namespace _2BNOR_2B
                         {
                             mergedTerm = mergeBrackets(b1, b2);
                             mergedList.Add(mergedTerm);
-                            productOfSums.Remove(b1); 
+                            productOfSums.Remove(b1);
                             productOfSums.Remove(b2);
-                            merged = true; 
+                            merged = true;
+                            i = c + 1;
+                            c = i + 1;
                         }
                     }
                 }
                 productOfSums = mergedList;
             }
             while (merged);
- 
             List<List<string>> param = convertBracketsToString(productOfSums);
-
             List<List<string>> sumOfProducts = recursiveDistributiveLaw(param);
-            return sumOfProducts[0][0].ToString(); 
+
+            string SOP = "";
+            foreach(string s in sumOfProducts[0])
+            {
+                SOP += $"{s} + "; 
+            }
+            return SOP; 
         }
 
-        private bracket mergeBrackets(bracket b1, bracket b2)
+        private Bracket mergeBrackets(Bracket b1, Bracket b2)
         {
+            Bracket b = new Bracket(); 
+
+
             if (b1.term1 == b2.term1)
             {
-                return new bracket($"{b1.term1}", $"{b1.term2 + b2.term2}");
+                b.term1 = b1.term1;
+                b.term2 = b1.term2 + b2.term2;
+                return b; 
             }
             else
             {
-                return new bracket($"{b1.term1 + b2.term1}", $"{b1.term2}"); 
+                b.term1 = b1.term1 + b2.term1;
+                b.term2 = b1.term2; 
+                return b;
             }
         }
 
-        private List<List<string>> convertBracketsToString(List<bracket> brackets)
+        private List<List<string>> convertBracketsToString(List<Bracket> brackets)
         {
             List<List<string>> result = new List<List<string>>();
             List<string> tmp;
-            foreach(bracket b in brackets)
+            foreach (Bracket b in brackets)
             {
                 tmp = new List<string>();
-                tmp.Add(b.term1); 
+                tmp.Add(b.term1);
                 tmp.Add(b.term2);
                 result.Add(tmp);
             }
             return result;
         }
-
 
         private List<List<string>> recursiveDistributiveLaw(List<List<string>> brackets)
         {
@@ -1657,10 +1662,55 @@ namespace _2BNOR_2B
         private List<string> singleDistributiveLaw(List<string> b1, List<string> b2)
         {
             List<string> lls = new List<string>();
-            //takes two bracket as list of strings as inputs
-            //do a single distributive law on them and return list of list of string lls
-            return lls; 
+            for (int i = 0; i < b1.Count; i++)
+            {
+                for (int j = 0; j < b2.Count; j++)
+                {
+                    lls.Add(applyDistributiveLaw(b1[i], b2[j]));
+                }
+            }
+            return lls;
         }
+
+        private string applyDistributiveLaw(string a, string b)
+        {
+            string tempresult = a + b;
+            string finalresult = "";
+            foreach (char c in tempresult)
+            {
+                if (!finalresult.Contains(c))
+                {
+                    finalresult += c;
+                }
+            }
+            return finalresult;
+        }
+
+        //private string getMinProduct(string sumOfProducts)
+        //{
+        //    string[] products = sumOfProducts.Split('+');
+        //    string min = products[0]; 
+        //    foreach(string p in products)
+        //    {
+        //        if (p.Length < min.Length)
+        //        {
+        //            min = p;
+        //        }
+        //    }
+        //}
+
+        //private string getFinalExpression(string minProduct)
+        //{
+        //    //iterate through the min number of terms. 
+        //    //get the PI from the respective term given in the PI-letter mapping. 
+        //    //convert this key into expression form and hey presto. 
+
+
+        //    foreach (char c in minProduct)
+        //    {
+        //        char letter = 
+        //    }
+        //}
 
     }
 }
