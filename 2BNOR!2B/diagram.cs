@@ -1127,8 +1127,6 @@ namespace _2BNOR_2B
         //Replaces the binary form into the input form so that a complete boolean expression can be created. 
         private string ConvertImplicantToExpression(string epi)
         {
-            //Removing regex characters to make conversion easier (due to "\d" being two characters long). 
-            epi = epi.Replace(@"\d", "-");
             string tmp = "";
             char input;
             for (int i = 0; i < epi.Length; i++)
@@ -1460,6 +1458,8 @@ namespace _2BNOR_2B
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
             List<Bracket> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
             string sumOfproducts = getSumOfProducts(productOfSums);
+            string minProduct = getMinProduct(sumOfproducts);
+            minimisedExpression = getFinalExpression(termsImplicantMapping, minProduct); 
             return minimisedExpression; 
         }
 
@@ -1686,31 +1686,33 @@ namespace _2BNOR_2B
             return finalresult;
         }
 
-        //private string getMinProduct(string sumOfProducts)
-        //{
-        //    string[] products = sumOfProducts.Split('+');
-        //    string min = products[0]; 
-        //    foreach(string p in products)
-        //    {
-        //        if (p.Length < min.Length)
-        //        {
-        //            min = p;
-        //        }
-        //    }
-        //}
+        private string getMinProduct(string sumOfProducts)
+        {
+            string[] products = sumOfProducts.Split('+');
+            string min = products[0];
+            foreach (string p in products)
+            {
+                if (p.Length < min.Length)
+                {
+                    min = p;
+                }
+            }
+            return min;
+        }
 
-        //private string getFinalExpression(string minProduct)
-        //{
-        //    //iterate through the min number of terms. 
-        //    //get the PI from the respective term given in the PI-letter mapping. 
-        //    //convert this key into expression form and hey presto. 
-
-
-        //    foreach (char c in minProduct)
-        //    {
-        //        char letter = 
-        //    }
-        //}
+        private string getFinalExpression(Dictionary<char, string> termToImplicantMap, string minProduct)
+        { 
+            string subExpression;
+            string implicant;
+            string result = ""; 
+            foreach (char c in minProduct)
+            {
+                implicant = termToImplicantMap[c];
+                subExpression = ConvertImplicantToExpression(implicant); 
+                result += subExpression;
+            }
+            return result; 
+        }
 
     }
 }
