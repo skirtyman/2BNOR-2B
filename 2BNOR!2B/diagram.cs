@@ -19,7 +19,7 @@ namespace _2BNOR_2B
     {
         private static Regex r = new Regex(@"\s+");
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
-        private char[] booleanOperators = { '.', '^', '+', '!' };
+        private char[] booleanOperators = { '+', '^', '.', '!' };
         private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
         private string[] inputMap;
         private string[] outputMap;
@@ -183,26 +183,6 @@ namespace _2BNOR_2B
         }
 
         #region diagram drawing
-
-        //Recursive inorder traversal to get the states of the inputs. A state is added only when the element has the correct name. 
-        private void GetInputStates(Element root)
-        {
-            if (root.leftChild != null)
-            {
-                GetInputStates(root.leftChild);
-            }
-
-            if (root.GetElementName() == "input_pin")
-            {
-                inputStates += root.GetState();
-            }
-
-            if (root.rightChild != null)
-            {
-                GetInputStates(root.rightChild);
-            }
-        }
-
         private void Getinputstates(Element root, string expression)
         {
             Stack<Element> s = new Stack<Element>();
@@ -655,10 +635,6 @@ namespace _2BNOR_2B
                 {
                     //Otherwise, calculate the Y-coord of the node according to the location within the tree. 
                     y = CalculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
-                    if (currentNode.GetLabel() == 'A')
-                    {
-                        y += 200; 
-                    }
                 }
                 logicGate = new LogicGate(currentNode);
                 //Adding the link between the tree and the visual diagram. 
@@ -1328,8 +1304,7 @@ namespace _2BNOR_2B
                 //A minterm has been found if input results in the expresion evaluating to true. 
                 int result = EvaluateBooleanExpression(input, expression) - 48;
                 if (result == 1)
-                {
-                    //WTF, why does (!D).(!(C.!B)+(B.B))+(C.A) not work -> stupid 
+                { 
                     minterms.Add(input);
                 }
             }
@@ -1462,9 +1437,6 @@ namespace _2BNOR_2B
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
             string covered = GetCoveredString(PIs, PIchart);
             //check that this result forms a complete string if not then call petriks method. 
-
-            //not working: !(!B.A)+(!A.!A) because covered string is not being read properly
-
             if (covered.Contains('0'))
             {
                 //call petriks method. 
