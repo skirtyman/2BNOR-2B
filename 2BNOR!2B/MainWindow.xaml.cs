@@ -111,8 +111,9 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
+                d.setExpression(expression); 
                 statusBar_Text.Text = "Generated diagram from expression: " + expression;
-                d.DrawDiagram(expression); 
+                d.DrawDiagram(); 
                 saveString = expression; 
             }
         }
@@ -146,7 +147,8 @@ namespace _2BNOR_2B
             openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
             openFileDialog.ShowDialog();
             saveString = File.ReadAllText(openFileDialog.FileName);
-            d.DrawDiagram(saveString);
+            d.setExpression(saveString);
+            d.DrawDiagram();
             statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
         }
 
@@ -188,15 +190,16 @@ namespace _2BNOR_2B
         private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //Refreshes the wire states whenever the canvas is clicked. 
-            if (d.GetTree() != null)
-            {
-                d.UpdateWires();
-                statusBar_Text.Text = "Updated the state of the diagram.";
-            }
-            else
-            {
-                statusBar_Text.Text = "Please draw a diagram first. ";
-            }    
+            d.UpdateWires();
+            //if (d.GetTree() != null)
+            //{
+            //    d.UpdateWires();
+            //    statusBar_Text.Text = "Updated the state of the diagram.";
+            //}
+            //else
+            //{
+            //    statusBar_Text.Text = "Please draw a diagram first. ";
+            //}    
         }
 
         private void Button_Click_TT(object sender, RoutedEventArgs e)

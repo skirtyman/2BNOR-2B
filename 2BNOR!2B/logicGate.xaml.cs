@@ -54,14 +54,16 @@ namespace _2BNOR_2B
         {
             if (gate.GetElementName() == "input_pin")
             {
+                //MessageBox.Show(gate.GetState().ToString());
                 if (gate.GetState() == 1)
                 {
                     gate.SetState(0);
-
+                    //MessageBox.Show(gate.GetState().ToString());
                 }
                 else
                 {
                     gate.SetState(1);
+                    //MessageBox.Show(gate.GetState().ToString());
                 }
             }
 

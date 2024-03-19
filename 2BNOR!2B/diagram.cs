@@ -15,7 +15,7 @@ using System.Windows.Media;
 
 namespace _2BNOR_2B
 {
-    class Diagram
+    public class Diagram
     {
         private static Regex r = new Regex(@"\s+");
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
@@ -55,6 +55,11 @@ namespace _2BNOR_2B
         private string RemoveWhitespace(string input, string replacement)
         {
             return r.Replace(input, replacement);
+        }
+
+        public void setExpression(string expression)
+        {
+            this.infixExpression = expression;
         }
 
         public void ClearDiagram()
@@ -172,7 +177,7 @@ namespace _2BNOR_2B
         public void UpdateWires()
         {
             inputStates = "";
-            GetInputStates(rootNode);
+            Getinputstates(rootNode, infixExpression);
             AssignGateStates(rootNode);
             ColourWires();
         }
@@ -195,6 +200,48 @@ namespace _2BNOR_2B
             if (root.rightChild != null)
             {
                 GetInputStates(root.rightChild);
+            }
+        }
+
+        private void Getinputstates(Element root, string expression)
+        {
+            Stack<Element> s = new Stack<Element>();
+            int numberOfInputs = GetNumberOfInputs(expression, true);
+            int[] states = new int[numberOfInputs]; 
+            string visited = ""; 
+            while (true)
+            {
+                while(root != null)
+                {
+                    s.Push(root);
+                    s.Push(root);
+                    root = root.leftChild; 
+                }
+                if (s.Count == 0)
+                {
+                    inputStates = string.Join("", states); 
+                    return; 
+                }
+                root = s.Pop(); 
+                if (s.Count != 0 && s.Peek() == root)
+                {
+                    root = root.rightChild;
+                }
+                else
+                {
+                    if (root.GetElementName() == "input_pin" && visited.Contains(root.GetLabel()) == false)
+                    {
+                        inputStates += root.GetState();
+                        states[root.GetLabel() - 65] = root.GetState();
+                        visited += root.GetLabel(); 
+                        root = null;
+                    }
+                    else
+                    {
+                        root = null; 
+                    }
+
+                }
             }
         }
 
@@ -322,7 +369,17 @@ namespace _2BNOR_2B
         private double CalculateNodeYposition(int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
             double initialY = (Math.Pow(2, heightOfTree) / Math.Pow(2, depthWithinTree)) * pixelsPerSquare;
-            return initialY + (initialY * positionWithinLayer * 2);
+            //old return value is below. 
+            initialY = initialY + (initialY * positionWithinLayer * 2); 
+            //applying a vertical shrink for ver large diagrams. 
+            if (heightOfTree > 5 && depthWithinTree < 4)
+            {
+                return initialY / 2; 
+            }
+            else
+            {
+                return initialY; 
+            }
         }
 
         private double CalculateXposition(int depthWithinTree)
@@ -347,7 +404,7 @@ namespace _2BNOR_2B
             }
             else
             {
-                x = CalculateXposition(depthWithinTree);
+                x = CalculateXposition(depthWithinTree) - 50;
             }
             return TranslateNode(x, heightOfTree);
         }
@@ -598,6 +655,10 @@ namespace _2BNOR_2B
                 {
                     //Otherwise, calculate the Y-coord of the node according to the location within the tree. 
                     y = CalculateNodeYposition(heightOfTree, depthWithinTree, positionWithinLayer);
+                    if (currentNode.GetLabel() == 'A')
+                    {
+                        y += 200; 
+                    }
                 }
                 logicGate = new LogicGate(currentNode);
                 //Adding the link between the tree and the visual diagram. 
@@ -704,7 +765,7 @@ namespace _2BNOR_2B
             LogicGate logicGate = new LogicGate(outputNode);
             outputNode.SetLogicGate(logicGate);
             //The position of the output node is the same y-position as the root node and a small shift from the root node. 
-            double x = TranslateNode(CalculateXposition(0), heightOfTree) + (pixelsPerSquare * 10);
+            double x = TranslateNode(CalculateXposition(0), heightOfTree) + (pixelsPerSquare * 8);
             double y = CalculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x);
@@ -713,14 +774,15 @@ namespace _2BNOR_2B
         }
 
         //public method that links UI to class, 'stitches' all of the methods together to give the drawn diagram. 
-        public void DrawDiagram(string inputExpression)
+        public void DrawDiagram()
         {
             canvasHeight = c.ActualHeight;
             canvasWidth = c.ActualWidth;
-            GenerateBinaryTreeFromExpression(inputExpression);
-            inputMap = GenerateInputMap(inputExpression, false);
-            headers = GetHeaders(inputExpression, false);
-            outputMap = GenerateOutputMap(inputExpression, headers, false);
+            GenerateBinaryTreeFromExpression(infixExpression);
+            inputMap = GenerateInputMap(infixExpression, true);
+            headers = GetHeaders(infixExpression, false);
+            outputMap = GenerateOutputMap(infixExpression, headers, false);
+            outputMap = outputMap.Distinct().ToArray();
             int heightOfTree = GetHeightOfTree(rootNode);
             DrawNodes(rootNode, heightOfTree);
             DrawWires(rootNode);
@@ -937,6 +999,7 @@ namespace _2BNOR_2B
         {
             string[] postorderHeaders = GeneratePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
             string[] displayHeaders = new string[GetNumberOfInputs(inputExpression, true) + numberOfOperators];
+            Array.Sort(postorderHeaders);
             Array.Sort(postorderHeaders, (x, y) => x.Length.CompareTo(y.Length));
             postorderHeaders = postorderHeaders.Distinct().ToArray();
             Array.Copy(postorderHeaders, displayHeaders, displayHeaders.Length);
@@ -1431,9 +1494,9 @@ namespace _2BNOR_2B
         private string GetCoveredString(List<string> epis, Dictionary<string, string> PIchart)
         {
             int result = 0; 
-            foreach(string s in PIchart.Values)
+            foreach(string s in epis)
             {
-                result |= Convert.ToInt32(s, 2);
+                result |= Convert.ToInt32(PIchart[s], 2);
             }
             return result.ToString();
         }
