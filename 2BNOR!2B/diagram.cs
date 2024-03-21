@@ -24,6 +24,7 @@ namespace _2BNOR_2B
         private string[] inputMap;
         private string[] outputMap;
         private string[] headers;
+        private static string validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ().!^+10";
         private string infixExpression = "";
         private string inputStates = "";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
@@ -181,6 +182,149 @@ namespace _2BNOR_2B
             AssignGateStates(rootNode);
             ColourWires();
         }
+
+        #region Validation routines
+        private void ConvertPostfixtoInfix(string postfixExpression)
+        {
+            Stack<string> s = new Stack<string>();
+            string operand1;
+            string operand2;
+            foreach (char c in postfixExpression)
+            {
+                if (char.IsLetter(c) || char.IsNumber(c))
+                {
+                    s.Push(c.ToString());
+                }
+                else if (c == '!')
+                {
+                    operand1 = s.Pop();
+                    s.Push($"{c}{operand1}");
+                }
+                else
+                {
+                    operand1 = s.Pop();
+                    operand2 = s.Pop();
+                    s.Push($"{operand1}{c}{operand2}");
+                }
+            }
+        }
+
+        private bool invalidCharacters(string expression)
+        {
+            foreach (char c in expression)
+            {
+                if (validCharacters.Contains(c) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private string removeComponents(string expression)
+        {
+            string result = "";
+            foreach (char c in expression)
+            {
+                if (c == '(' || c == ')')
+                {
+                    result += c;
+                }
+            }
+            return result;
+        }
+
+        private bool validateBrackets(string expression)
+        {
+            //stores only the sequence of brackets within the expression so (A.B) => "()" and (A.B => "("
+            string brackets = removeComponents(expression);
+            Stack<char> s = new Stack<char>();
+            foreach (char c in brackets)
+            {
+                if (c == '(')
+                {
+                    s.Push(')');
+                }
+                else if (s.Count == 0 || s.Pop() != c)
+                {
+                    return false;
+                }
+            }
+
+            if (s.Count == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool isSequential(string expression)
+        {
+            char[] inputs = GetOnlyInputs(expression);
+            Array.Sort(inputs);
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                if (inputs[i] != validCharacters[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private char[] GetOnlyInputs(string expression)
+        {
+            char[] inputs = new char[GetNumberOfInputs(expression, true) - getNumberOfConstants(expression)];
+            int i = 0;
+            foreach (char c in expression)
+            {
+                if (char.IsLetter(c) && inputs.Contains(c) == false)
+                {
+                    inputs[i] = c;
+                    i++;
+                }
+            }
+            return inputs;
+        }
+
+        private int getNumberOfConstants(string expression)
+        {
+            int total = 0;
+            foreach (char c in expression)
+            {
+                if (c == '0' || c == '1')
+                {
+                    total++;
+                }
+            }
+            return total;
+        }
+
+        public bool isExpressionValid(string expression)
+        {
+            string postfix = ConvertInfixtoPostfix(expression);
+            if (isSequential(expression) && invalidCharacters(expression) && validateBrackets(expression))
+            {
+                try
+                {
+                    ConvertPostfixtoInfix(postfix);
+                    return true; 
+                }
+                catch (Exception e)
+                {
+                    return false; 
+                }
+            }
+            else
+            {
+                return false; 
+            }
+        }
+
+        #endregion
 
         #region diagram drawing
         private void Getinputstates(Element root, string expression)
@@ -1440,7 +1584,7 @@ namespace _2BNOR_2B
             if (covered.Contains('0'))
             {
                 //call petriks method. 
-                minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants);
+                minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants, minterms);
             }
             else
             {
@@ -1473,21 +1617,51 @@ namespace _2BNOR_2B
             return result.ToString();
         }
 
-        private Dictionary<string, string> removeEPIs(Dictionary<string, string> PIchart, List<string> epis)
+        private Dictionary<string, string> removeEPIs(Dictionary<string, string> PIchart, List<string> epis, List<string> minterms)
         {
+            string value;
+            int pos; 
+            int[] freq = GetFrequencyTable(PIchart, minterms); 
             foreach(string k in PIchart.Keys)
             {
                 if (epis.Contains(k))
                 {
+                    value = PIchart[k];
+                    pos = GetSignificantBit(k, freq);
+                    trimMinterm(PIchart, pos); 
                     PIchart.Remove(k);
                 }
             }
             return PIchart; 
         }
 
-        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants)
+        private Dictionary<string, string> trimMinterm(Dictionary<string, string> PIchart, int pos)
         {
-            PIchart = removeEPIs(PIchart, epis); 
+            string value; 
+            foreach(string s in PIchart.Keys)
+            {
+                value = PIchart[s];
+                value = value.Remove(pos, 1);
+                PIchart[s] = value;
+            }
+            return PIchart; 
+        }
+
+        private int GetSignificantBit(string epi, int[] freq)
+        {
+            for(int i = 0; i < freq.Length; i++)
+            {
+                if (freq[i] == 1 && epi[i] == '1')
+                {
+                    return i; 
+                }
+            }
+            return -1; 
+        }
+
+        private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants, List<string> minterms)
+        {
+            PIchart = removeEPIs(PIchart, epis, minterms); 
             string minimisedExpression = ""; 
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
@@ -1560,8 +1734,11 @@ namespace _2BNOR_2B
                 {
                     term1 = GetTermFromImplicant(termToImplicantMap, key);
                     term2 = GetTermFromImplicant(termToImplicantMap, k); 
-                    sum = new Bracket(term1, term2);    
-                    sumsToAdd.Add(sum); 
+                    if (term1 != term2)
+                    {
+                        sum = new Bracket(term1, term2);
+                        sumsToAdd.Add(sum); 
+                    }
                 }
             }
             return sumsToAdd; 
@@ -1586,7 +1763,7 @@ namespace _2BNOR_2B
         {
             public Bracket(char term1, char term2)
             {
-                if (term1 > term2)
+                if (term1 < term2)
                 {
                     this.term1 = term1.ToString();
                     this.term2 = term2.ToString();  
@@ -1637,28 +1814,28 @@ namespace _2BNOR_2B
             List<List<string>> sumOfProducts = recursiveDistributiveLaw(param);
 
             string SOP = "";
-            foreach(string s in sumOfProducts[0])
+            List<string> tmp = sumOfProducts[0]; 
+            for (int i = 0; i < tmp.Count - 1; i++)
             {
-                SOP += $"{s} + "; 
+                SOP += $"{tmp[i]}+{tmp[i+1]}";
             }
+
             return SOP; 
         }
 
         private Bracket mergeBrackets(Bracket b1, Bracket b2)
         {
-            Bracket b = new Bracket(); 
-
-
+            Bracket b = new Bracket();
             if (b1.term1 == b2.term1)
             {
                 b.term1 = b1.term1;
                 b.term2 = b1.term2 + b2.term2;
-                return b; 
+                return b;
             }
             else
             {
-                b.term1 = b1.term1 + b2.term1;
-                b.term2 = b1.term2; 
+                b.term1 = b1.term2;
+                b.term2 = b1.term1 + b2.term2;
                 return b;
             }
         }
@@ -1684,7 +1861,7 @@ namespace _2BNOR_2B
             {
                 lls.Add(singleDistributiveLaw(brackets[0], brackets[1]));
                 brackets.RemoveAt(0);
-                brackets.RemoveAt(1);
+                brackets.RemoveAt(0);
                 lls.AddRange(brackets);
                 return recursiveDistributiveLaw(lls);
             }

@@ -111,10 +111,17 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
-                d.setExpression(expression); 
-                statusBar_Text.Text = "Generated diagram from expression: " + expression;
-                d.DrawDiagram(); 
-                saveString = expression; 
+                if (d.isExpressionValid(expression))
+                {
+                    d.setExpression(saveString);
+                    statusBar_Text.Text = "Generated diagram from expression: " + expression;
+                    d.DrawDiagram();
+                    saveString = expression;
+                }
+                else
+                {
+                    MessageBox.Show("This expression is invalid. Please try again. ");
+                }
             }
         }
 
@@ -147,9 +154,17 @@ namespace _2BNOR_2B
             openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
             openFileDialog.ShowDialog();
             saveString = File.ReadAllText(openFileDialog.FileName);
-            d.setExpression(saveString);
-            d.DrawDiagram();
-            statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
+            if (d.isExpressionValid(saveString))
+            {
+                d.setExpression(saveString);
+                d.DrawDiagram();
+                statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
+            }
+            else
+            {
+                MessageBox.Show("This expression is invalid. Please try again. ");
+            }
+           
         }
 
         private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
