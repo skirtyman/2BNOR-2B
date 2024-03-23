@@ -26,6 +26,7 @@ namespace _2BNOR_2B
         private string[] headers;
         private static string validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ().!^+10";
         private string infixExpression = "";
+        private string minimisedExpression = "";
         private string inputStates = "";
         //The root of the tree. Do not need array as the children are stored within the class itself. 
         private Element rootNode;
@@ -63,6 +64,17 @@ namespace _2BNOR_2B
             this.infixExpression = expression;
         }
 
+        public string getExpression()
+        {
+            return this.infixExpression;
+        }
+
+        public string getMinimisedExpression()
+        {
+            return this.minimisedExpression; 
+        }
+
+
         public void ClearDiagram()
         {
             rootNode = null;
@@ -73,6 +85,7 @@ namespace _2BNOR_2B
             headers = null;
             elements = null;
             inputStates = null;
+            infixExpression = ""; 
         }
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
@@ -1282,21 +1295,6 @@ namespace _2BNOR_2B
         #endregion
 
         #region Minimisation
-        //Adds and gates to consecutive inputs (ie A!B -> (A.!B))
-        private string AddANDGates(string epi)
-        {
-            string tmp = epi;
-            char last = epi[0];
-            for (int i = 1; i < epi.Length; i++)
-            {
-                if (char.IsLetter(epi[i]) && char.IsLetter(last))
-                {
-                    tmp = tmp.Insert(i, ".");
-                }
-            }
-            return $"({tmp})";
-        }
-
         //Produces the final minimised expression from the essential prime implicants.
         private string ConvertEPIsToExpression(List<string> essentialPrimeImplicants)
         {
@@ -1325,9 +1323,13 @@ namespace _2BNOR_2B
                 {
                     tmp += $"!{input}";
                 }
+
+                if (i < epi.Length - 1)
+                {
+                    tmp += ".";
+                }
             }
-            //tmp = AddANDGates(tmp);
-            return tmp;
+            return $"({tmp})";
         }
 
         //Evaluates the minterms to the prime implicants. This forms the basis of the prime implicant chart.
@@ -1567,9 +1569,8 @@ namespace _2BNOR_2B
         }
 
         //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. Returns the minised expression by finding prime and essential prime implicants from merged minterms. 
-        public string MinimiseExpression(string expression)
-        {
-            string minimisedExpression = ""; 
+        public void MinimiseExpression(string expression)
+        { 
             //Finding prime implicants to get essential prime implicants. 
             List<string> minterms = GetMinterms(expression);
             List<string> primeImplicants = GetPrimeImplicants(minterms);
@@ -1590,7 +1591,6 @@ namespace _2BNOR_2B
             {
                 minimisedExpression = ConvertEPIsToExpression(PIs); 
             }
-            return minimisedExpression;
         }
         #endregion
 
@@ -1659,6 +1659,7 @@ namespace _2BNOR_2B
             return -1; 
         }
 
+        //Petrick's Method. 
         private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants, List<string> minterms)
         {
             PIchart = removeEPIs(PIchart, epis, minterms); 
@@ -1756,29 +1757,6 @@ namespace _2BNOR_2B
                 }
             }
             throw new Exception("Could not map implicant to key");
-        }
-
-        //NEW PETRIKS 
-        private struct Bracket
-        {
-            public Bracket(char term1, char term2)
-            {
-                //Sorting so the terms are in alphabetical order. 
-                //This is for the distributive law. 
-                if (term1 < term2)
-                {
-                    this.term1 = term1.ToString();
-                    this.term2 = term2.ToString();  
-                }
-                else
-                {
-                    this.term1 = term2.ToString(); 
-                    this.term2 = term1.ToString();  
-                }
-            }
-
-            public string term1;
-            public string term2;
         }
 
         private string[] getSumOfProducts(List<Bracket> productOfSums)

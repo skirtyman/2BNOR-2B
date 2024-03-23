@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
-        Title="Help Window" MaxHeight="850" MaxWidth="1500" MinWidth="450" MinHeight="450" Topmost="True">
-    <Window.Resources>
-        <ResourceDictionary>
+        Title="Help Window" MaxHeight="850" MaxWidth="1000" MinWidth="450" MinHeight="450" Topmost="True">
+    <!--<Window.Resources>
+        <ResourceDictionary x:Name="pages">
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="helpPages.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-    </Window.Resources>
+    </Window.Resources>-->
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -31,9 +31,9 @@
 
             <ListView x:Name="listItems" Visibility="Collapsed" BorderBrush="Transparent">
                 <ListViewItem>
-                    <Button Width="135" Height="40" Background="#eeefed">
+                    <Button Width="135" Height="40" Background="#eeefed" Click="Button_Click">
                         <Button.Content>
-                            <TextBlock TextAlignment="Center" FontFamily="Consolas" >
+                            <TextBlock TextAlignment="Center" FontFamily="Consolas">
                                 Diagram drawing
                             </TextBlock>
                         </Button.Content>
@@ -54,47 +54,18 @@
                     <Button Width="135" Height="40" Background="#eeefed">
                         <Button.Content>
                             <TextBlock TextAlignment="Center" FontFamily="Consolas" >
-                                Boolean Expressions
-                            </TextBlock>
-                        </Button.Content>
-                    </Button>
-                </ListViewItem>
-
-                <ListViewItem>
-                    <Button Width="135" Height="40" Background="#eeefed">
-                        <Button.Content>
-                            <TextBlock TextAlignment="Center" FontFamily="Consolas" >
                                 Diagram minimisation
                             </TextBlock>
                         </Button.Content>
                     </Button>
                 </ListViewItem>
-
-                <ListViewItem>
-                    <Button Width="135" Height="40" Background="#eeefed">
-                        <Button.Content>
-                            <TextBlock TextAlignment="Center" FontFamily="Consolas" >
-                                Help menu
-                            </TextBlock>
-                        </Button.Content>
-                    </Button>
-                </ListViewItem>
-
-                <ListViewItem>
-                    <Button Width="135" Height="40" Background="#eeefed">
-                        <Button.Content>
-                            <TextBlock TextAlignment="Center" FontFamily="Consolas" >
-                                About
-                            </TextBlock>
-                        </Button.Content>
-                    </Button>
-                </ListViewItem>
-
             </ListView>
         </StackPanel>
 
         <Border Grid.Column="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-            <FlowDocumentPageViewer Grid.Column="1" BorderThickness="1" Document="{StaticResource doctext}"/>
+            <!--<FlowDocumentPageViewer Name="currentDocument" Grid.Column="1" BorderThickness="1" Document="{StaticResource doctext}"/>-->
+            <FlowDocumentScrollViewer Name="currentDocument" Grid.Column="1" BorderThickness="1" Document="{StaticResource DiagramDrawingHelp}"/>
+
         </Border>
 
     </Grid>

@@ -45,7 +45,7 @@
 
         <StackPanel Grid.Row="0">
             <Label FontFamily="Consolas">
-                <Label.Content>Enter a boolean expression: </Label.Content>
+                <Label.Content>Enter a boolean expression:</Label.Content>
             </Label>
 
             <TextBox Margin="5,0" FontFamily="Consolas" Name="inputBox"/>

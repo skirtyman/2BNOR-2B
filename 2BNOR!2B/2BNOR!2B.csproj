@@ -6,6 +6,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <ApplicationIcon>Croppedicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
@@ -26,6 +27,9 @@
     <None Remove="Resources\tick.png" />
     <None Remove="Resources\xor_gate.png" />
     <Page Remove="AboutWindow.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Croppedicon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\input_pin.png" />

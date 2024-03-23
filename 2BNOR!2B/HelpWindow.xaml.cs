@@ -35,5 +35,10 @@ namespace _2BNOR_2B
                 listItems.Visibility = Visibility.Collapsed;
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            currentDocument.Document = Application.Current.FindResource("doctext2") as FlowDocument; 
+        }
     }
 }

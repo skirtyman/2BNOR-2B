@@ -1,9 +1,12 @@
-﻿using Microsoft.Win32;
+﻿using _2BNOR_2B.Properties;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,6 +16,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Converters;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -37,15 +41,20 @@ namespace _2BNOR_2B
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
             StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
-            string expression = "A.B";
             bool isSteps = false;
-            if (stepsDialog.ShowDialog() == true)
+            if (d.getExpression() != "")
             {
-                isSteps = stepsDialog.result;
-                d.DrawTruthTable(TruthTableCanvas, expression, isSteps);
-                statusBar_Text.Text = "Generated Truth table from diagram: " + saveString; 
+                if (stepsDialog.ShowDialog() == true)
+                {
+                    isSteps = stepsDialog.result;
+                    d.DrawTruthTable(TruthTableCanvas, d.getExpression(), isSteps);
+                    statusBar_Text.Text = $"Generated truth table for the expression {d.getExpression()}."; 
+                }
             }
-
+            else
+            {
+                MessageBox.Show("Error generating truth table: Diagram does not exist. ", "Truth table error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         //Debug button to remove items from the canvas. 
@@ -100,7 +109,7 @@ namespace _2BNOR_2B
 
         private void MenuItem_GenerateExpressionFromDiagram(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show(d.getInfixExpression()); 
+            
         }
 
 
@@ -113,6 +122,8 @@ namespace _2BNOR_2B
                 expression = expressionInputDialog.result;
                 if (d.isExpressionValid(expression))
                 {
+                    MainWindowCanvas.Children.Clear();
+                    d.ClearDiagram(); 
                     d.setExpression(expression);
                     statusBar_Text.Text = "Generated diagram from expression: " + expression;
                     d.DrawDiagram();
@@ -125,6 +136,26 @@ namespace _2BNOR_2B
             }
         }
 
+        private void MenuItem_MinimiseDiagram(object sender, RoutedEventArgs e)
+        {
+            string expression = d.getExpression();
+            string minimisedExpression;
+            if (expression != "")
+            {
+                MainWindowCanvas.Children.Clear();
+                d.ClearDiagram();
+                d.MinimiseExpression(expression);
+                minimisedExpression = d.getMinimisedExpression();  
+                d.setExpression(minimisedExpression);
+                d.DrawDiagram(); 
+            }
+            else
+            {
+                MessageBox.Show("Error generating truth table: Diagram does not exist. ", "Truth table error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
         private void MenuItem_MinimiseExpression(object sender, RoutedEventArgs e)
         {
             BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
@@ -132,7 +163,9 @@ namespace _2BNOR_2B
             if (expressionInputDialog.ShowDialog() == true)
             {
                 expression = expressionInputDialog.result;
-                MessageBox.Show(d.MinimiseExpression(expression));
+                d.setExpression(expression);
+                d.MinimiseExpression(expression);
+                MessageBox.Show(d.getMinimisedExpression());
                 statusBar_Text.Text = "Minimised expression: " + expression; 
             }
         }
@@ -205,16 +238,15 @@ namespace _2BNOR_2B
         private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //Refreshes the wire states whenever the canvas is clicked. 
-            d.UpdateWires();
-            //if (d.GetTree() != null)
-            //{
-            //    d.UpdateWires();
-            //    statusBar_Text.Text = "Updated the state of the diagram.";
-            //}
-            //else
-            //{
-            //    statusBar_Text.Text = "Please draw a diagram first. ";
-            //}    
+            if (d.GetTree() != null)
+            {
+                d.UpdateWires();
+                statusBar_Text.Text = "Updated the state of the diagram.";
+            }
+            else
+            {
+                statusBar_Text.Text = "Please draw a diagram first. ";
+            }
         }
 
         private void Button_Click_TT(object sender, RoutedEventArgs e)

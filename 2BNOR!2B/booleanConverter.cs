@@ -112,16 +112,15 @@ namespace _2BNOR_2B
             return subExpressionStack.Pop();
         }
 
-
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             try
             {
-                return convertString(value as string); 
+                return convertString(value as string);
             }
             catch
             {
-                return null;
+                return "";
             }
         }
 

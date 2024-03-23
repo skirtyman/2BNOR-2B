@@ -5,5 +5,139 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <local:booleanConverter x:Key="BooleanConverter"></local:booleanConverter>
+
+        <FlowDocument x:Key="helpMenu">
+            <Paragraph TextAlignment="Left" FontFamily="Consolas">
+                <Underline>
+                    <Bold FontSize="40">2B NOR !2B</Bold>
+                </Underline>
+                <LineBreak/>
+                <LineBreak/> This window is the main window for help-pages for 2B NOR !2B. Please refer to
+                these pages if you have any difficulties with using the program. You can find the resources in 
+                the side-panel of this window.
+            </Paragraph>
+
+            <Paragraph FontFamily="Consolas">
+                The Content covered by the pages is listed below, in their relevant sections:
+            </Paragraph>
+            <List FontFamily="Consolas">
+                <ListItem>
+                    <Paragraph>Diagram drawing</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Truth Tables</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Minimisation</Paragraph>
+                </ListItem>
+            </List>
+        </FlowDocument>
+
+
+        <FlowDocument x:Key="DiagramDrawingHelp">
+            <Paragraph TextAlignment="Left" FontFamily="Consolas">
+                <Underline>
+                    <Bold FontSize="40">Diagram Drawing</Bold>
+                </Underline>
+                <LineBreak/>
+                <LineBreak/>
+                <Underline>
+                    <Bold FontSize="20">Generating digrams from expressions</Bold>
+                </Underline>
+                <LineBreak/>
+                This window is the main window for help-pages for 2B NOR !2B. Please refer to
+                these pages if you have any difficulties with using the program. You can find the resources in 
+                the side-panel of this window.
+            </Paragraph>
+            <Paragraph>
+                <Underline>
+                    <Bold FontSize="20">Generating digrams from expressions</Bold>
+                </Underline>
+                <LineBreak/>
+                This window is the main window for help-pages for 2B NOR !2B. Please refer to
+                these pages if you have any difficulties with using the program. You can find the resources in 
+                the side-panel of this window.
+            </Paragraph>
+            <Paragraph>
+                <Underline>
+                    <Bold FontSize="20">Generating digrams from expressions</Bold>
+                </Underline>
+                <LineBreak/>
+                This window is the main window for help-pages for 2B NOR !2B. Please refer to
+                these pages if you have any difficulties with using the program. You can find the resources in 
+                the side-panel of this window.
+            </Paragraph>
+            <Paragraph>
+                <Underline>
+                    <Bold FontSize="20">Generating digrams from expressions</Bold>
+                </Underline>
+                <LineBreak/>
+                This window is the main window for help-pages for 2B NOR !2B. Please refer to
+                these pages if you have any difficulties with using the program. You can find the resources in 
+                the side-panel of this window.
+            </Paragraph>
+        </FlowDocument>
+
+        <FlowDocument x:Key="TruthTableHelp">
+            <Paragraph TextAlignment="Left" FontSize="120">
+                <Bold>Mouse Operations with cool stuff attached</Bold>
+            </Paragraph>
+            <List>
+                <ListItem>
+                    <Paragraph>Left Click = Menu options</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Right Click = Ok</Paragraph>
+                </ListItem>
+            </List>
+            <Paragraph>
+                <Bold>Keyboard Shortcuts</Bold>
+            </Paragraph>
+            <List>
+                <ListItem>
+                    <Paragraph>Ctrl + a = Select All</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Ctrl + Click = Item selected</Paragraph>
+                </ListItem>
+            </List>
+        </FlowDocument>
+
+        <FlowDocument x:Key="MinimisationHelp">
+            <Paragraph TextAlignment="Left" FontSize="120">
+                <Bold>Mouse Operations with cool stuff attached</Bold>
+            </Paragraph>
+            <List>
+                <ListItem>
+                    <Paragraph>Left Click = Menu options</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Right Click = Ok</Paragraph>
+                </ListItem>
+            </List>
+            <Paragraph>
+                <Bold>Keyboard Shortcuts</Bold>
+            </Paragraph>
+            <List>
+                <ListItem>
+                    <Paragraph>Ctrl + a = Select All</Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>Ctrl + Click = Item selected</Paragraph>
+                </ListItem>
+            </List>
+        </FlowDocument>
+
+        <Style TargetType="{x:Type FlowDocumentPageViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type FlowDocumentPageViewer}">
+                        <AdornerDecorator>
+                            <DocumentPageView></DocumentPageView>
+                        </AdornerDecorator>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>
