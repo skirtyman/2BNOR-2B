@@ -4,7 +4,6 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 ---
 Online xaml interpreter:  [interpreter](https://s3.amazonaws.com/praeclarum.org/wasm/index.html)
 ### Todo 
-- [ ] diagrams can be created only with NAND and NOR, (ask for this with a dialog) 
 - [ ] ensure the boolean function is completely covered by the essential prime and prime implicant. (petriks method)
 - [ ] write the help pages for the program 
 - [ ] redesign the main window for a more appealing side panel (key with the gates) 
@@ -14,7 +13,6 @@ Online xaml interpreter:  [interpreter](https://s3.amazonaws.com/praeclarum.org/
 - [ ] Add a application picture for the application.
 - [ ] Ensure code follows the microsoft coding conventions
 - [ ] recomment code for explanation.
-- [ ] add validation to expression input (brackets, operators, operands, sequence [use valid postfix])
 - [ ] Fix documentation to cover all of the changes.
 
 
