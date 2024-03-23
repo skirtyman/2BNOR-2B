@@ -7,6 +7,7 @@ Online xaml interpreter:  [interpreter](https://s3.amazonaws.com/praeclarum.org/
 - [ ] write the help pages for the program 
 - [ ] Increase size and readability of the dialogs. 
 - [ ] Popmenu for gate information
+- [ ] fix output method for minimisation
 - [ ] Add a scroll viewer so that much larger tables and diagrams can be viewed more easily. 
 - [ ] Ensure code follows the microsoft coding conventions
 - [ ] recomment code for explanation.
