@@ -12,7 +12,7 @@
             <Button Margin ="10,0" HorizontalAlignment="Center" Click="btnDialogYes_Click">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/images/tick.png"/>
+                        <Image Source="Resources/tick.png"/>
                         <TextBlock Text=" Yes " FontFamily="Consolas"/>
                     </StackPanel>
                 </Button.Content>
@@ -21,7 +21,7 @@
             <Button IsDefault="True" Click="btnDialogNo_Click">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal" MaxWidth="40">
-                        <Image Source="/images/cross.png"/>
+                        <Image Source="Resources/cross.png"/>
                         <TextBlock Text=" No " FontFamily="Consolas"/>
                     </StackPanel>
                 </Button.Content>
@@ -30,7 +30,7 @@
             <Button Margin ="10,0" HorizontalAlignment="Center" IsCancel="True">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/images/cancel.png"/>
+                        <Image Source="Resources/cancel.png"/>
                         <TextBlock Text=" Cancel " FontFamily="Consolas"/>
                     </StackPanel>
                 </Button.Content>

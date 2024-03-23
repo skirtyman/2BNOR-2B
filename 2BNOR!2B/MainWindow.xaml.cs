@@ -113,7 +113,7 @@ namespace _2BNOR_2B
                 expression = expressionInputDialog.result;
                 if (d.isExpressionValid(expression))
                 {
-                    d.setExpression(saveString);
+                    d.setExpression(expression);
                     statusBar_Text.Text = "Generated diagram from expression: " + expression;
                     d.DrawDiagram();
                     saveString = expression;

@@ -111,22 +111,23 @@ namespace _2BNOR_2B
 
         private void SetImage()
         {
-            BitmapImage bitmap = new BitmapImage(); 
+            BitmapImage bitmap;
+            Uri path; 
             string imageName = gate.GetElementName();
-            string filePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images", imageName+".png");
-            using (FileStream stream = new FileStream(@$"C:\Users\andreas\source\repos\2BNOR!2B - Copy\2BNOR!2B\images\{imageName}.png", FileMode.Open))
+            try
             {
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.StreamSource = stream;
-                bitmap.EndInit();
-                bitmap.Freeze();
+                path = new Uri($"pack://application:,,,/Resources/{imageName}.png");
+                bitmap = new BitmapImage(path);
+                elementImage.Stretch = Stretch.Uniform;
+                elementImage.Height = bitmap.Height / 5;
+                elementImage.Width = bitmap.Width / 5;
+                elementImage.Source = bitmap;
+                elementLabel.Content = gate.GetLabel();
             }
-            elementImage.Stretch = Stretch.Uniform;
-            elementImage.Height = bitmap.Height / 5;
-            elementImage.Width = bitmap.Width / 5;
-            elementImage.Source = bitmap;
-            elementLabel.Content = gate.GetLabel(); 
+            catch (Exception e)
+            {
+                throw new Exception($"Could not load the image for: {imageName}", e);
+            }
         }
     }
 }

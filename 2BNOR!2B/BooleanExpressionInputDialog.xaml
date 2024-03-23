@@ -56,7 +56,7 @@
                 <Button IsDefault="True" Margin ="10,0" HorizontalAlignment="Center" Click="btnDialogOk_Click">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/images/tick.png"/>
+                            <Image Source="Resources/tick.png"/>
                             <TextBlock Text=" Ok " FontFamily="Consolas"/>
                         </StackPanel>
                     </Button.Content>
@@ -65,7 +65,7 @@
                 <Button IsCancel="True" Click="btnDialogCancel_Click">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/images/cancel.png"/>
+                            <Image Source="Resources/cancel.png"/>
                             <TextBlock Text=" Cancel " FontFamily="Consolas"/>
                         </StackPanel>
                     </Button.Content>

@@ -8,36 +8,38 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="images\tick.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\and_gate.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="images\nand_gate.png" />
-    <Resource Include="images\nor_gate.png" />
-    <Resource Include="images\not_gate.png" />
-    <Resource Include="images\or_gate.png" />
-    <Resource Include="images\xor_gate.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\cancel.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\output_pin.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\cross.png" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="WpfMath" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="AboutWindow.xaml.cs" />
+    <None Remove="Resources\and_gate.png" />
+    <None Remove="Resources\cancel.png" />
+    <None Remove="Resources\cross.png" />
+    <None Remove="Resources\input_pin.png" />
+    <None Remove="Resources\nand_gate.png" />
+    <None Remove="Resources\nor_gate.png" />
+    <None Remove="Resources\not_gate.png" />
+    <None Remove="Resources\or_gate.png" />
+    <None Remove="Resources\output_pin.png" />
+    <None Remove="Resources\tick.png" />
+    <None Remove="Resources\xor_gate.png" />
     <Page Remove="AboutWindow.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\input_pin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\and_gate.png" />
+    <Resource Include="Resources\cancel.png" />
+    <Resource Include="Resources\cross.png" />
+    <Resource Include="Resources\nand_gate.png" />
+    <Resource Include="Resources\nor_gate.png" />
+    <Resource Include="Resources\not_gate.png" />
+    <Resource Include="Resources\or_gate.png" />
+    <Resource Include="Resources\output_pin.png" />
+    <Resource Include="Resources\tick.png" />
+    <Resource Include="Resources\xor_gate.png" />
   </ItemGroup>
 </Project>

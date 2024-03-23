@@ -85,7 +85,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="0" Grid.Row="0" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/and_gate.png"/>
+                        <Image Source="Resources/and_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     AND gate
                         </TextBlock>
@@ -96,7 +96,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="1" Grid.Row="0" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/or_gate.png"/>
+                        <Image Source="Resources/or_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     OR gate
                         </TextBlock>
@@ -106,7 +106,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="2" Grid.Row="0" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/not_gate.png"/>
+                        <Image Source="Resources/not_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     NOT gate
                         </TextBlock>
@@ -116,7 +116,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="0" Grid.Row="1" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/xor_gate.png"/>
+                        <Image Source="Resources/xor_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     XOR gate
                         </TextBlock>
@@ -127,7 +127,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="1" Grid.Row="1" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/nand_gate.png"/>
+                        <Image Source="Resources/nand_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     NAND gate
                         </TextBlock>
@@ -137,7 +137,7 @@
                 <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
                         Grid.Column="2" Grid.Row="1" Margin="10">
                     <StackPanel Margin="10" Width="100">
-                        <Image Source="/images/nor_gate.png"/>
+                        <Image Source="Resources/nor_gate.png"/>
                         <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
                     NOR gate
                         </TextBlock>
