@@ -1666,7 +1666,7 @@ namespace _2BNOR_2B
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
             List<Bracket> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
-            string sumOfproducts = getSumOfProducts(productOfSums);
+            string[] sumOfproducts = getSumOfProducts(productOfSums);
             string minProduct = getMinProduct(sumOfproducts);
             minimisedExpression = getFinalExpression(termsImplicantMapping, minProduct); 
             return minimisedExpression; 
@@ -1763,6 +1763,8 @@ namespace _2BNOR_2B
         {
             public Bracket(char term1, char term2)
             {
+                //Sorting so the terms are in alphabetical order. 
+                //This is for the distributive law. 
                 if (term1 < term2)
                 {
                     this.term1 = term1.ToString();
@@ -1779,14 +1781,14 @@ namespace _2BNOR_2B
             public string term2;
         }
 
-        private string getSumOfProducts(List<Bracket> productOfSums)
+        private string[] getSumOfProducts(List<Bracket> productOfSums)
         {
             List<Bracket> mergedList = new List<Bracket>();
             Bracket b1;
             Bracket b2;
             Bracket mergedTerm;
-            bool merged;
-            do
+            bool merged = true;
+            while (merged)
             {
                 merged = false;
                 for (int i = 0; i < productOfSums.Count - 1; i++)
@@ -1798,7 +1800,7 @@ namespace _2BNOR_2B
                         if ((b1.term1 == b2.term1) != (b1.term2 == b2.term2) != (b1.term1 == b2.term2) != (b1.term2 == b2.term1))
                         {
                             mergedTerm = mergeBrackets(b1, b2);
-                            mergedList.Add(mergedTerm);
+                            productOfSums.Add(mergedTerm);
                             productOfSums.Remove(b1);
                             productOfSums.Remove(b2);
                             merged = true;
@@ -1807,20 +1809,11 @@ namespace _2BNOR_2B
                         }
                     }
                 }
-                productOfSums = mergedList;
             }
-            while (merged);
+
             List<List<string>> param = convertBracketsToString(productOfSums);
             List<List<string>> sumOfProducts = recursiveDistributiveLaw(param);
-
-            string SOP = "";
-            List<string> tmp = sumOfProducts[0]; 
-            for (int i = 0; i < tmp.Count - 1; i++)
-            {
-                SOP += $"{tmp[i]}+{tmp[i+1]}";
-            }
-
-            return SOP; 
+            return sumOfProducts[0].ToArray();
         }
 
         private Bracket mergeBrackets(Bracket b1, Bracket b2)
@@ -1898,11 +1891,10 @@ namespace _2BNOR_2B
             return finalresult;
         }
 
-        private string getMinProduct(string sumOfProducts)
+        private string getMinProduct(string[] sumOfProducts)
         {
-            string[] products = sumOfProducts.Split('+');
-            string min = products[0];
-            foreach (string p in products)
+            string min = sumOfProducts[0];
+            foreach (string p in sumOfProducts)
             {
                 if (p.Length < min.Length)
                 {
@@ -1913,15 +1905,20 @@ namespace _2BNOR_2B
         }
 
         private string getFinalExpression(Dictionary<char, string> termToImplicantMap, string minProduct)
-        { 
+        {
             string subExpression;
             string implicant;
-            string result = ""; 
-            foreach (char c in minProduct)
+            string result = "";
+
+            for (int i = 0; i < minProduct.Length; i++)
             {
-                implicant = termToImplicantMap[c];
-                subExpression = ConvertImplicantToExpression(implicant); 
+                implicant = termToImplicantMap[minProduct[i]];
+                subExpression = ConvertImplicantToExpression(implicant);
                 result += subExpression;
+                if (i < minProduct.Length - 1)
+                {
+                    result += " + ";
+                }
             }
             return result; 
         }
