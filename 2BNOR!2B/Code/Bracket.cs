@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _2BNOR_2B
+namespace _2BNOR_2B.Code
 {
     struct Bracket
     {

@@ -9,33 +9,31 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace _2BNOR_2B
+namespace _2BNOR_2B.Code
 {
     public class Wire
     {
-        private bool repeated; 
+        private bool repeated;
         private Point inputPoint;
-        private Point outputPoint; 
-        private List<Point> points = new List<Point>();
-        private Ellipse e; 
-        private LogicGate inputGate; 
-        private Brush colour = Brushes.Red; 
-        private Canvas c;
+        private Point outputPoint;
+        private readonly List<Point> points = new();
+        private Ellipse e;
+        private LogicGate inputGate;
+        private Brush colour = Brushes.Red;
+        private readonly Canvas c;
         private string wireString = "lll";
         private int shift = 0;
-        private int radiusOfArc = 15;
-        private int radiusOfJunction = 10; 
-
-
-        Path p = new Path();
-        PathGeometry pg = new PathGeometry();
-        PathFigureCollection pfc = new PathFigureCollection();
+        private readonly int radiusOfArc = 15;
+        private readonly int radiusOfJunction = 10;
+        private readonly Path p = new();
+        private readonly PathGeometry pg = new();
+        private readonly PathFigureCollection pfc = new();
 
 
         public Wire(Canvas c)
         {
             this.c = c;
-            p.Stroke = this.colour;
+            p.Stroke = colour;
             p.StrokeThickness = 2;
         }
 
@@ -44,7 +42,7 @@ namespace _2BNOR_2B
             this.inputPoint = inputPoint;
             this.outputPoint = outputPoint;
             this.c = c;
-            p.Stroke = this.colour;
+            p.Stroke = colour;
             p.StrokeThickness = 2;
         }
 
@@ -65,8 +63,8 @@ namespace _2BNOR_2B
 
         public void SetGate(LogicGate logicGate)
         {
-            inputGate = logicGate; 
-            
+            inputGate = logicGate;
+
         }
 
         public void SetShift(int shift)
@@ -99,7 +97,7 @@ namespace _2BNOR_2B
 
         private List<Point> GetHorizontalPoints()
         {
-            List<Point> p = new List<Point>();
+            List<Point> p = new();
             for (int i = 0; i < points.Count - 1; i++)
             {
                 if (points[i].Y == points[i + 1].Y)
@@ -113,7 +111,7 @@ namespace _2BNOR_2B
 
         private List<Point> GetVerticalPoints()
         {
-            List<Point> p = new List<Point>();
+            List<Point> p = new();
             for (int i = 0; i < points.Count - 1; i++)
             {
                 if (points[i].X == points[i + 1].X)
@@ -141,8 +139,8 @@ namespace _2BNOR_2B
         {
             points.Add(inputPoint);
             //creating the first horizontal line. 
-            double midpointX = ((inputPoint.X + outputPoint.X) / 2) - (shift * 10); 
-            Point midpoint = new Point(midpointX, inputPoint.Y);
+            double midpointX = (inputPoint.X + outputPoint.X) / 2 - shift * 10;
+            Point midpoint = new(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
             points.Add(midpoint);
@@ -153,8 +151,8 @@ namespace _2BNOR_2B
         //Splits the line segment, adds a curved bridge for the wire intersection. 
         public void AddBridge(Point? bridgeLocation)
         {
-            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - (radiusOfArc/2)));
-            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + (radiusOfArc/2)));
+            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - radiusOfArc / 2));
+            points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + radiusOfArc / 2));
             wireString = wireString.Insert(wireString.Length - 1, "bl");
         }
 
@@ -171,20 +169,24 @@ namespace _2BNOR_2B
             pfc.Clear();
             for (int i = 0; i < wireString.Length; i++)
             {
-                pf = new PathFigure();
-                pf.StartPoint = points[i];
+                pf = new PathFigure
+                {
+                    StartPoint = points[i]
+                };
                 if (wireString[i] == 'l')
                 {
                     //draw a line
-                    l = new LineSegment();
-                    l.Point = points[i + 1];
-                    l.IsStroked = true;
+                    l = new LineSegment
+                    {
+                        Point = points[i + 1],
+                        IsStroked = true
+                    };
                     pf.Segments.Add(l);
                 }
                 else
                 {
 
-                    s = new Size(radiusOfArc/4, radiusOfArc/4);
+                    s = new Size(radiusOfArc / 4, radiusOfArc / 4);
                     arc = new ArcSegment(points[i + 1], s, 180, true, SweepDirection.Clockwise, true);
                     pf.Segments.Add(arc);
                 }
@@ -193,17 +195,21 @@ namespace _2BNOR_2B
             pg.Figures = pfc;
             p.Data = pg;
             p.Stroke = Brushes.Black;
+            Panel.SetZIndex(p, 1);
             c.Children.Add(p);
 
             if (repeated)
             {
-                e = new Ellipse();
-                e.Width = radiusOfJunction;
-                e.Height = radiusOfJunction;
-                e.Fill = Brushes.Black;
-                e.Stroke = Brushes.Black;
-                Canvas.SetTop(e, points[points.Count-2].Y - (radiusOfJunction/2));
-                Canvas.SetLeft(e, points[points.Count-2].X - (radiusOfJunction/2));
+                e = new Ellipse
+                {
+                    Width = radiusOfJunction,
+                    Height = radiusOfJunction,
+                    Fill = Brushes.Black,
+                    Stroke = Brushes.Black
+                };
+                Canvas.SetTop(e, points[points.Count - 2].Y - radiusOfJunction / 2);
+                Canvas.SetLeft(e, points[points.Count - 2].X - radiusOfJunction / 2);
+                Panel.SetZIndex(e, 1);
                 c.Children.Add(e);
             }
         }

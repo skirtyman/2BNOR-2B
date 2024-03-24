@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -13,18 +14,18 @@ using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
 
-namespace _2BNOR_2B
+namespace _2BNOR_2B.Code
 {
     public class Diagram
     {
-        private static Regex r = new Regex(@"\s+");
+        private static readonly Regex r = new(@"\s+");
         //the base operators within boolean logic. NAND and NOR not included as they are compound gates.
-        private char[] booleanOperators = { '+', '^', '.', '!' };
-        private string[] gateNames = { "and_gate", "xor_gate", "or_gate", "not_gate" };
+        private readonly char[] booleanOperators = { '+', '^', '.', '!' };
+        private readonly string[] gateNames = { "or_gate", "xor_gate", "and_gate", "not_gate" };
         private string[] inputMap;
         private string[] outputMap;
         private string[] headers;
-        private static string validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ().!^+10";
+        private static readonly string validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ().!^+10";
         private string infixExpression = "";
         private string minimisedExpression = "";
         private string inputStates = "";
@@ -35,18 +36,20 @@ namespace _2BNOR_2B
         private Element[] elements;
         private Element[] inputs;
         private Wire[] wires;
-        private Canvas c;
+        private readonly Canvas c;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
-        int elementWidth = 2;
-        int xOffset = 12;
-        int pixelsPerSquare = 15;
+        readonly int elementWidth = 2;
+        readonly int xOffset = 12;
+        readonly int pixelsPerSquare = 15;
         double canvasWidth, canvasHeight;
 
         public Diagram(Canvas c)
         {
             this.c = c;
         }
+
+        //Utility methods for stuff. blah comment. 
 
         //returns the binary tree representing the logic diagram 
         public Element GetTree()
@@ -59,19 +62,19 @@ namespace _2BNOR_2B
             return r.Replace(input, replacement);
         }
 
-        public void setExpression(string expression)
+        public void SetExpression(string expression)
         {
-            this.infixExpression = expression;
+            infixExpression = expression;
         }
 
-        public string getExpression()
+        public string GetExpression()
         {
-            return this.infixExpression;
+            return infixExpression;
         }
 
-        public string getMinimisedExpression()
+        public string GetMinimisedExpression()
         {
-            return this.minimisedExpression; 
+            return minimisedExpression;
         }
 
 
@@ -85,7 +88,7 @@ namespace _2BNOR_2B
             headers = null;
             elements = null;
             inputStates = null;
-            infixExpression = ""; 
+            infixExpression = "";
         }
 
         //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
@@ -93,7 +96,7 @@ namespace _2BNOR_2B
         {
             //removing the compound gates from the expression (NAND and NOR) because they do not have operator precedence.  Also removing whitespace for ease. 
             infixExpression = RemoveCompoundGates(RemoveWhitespace(infixExpression, ""));
-            Stack<char> operatorStack = new Stack<char>();
+            Stack<char> operatorStack = new();
             string postfixExpression = "";
             int operatorPrecedence;
             //tokenising infix ready for the conversion
@@ -108,7 +111,7 @@ namespace _2BNOR_2B
                 {
                     //precedence value of the token
                     operatorPrecedence = Array.IndexOf(booleanOperators, token);
-                    while ((operatorStack.Count > 0 && operatorStack.Peek() != '(') && (Array.IndexOf(booleanOperators, operatorStack.Peek()) > operatorPrecedence))
+                    while (operatorStack.Count > 0 && operatorStack.Peek() != '(' && Array.IndexOf(booleanOperators, operatorStack.Peek()) > operatorPrecedence)
                     {
                         postfixExpression += operatorStack.Pop();
                     }
@@ -161,7 +164,7 @@ namespace _2BNOR_2B
                     operand2 = booleanExpression[i + 1];
                     //removing the first operand from the flattened expression to remove duplication.
                     flattenedExpression = flattenedExpression.Substring(0, i - 1);
-                    subExpression = $"!({operand1}.{operand2})"; 
+                    subExpression = $"!({operand1}.{operand2})";
                     flattenedExpression += subExpression;
                     //incrementing the counter (token in the expression) to 'skip' the second operand -> remove duplicate operands
                     i++;
@@ -199,7 +202,7 @@ namespace _2BNOR_2B
         #region Validation routines
         private void ConvertPostfixtoInfix(string postfixExpression)
         {
-            Stack<string> s = new Stack<string>();
+            Stack<string> s = new();
             string operand1;
             string operand2;
             foreach (char c in postfixExpression)
@@ -222,7 +225,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private bool invalidCharacters(string expression)
+        private bool InvalidCharacters(string expression)
         {
             foreach (char c in expression)
             {
@@ -234,7 +237,7 @@ namespace _2BNOR_2B
             return true;
         }
 
-        private string removeComponents(string expression)
+        private string RemoveComponents(string expression)
         {
             string result = "";
             foreach (char c in expression)
@@ -247,11 +250,11 @@ namespace _2BNOR_2B
             return result;
         }
 
-        private bool validateBrackets(string expression)
+        private bool ValidateBrackets(string expression)
         {
             //stores only the sequence of brackets within the expression so (A.B) => "()" and (A.B => "("
-            string brackets = removeComponents(expression);
-            Stack<char> s = new Stack<char>();
+            string brackets = RemoveComponents(expression);
+            Stack<char> s = new();
             foreach (char c in brackets)
             {
                 if (c == '(')
@@ -274,7 +277,7 @@ namespace _2BNOR_2B
             }
         }
 
-        private bool isSequential(string expression)
+        private bool IsSequential(string expression)
         {
             char[] inputs = GetOnlyInputs(expression);
             Array.Sort(inputs);
@@ -290,7 +293,7 @@ namespace _2BNOR_2B
 
         private char[] GetOnlyInputs(string expression)
         {
-            char[] inputs = new char[GetNumberOfInputs(expression, true) - getNumberOfConstants(expression)];
+            char[] inputs = new char[GetNumberOfInputs(expression, true) - GetNumberOfConstants(expression)];
             int i = 0;
             foreach (char c in expression)
             {
@@ -303,7 +306,7 @@ namespace _2BNOR_2B
             return inputs;
         }
 
-        private int getNumberOfConstants(string expression)
+        private int GetNumberOfConstants(string expression)
         {
             int total = 0;
             foreach (char c in expression)
@@ -316,24 +319,43 @@ namespace _2BNOR_2B
             return total;
         }
 
-        public bool isExpressionValid(string expression)
+        private bool PostfixCheck(string expression)
+        {
+            try
+            {
+                ConvertPostfixtoInfix(expression);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public bool IsExpressionValid(string expression, bool isTable = false)
         {
             string postfix = ConvertInfixtoPostfix(expression);
-            if (isSequential(expression) && invalidCharacters(expression) && validateBrackets(expression))
+            if (IsSequential(expression) && InvalidCharacters(expression) && ValidateBrackets(expression))
             {
-                try
+                if (isTable)
                 {
-                    ConvertPostfixtoInfix(postfix);
-                    return true; 
+                    if (GetNumberOfInputs(expression, true) > 4)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return PostfixCheck(postfix);
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    return false; 
+                    return PostfixCheck(postfix);
                 }
             }
             else
             {
-                return false; 
+                return false;
             }
         }
 
@@ -342,24 +364,24 @@ namespace _2BNOR_2B
         #region diagram drawing
         private void Getinputstates(Element root, string expression)
         {
-            Stack<Element> s = new Stack<Element>();
+            Stack<Element> s = new();
             int numberOfInputs = GetNumberOfInputs(expression, true);
-            int[] states = new int[numberOfInputs]; 
-            string visited = ""; 
+            int[] states = new int[numberOfInputs];
+            string visited = "";
             while (true)
             {
-                while(root != null)
+                while (root != null)
                 {
                     s.Push(root);
                     s.Push(root);
-                    root = root.leftChild; 
+                    root = root.leftChild;
                 }
                 if (s.Count == 0)
                 {
-                    inputStates = string.Join("", states); 
-                    return; 
+                    inputStates = string.Join("", states);
+                    return;
                 }
-                root = s.Pop(); 
+                root = s.Pop();
                 if (s.Count != 0 && s.Peek() == root)
                 {
                     root = root.rightChild;
@@ -370,12 +392,12 @@ namespace _2BNOR_2B
                     {
                         inputStates += root.GetState();
                         states[root.GetLabel() - 65] = root.GetState();
-                        visited += root.GetLabel(); 
+                        visited += root.GetLabel();
                         root = null;
                     }
                     else
                     {
-                        root = null; 
+                        root = null;
                     }
 
                 }
@@ -430,7 +452,7 @@ namespace _2BNOR_2B
         {
             string postfixExpression = ConvertInfixtoPostfix(inputExpression);
             inputs = new Element[GetNumberOfInputs(inputExpression, false)];
-            Stack<Element> nodeStack = new Stack<Element>();
+            Stack<Element> nodeStack = new();
             elements = new Element[inputExpression.Length + 1];
             Element nodeToAdd;
             Element leftChild;
@@ -446,7 +468,7 @@ namespace _2BNOR_2B
             foreach (char c in postfixExpression)
             {
                 //If the token is a letter then it must be an input. 
-                if ((char.IsLetter(c) && char.IsUpper(c)) || char.IsNumber(c))
+                if (char.IsLetter(c) && char.IsUpper(c) || char.IsNumber(c))
                 {
                     //creating an input pin
                     nodeToAdd = new Element(elementID, c);
@@ -505,23 +527,23 @@ namespace _2BNOR_2B
         //nodes within the same column. 
         private double CalculateNodeYposition(int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
-            double initialY = (Math.Pow(2, heightOfTree) / Math.Pow(2, depthWithinTree)) * pixelsPerSquare;
+            double initialY = Math.Pow(2, heightOfTree) / Math.Pow(2, depthWithinTree) * pixelsPerSquare;
             //old return value is below. 
-            initialY = initialY + (initialY * positionWithinLayer * 2); 
+            initialY = initialY + initialY * positionWithinLayer * 2;
             //applying a vertical shrink for ver large diagrams. 
             if (heightOfTree > 5 && depthWithinTree < 4)
             {
-                return initialY / 2; 
+                return initialY / 2;
             }
             else
             {
-                return initialY; 
+                return initialY;
             }
         }
 
         private double CalculateXposition(int depthWithinTree)
         {
-            return canvasWidth - ((((pixelsPerSquare - 7) * elementWidth) + ((pixelsPerSquare - 7) * xOffset)) * depthWithinTree);
+            return canvasWidth - ((pixelsPerSquare - 7) * elementWidth + (pixelsPerSquare - 7) * xOffset) * depthWithinTree;
         }
 
         private double TranslateNode(double startX, int heightOfTree)
@@ -535,7 +557,7 @@ namespace _2BNOR_2B
         {
             double x;
             //Inputs (leaf nodes) should be drawn at minimum x position within the canvas. 
-            if ((node.leftChild == null) && (node.rightChild == null))
+            if (node.leftChild == null && node.rightChild == null)
             {
                 x = CalculateXposition(heightOfTree);
             }
@@ -550,8 +572,8 @@ namespace _2BNOR_2B
         private LogicGate GetWidestGate(Element root)
         {
 
-            Element tmp = new Element();
-            Queue<Element> q = new Queue<Element>();
+            Element tmp = new();
+            Queue<Element> q = new();
             q.Enqueue(root);
             //Carrying out a traversal on only the right children of the root node. This is because the rightmost node will be the furthese down the screen
             //and so the whole the diagram will be in the exported image if this node is within the export. 
@@ -568,15 +590,22 @@ namespace _2BNOR_2B
 
         public Rect GetBoundsOfDiagram()
         {
-            LogicGate l = GetWidestGate(rootNode);
-            double maxX = Canvas.GetRight(outputNode.GetLogicGate()) + 75;
-            double maxY = Canvas.GetBottom(l) + 25;
-            return new Rect(new Size(maxX, maxY));
+            try
+            {
+                LogicGate l = GetWidestGate(rootNode);
+                double maxX = Canvas.GetRight(outputNode.GetLogicGate()) + 75;
+                double maxY = Canvas.GetBottom(l) + 25;
+                return new Rect(new Size(maxX, maxY));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not get bounds for diagram as it doesnt exist. ", ex);
+            }
         }
 
         private Wire DrawWiresForLeftChildren(Element root)
         {
-            Wire w = new Wire(c);
+            Wire w = new(c);
             LogicGate rootLogicGate = root.GetLogicGate();
             LogicGate leftchildLogicGate = root.leftChild.GetLogicGate();
             Element input;
@@ -606,7 +635,7 @@ namespace _2BNOR_2B
 
         private Wire DrawWiresForRightChildren(Element root)
         {
-            Wire w = new Wire(c);
+            Wire w = new(c);
             LogicGate rootLogicGate = root.GetLogicGate();
             LogicGate rightchildLogicGate = root.rightChild.GetLogicGate();
             Element input;
@@ -653,33 +682,33 @@ namespace _2BNOR_2B
             double s_numer = s_x * s3_y - s_y * s3_x;
 
 
-            if ((s_numer < 0) == isDenomPositive)
+            if (s_numer < 0 == isDenomPositive)
             {
                 return null;
             }
 
             double t_numer = s2_x * s3_y - s_x * s3_y;
 
-            if ((t_numer < 0) == isDenomPositive)
+            if (t_numer < 0 == isDenomPositive)
             {
                 return null;
             }
 
-            if (((s_numer > denom) == isDenomPositive) || ((t_numer > denom) == isDenomPositive))
+            if (s_numer > denom == isDenomPositive || t_numer > denom == isDenomPositive)
             {
                 return null;
             }
 
             double t = t_numer / denom;
-            Point? result = new Point(p0.X + (t * s_x), p0.Y + (t * s_y));
+            Point? result = new Point(p0.X + t * s_x, p0.Y + t * s_y);
             return result;
         }
 
         //Searches through all points to find the intersections. 
         private void DrawIntersections()
         {
-            List<Point> horizontalLines = new List<Point>();
-            List<Point> verticalLines = new List<Point>();
+            List<Point> horizontalLines = new();
+            List<Point> verticalLines = new();
             Point? intersection;
             Wire tmp;
             for (int j = 0; j < wires.Length - 1; j++)
@@ -696,7 +725,7 @@ namespace _2BNOR_2B
                 {
                     //again c and c + 1 form the horizontal line being checked. 
                     intersection = FindIntersection(verticalLines[i], verticalLines[i + 1], horizontalLines[c], horizontalLines[c + 1]);
-                    if (intersection != null && (FindWire(verticalLines[i]) != FindWire(horizontalLines[c])))
+                    if (intersection != null && FindWire(verticalLines[i]) != FindWire(horizontalLines[c]))
                     {
                         tmp = FindWire(verticalLines[i]);
                         tmp.AddBridge(intersection);
@@ -721,8 +750,8 @@ namespace _2BNOR_2B
 
         private void DrawWires(Element root)
         {
-            Queue<Element> q = new Queue<Element>();
-            Queue<Wire> intersectionq = new Queue<Wire>();
+            Queue<Element> q = new();
+            Queue<Wire> intersectionq = new();
             wires = new Wire[GetNumberOfNodes(root)];
             Element tmp;
             int i = 0;
@@ -802,6 +831,7 @@ namespace _2BNOR_2B
                 double p = logicGate.GetInputPoint2().Y + 50;
                 Canvas.SetBottom(logicGate, p);
                 Canvas.SetRight(logicGate, logicGate.GetInputPoint2().X);
+                Panel.SetZIndex(logicGate, 3);
                 c.Children.Add(logicGate);
             }
         }
@@ -809,7 +839,7 @@ namespace _2BNOR_2B
         //Breadth first traversal that is used to place all of the nodes within the tree onto the canvas. 
         private void DrawNodes(Element root, int heightOfTree)
         {
-            Queue<Element> q = new Queue<Element>();
+            Queue<Element> q = new();
             q.Enqueue(root);
             int depthWithinTree = 0;
             int positionWithinLayer = 0;
@@ -846,7 +876,7 @@ namespace _2BNOR_2B
         {
             //A singular row of the truth table. Using the input states to find the correct row. 
             string tableRow = GetTruthTableRow();
-            Stack<Element> s = new Stack<Element>();
+            Stack<Element> s = new();
             int i = 0;
             while (true)
             {
@@ -880,7 +910,7 @@ namespace _2BNOR_2B
         //Small function for drawing the wire that connects the input to the root node of the binary tree. 
         private void DrawOutputWire()
         {
-            Wire w = new Wire(c);
+            Wire w = new(c);
             w.SetStart(outputNode.GetLogicGate().GetInputForOutput());
             w.SetEnd(rootNode.GetLogicGate().GetOutputPoint());
             w.SetGate(rootNode.GetLogicGate());
@@ -895,10 +925,10 @@ namespace _2BNOR_2B
             //Creating an element to represent the output. Unique elementID of -1. 
             //Limitation of program can only draw single input gates. 
             outputNode = new Element(-1);
-            LogicGate logicGate = new LogicGate(outputNode);
+            LogicGate logicGate = new(outputNode);
             outputNode.SetLogicGate(logicGate);
             //The position of the output node is the same y-position as the root node and a small shift from the root node. 
-            double x = TranslateNode(CalculateXposition(0), heightOfTree) + (pixelsPerSquare * 8);
+            double x = TranslateNode(CalculateXposition(0), heightOfTree) + pixelsPerSquare * 8;
             double y = CalculateNodeYposition(heightOfTree, 0, 0);
             Canvas.SetTop(logicGate, y);
             Canvas.SetLeft(logicGate, x);
@@ -938,9 +968,9 @@ namespace _2BNOR_2B
             int operand2;
             int tmp;
             string sub = SubsituteIntoExpression(binaryCombination, postfix);
-            Stack<int> evaluatedStack = new Stack<int>();
+            Stack<int> evaluatedStack = new();
             foreach (char c in sub)
-            { 
+            {
                 if (char.IsNumber(c))
                 {
                     evaluatedStack.Push(c);
@@ -964,7 +994,7 @@ namespace _2BNOR_2B
                     operand2 = evaluatedStack.Pop();
                     tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp);
-                }  
+                }
             }
             //Final item on the stack is the result of the evaluation. 
             return evaluatedStack.Pop();
@@ -1011,7 +1041,16 @@ namespace _2BNOR_2B
         //Converts an int into binary string. This can be used to generate the input combinations for truth tables. 
         private string ConvertIntintoBinaryString(int n, string booleanExpression, bool isUnique)
         {
-            return Convert.ToString(n, 2).PadLeft(GetNumberOfInputs(booleanExpression, isUnique), '0');
+            int numInp = GetNumberOfInputs(booleanExpression, isUnique);
+            int rem = 0;
+            string bin = ""; 
+            while (n > 0)
+            {
+                rem = n % 2;
+                n /= 2;
+                bin = rem.ToString() + bin; 
+            }
+            return bin.PadLeft(numInp, '0');
         }
 
         //Gets the respective string value of the truth table based off of its input. 
@@ -1131,17 +1170,16 @@ namespace _2BNOR_2B
         private string[] GenerateDisplayOperatorHeaders(string inputExpression, int numberOfInputs, int numberOfOperators)
         {
             string[] postorderHeaders = GeneratePostOrderHeaders(inputExpression, numberOfInputs, numberOfOperators);
-            string[] displayHeaders = new string[GetNumberOfInputs(inputExpression, true) + numberOfOperators];
+            //string[] displayHeaders = new string[GetNumberOfInputs(inputExpression, true) + numberOfOperators];  
             Array.Sort(postorderHeaders);
             Array.Sort(postorderHeaders, (x, y) => x.Length.CompareTo(y.Length));
             postorderHeaders = postorderHeaders.Distinct().ToArray();
-            Array.Copy(postorderHeaders, displayHeaders, displayHeaders.Length);
-            return displayHeaders;
+            return postorderHeaders;
         }
 
         private string[] GeneratePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
         {
-            Stack<string> subExpressionStack = new Stack<string>();
+            Stack<string> subExpressionStack = new();
             string[] headers = new string[numberOfOperators + numberOfInputs];
             string subexpression;
             string operand1;
@@ -1160,7 +1198,7 @@ namespace _2BNOR_2B
                     if (c == '!')
                     {
                         operand1 = subExpressionStack.Pop();
-                        subexpression = $"({c}{operand1})"; 
+                        subexpression = $"({c}{operand1})";
                     }
                     else
                     {
@@ -1176,37 +1214,45 @@ namespace _2BNOR_2B
             return headers;
         }
 
+        private double CalculateCellWidth(string header)
+        {
+            double cellWidth = 30;
+            if (header.Length != 1)
+            {
+                if (header.Length > 5)
+                {
+                    cellWidth = header.Length * 11 + 15;
+                }
+                else
+                {
+                    cellWidth = header.Length * 10 + 15;
+                }
+            }
+            return cellWidth;
+        }
+
         private void DrawTruthTableHeaders(Canvas c, string[] headers)
         {
             Label cell;
-            Thickness border = new Thickness(2);
-            FontFamily font = new FontFamily("Consolas");
-            double cellWidth = 30;
+            Thickness border = new(2);
+            FontFamily font = new("Consolas");
+            double cellWidth;
             double x = 20;
             foreach (string header in headers)
             {
                 //Checking for inputs of the table
-                if (header.Length != 1)
+                cellWidth = CalculateCellWidth(header);
+                cell = new Label
                 {
-                    if (header.Length > 5)
-                    {
-                        cellWidth = (header.Length * 8) + 10;
-                    }
-                    else
-                    {
-                        cellWidth = (header.Length * 10) + 20;
-                    }
-
-                }
-                cell = new Label();
-                cell.HorizontalContentAlignment = HorizontalAlignment.Center;
-                cell.Width = cellWidth;
-                cell.BorderBrush = Brushes.LightGray;
-                cell.BorderThickness = border;
-                cell.Background = Brushes.White;
-                cell.FontFamily = font;
-                cell.FontSize = 14;
-                cell.Content = header;
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    Width = cellWidth,
+                    BorderBrush = Brushes.LightGray,
+                    BorderThickness = border,
+                    Background = Brushes.White,
+                    FontFamily = font,
+                    FontSize = 18,
+                    Content = header
+                };
                 Canvas.SetTop(cell, 20);
                 Canvas.SetLeft(cell, x);
                 c.Children.Add(cell);
@@ -1217,9 +1263,9 @@ namespace _2BNOR_2B
         private void DrawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
         {
             Label cell;
-            Thickness border = new Thickness(2);
-            FontFamily font = new FontFamily("Consolas");
-            double cellWidth = 30;
+            Thickness border = new(2);
+            FontFamily font = new("Consolas");
+            double cellWidth;
             double x = 20;
             double y = 50;
             foreach (string row in outputMap)
@@ -1227,43 +1273,31 @@ namespace _2BNOR_2B
                 for (int i = 0; i < headers.Length; i++)
                 {
                     //Checking for inputs of the table
-                    if (headers[i].Length != 1)
+                    cellWidth = CalculateCellWidth(headers[i]);
+                    cell = new Label
                     {
-                        if (headers[i].Length > 5)
-                        {
-                            cellWidth = (headers[i].Length * 8) + 10;
-                        }
-                        else
-                        {
-                            cellWidth = (headers[i].Length * 10) + 20;
-                        }
-
-                    }
-                    cell = new Label();
-                    cell.HorizontalContentAlignment = HorizontalAlignment.Center;
-                    cell.Width = cellWidth;
-                    cell.BorderBrush = Brushes.LightGray;
-                    cell.BorderThickness = border;
-                    cell.Background = Brushes.White;
-                    cell.FontFamily = font;
-                    cell.FontSize = 14;
-                    cell.Content = row[i];
+                        HorizontalContentAlignment = HorizontalAlignment.Center,
+                        Width = cellWidth,
+                        BorderBrush = Brushes.LightGray,
+                        BorderThickness = border,
+                        Background = Brushes.White,
+                        FontFamily = font,
+                        FontSize = 18,
+                        Content = row[i]
+                    };
                     Canvas.SetTop(cell, y);
                     Canvas.SetLeft(cell, x);
                     c.Children.Add(cell);
                     x += cellWidth;
                 }
-                cellWidth = 30;
                 x = 20;
                 y += 30;
             }
-
-
         }
 
         private string[] TrimBrackets(string[] headers)
         {
-            for(int i = 0; i < headers.Length; i++)
+            for (int i = 0; i < headers.Length; i++)
             {
                 if (headers[i].Length != 1)
                 {
@@ -1271,26 +1305,18 @@ namespace _2BNOR_2B
                 }
             }
             return headers;
-        } 
+        }
 
         //Links class to UI, used to draw the truth tables to the canvas. 
-        public void DrawTruthTable(Canvas c, string inputExpression, bool isSteps)
+        public void DrawTruthTable(Canvas c, string inputExpression)
         {
             //Removing any previously drawn tables from the canvas. 
             c.Children.Clear();
             headers = GetHeaders(inputExpression, true);
             outputMap = GenerateOutputMap(inputExpression, headers, true);
-            headers = TrimBrackets(headers); 
-            if (isSteps)
-            {
-                //drawTruthTable(c, headers, outputMap);
-                DrawTruthTableHeaders(c, headers);
-                DrawTruthTableBody(c, headers, outputMap);
-            }
-            else
-            {
-                throw new NotImplementedException("Not yet buster!");
-            }
+            headers = TrimBrackets(headers);
+            DrawTruthTableHeaders(c, headers);
+            DrawTruthTableBody(c, headers, outputMap);
         }
         #endregion
 
@@ -1324,9 +1350,19 @@ namespace _2BNOR_2B
                     tmp += $"!{input}";
                 }
 
-                if (i < epi.Length - 1)
+                if (epi.Length == 2)
                 {
-                    tmp += ".";
+                    if (i == 0 && epi[i] != '-')
+                    {
+                        tmp += ".";
+                    }
+                }
+                else
+                {
+                    if (i != 0 && i < epi.Length - 1 && epi[i] != '-')
+                    {
+                        tmp += ".";
+                    }
                 }
             }
             return $"({tmp})";
@@ -1432,7 +1468,7 @@ namespace _2BNOR_2B
             int minterm1 = RemoveDashes(m1);
             int minterm2 = RemoveDashes(m2);
             int res = minterm1 ^ minterm2;
-            return (res != 0 && ((res & (res - 1)) == 0));
+            return res != 0 && (res & res - 1) == 0;
         }
 
         //Utilty function that temporarily removes the dashes from a binary pattern so that it can be compared. 
@@ -1443,14 +1479,14 @@ namespace _2BNOR_2B
 
         private List<string> GetMinterms(string expression)
         {
-            List<string> minterms = new List<string>();
+            List<string> minterms = new();
             inputMap = GenerateInputMap(expression, true);
             foreach (string input in inputMap)
             {
                 //A minterm has been found if input results in the expresion evaluating to true. 
                 int result = EvaluateBooleanExpression(input, expression) - 48;
                 if (result == 1)
-                { 
+                {
                     minterms.Add(input);
                 }
             }
@@ -1497,7 +1533,7 @@ namespace _2BNOR_2B
         {
             //Calculating the number of 1's within each column of the values in the dictionary. 
             int[] bitFrequencyTable = GetFrequencyTable(regex, minterms);
-            List<string> essentialPrimeImplicants = new List<string>();
+            List<string> essentialPrimeImplicants = new();
             string epi = "";
             for (int i = 0; i < bitFrequencyTable.Length; i++)
             {
@@ -1520,7 +1556,7 @@ namespace _2BNOR_2B
         private List<string> GetPrimeImplicants(List<string> mintermList)
         {
             //Stores the prime implicants that are within the list of minterms.
-            List<string> primeImplicants = new List<string>();
+            List<string> primeImplicants = new();
             //Array used to track the merged terms and hence find the prime implicants. 
             bool[] merges = new bool[mintermList.Count];
             //If this is zero then the prime implicants have been found. 
@@ -1570,15 +1606,15 @@ namespace _2BNOR_2B
 
         //Implementation of the Quine-McCluskey algorithm for diagram/expression minimisation. Returns the minised expression by finding prime and essential prime implicants from merged minterms. 
         public void MinimiseExpression(string expression)
-        { 
+        {
             //Finding prime implicants to get essential prime implicants. 
             List<string> minterms = GetMinterms(expression);
             List<string> primeImplicants = GetPrimeImplicants(minterms);
             //Creating the prime-implicant chart which is used to find the essential prime implicants. 
-            Dictionary<string, string> PIchart = new Dictionary<string, string>();
+            Dictionary<string, string> PIchart = new();
             ConvertImplicantsIntoRegex(PIchart, primeImplicants);
             SetRegexPatterns(PIchart, minterms);
-            PIchart = replaceDashesFromRegex(PIchart); 
+            PIchart = ReplaceDashesFromRegex(PIchart);
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms, primeImplicants);
             string covered = GetCoveredString(PIs, PIchart);
             //check that this result forms a complete string if not then call petriks method. 
@@ -1589,98 +1625,98 @@ namespace _2BNOR_2B
             }
             else
             {
-                minimisedExpression = ConvertEPIsToExpression(PIs); 
+                minimisedExpression = ConvertEPIsToExpression(PIs);
             }
         }
         #endregion
 
-        private Dictionary<string,string> replaceDashesFromRegex(Dictionary<string, string> PIChart)
+        private Dictionary<string, string> ReplaceDashesFromRegex(Dictionary<string, string> PIChart)
         {
-            Dictionary<string, string> newKeys = new Dictionary<string, string>();
-            string tmp;  
-            foreach(string k in PIChart.Keys)
+            Dictionary<string, string> newKeys = new();
+            string tmp;
+            foreach (string k in PIChart.Keys)
             {
                 tmp = k;
                 tmp = tmp.Replace(@"\d", "-");
-                newKeys.Add(tmp, PIChart[k]); 
+                newKeys.Add(tmp, PIChart[k]);
             }
-            return newKeys; 
+            return newKeys;
         }
 
         private string GetCoveredString(List<string> epis, Dictionary<string, string> PIchart)
         {
-            int result = 0; 
-            foreach(string s in epis)
+            int result = 0;
+            foreach (string s in epis)
             {
                 result |= Convert.ToInt32(PIchart[s], 2);
             }
             return result.ToString();
         }
 
-        private Dictionary<string, string> removeEPIs(Dictionary<string, string> PIchart, List<string> epis, List<string> minterms)
+        private Dictionary<string, string> RemoveEPIs(Dictionary<string, string> PIchart, List<string> epis, List<string> minterms)
         {
             string value;
-            int pos; 
-            int[] freq = GetFrequencyTable(PIchart, minterms); 
-            foreach(string k in PIchart.Keys)
+            int pos;
+            int[] freq = GetFrequencyTable(PIchart, minterms);
+            foreach (string k in PIchart.Keys)
             {
                 if (epis.Contains(k))
                 {
                     value = PIchart[k];
                     pos = GetSignificantBit(k, freq);
-                    trimMinterm(PIchart, pos); 
+                    TrimMinterm(PIchart, pos);
                     PIchart.Remove(k);
                 }
             }
-            return PIchart; 
+            return PIchart;
         }
 
-        private Dictionary<string, string> trimMinterm(Dictionary<string, string> PIchart, int pos)
+        private Dictionary<string, string> TrimMinterm(Dictionary<string, string> PIchart, int pos)
         {
-            string value; 
-            foreach(string s in PIchart.Keys)
+            string value;
+            foreach (string s in PIchart.Keys)
             {
                 value = PIchart[s];
                 value = value.Remove(pos, 1);
                 PIchart[s] = value;
             }
-            return PIchart; 
+            return PIchart;
         }
 
         private int GetSignificantBit(string epi, int[] freq)
         {
-            for(int i = 0; i < freq.Length; i++)
+            for (int i = 0; i < freq.Length; i++)
             {
                 if (freq[i] == 1 && epi[i] == '1')
                 {
-                    return i; 
+                    return i;
                 }
             }
-            return -1; 
+            return -1;
         }
 
         //Petrick's Method. 
         private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants, List<string> minterms)
         {
-            PIchart = removeEPIs(PIchart, epis, minterms); 
-            string minimisedExpression = ""; 
+            PIchart = RemoveEPIs(PIchart, epis, minterms);
+            string minimisedExpression = "";
             //create mapping between prime implicants. 
             Dictionary<char, string> termsImplicantMapping = MapTermsToImplicants(primeImplicants);
             List<Bracket> productOfSums = GetProductOfSums(termsImplicantMapping, PIchart);
-            string[] sumOfproducts = getSumOfProducts(productOfSums);
-            string minProduct = getMinProduct(sumOfproducts);
-            minimisedExpression = getFinalExpression(termsImplicantMapping, minProduct); 
-            return minimisedExpression; 
+            string[] sumOfproducts = GetSumOfProducts(productOfSums);
+            string minProduct = GetMinProduct(sumOfproducts);
+            minimisedExpression = GetFinalExpression(termsImplicantMapping, minProduct);
+            return minimisedExpression;
         }
 
         private Dictionary<char, string> MapTermsToImplicants(List<string> primeImplicants)
         {
-            Dictionary<char, string> mapping = new Dictionary<char, string>();
-            char minChar = (char)(primeImplicants[0].Length + 65); 
-            for(int i = 0; i < primeImplicants.Count; i++)
+            Dictionary<char, string> mapping = new();
+            char minChar = (char)(primeImplicants[0].Length + 65);
+            for (int i = 0; i < primeImplicants.Count; i++)
             {
                 mapping.Add(minChar, primeImplicants[i]);
-                minChar++; 
+                minChar++;
             }
             return mapping;
 
@@ -1688,10 +1724,10 @@ namespace _2BNOR_2B
 
         private List<Bracket> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplicantChart)
         {
-            List<Bracket> productOfSums = new List<Bracket>();
+            List<Bracket> productOfSums = new();
             List<Bracket> sumsToAdd;
-            string primeImplicant; 
-            foreach(string key in primeImplicantChart.Keys)
+            string primeImplicant;
+            foreach (string key in primeImplicantChart.Keys)
             {
                 primeImplicant = primeImplicantChart[key];
                 for (int i = 0; i < primeImplicant.Length; i++)
@@ -1704,29 +1740,29 @@ namespace _2BNOR_2B
                     }
                 }
             }
-            return productOfSums;  
+            return productOfSums;
         }
 
         private void AddSumsToList(List<Bracket> productOfSums, List<Bracket> sumsToAdd)
         {
-            Bracket reverse; 
-            foreach(Bracket s in sumsToAdd)
+            Bracket reverse;
+            foreach (Bracket s in sumsToAdd)
             {
-                reverse = s; 
+                reverse = s;
                 if (productOfSums.Contains(s) == false)
                 {
                     productOfSums.Add(s);
                 }
             }
         }
-        
+
         private List<Bracket> GetSumsToAdd(Dictionary<string, string> PIchart, Dictionary<char, string> termToImplicantMap, string key, int positionWithinKey)
         {
-            List<Bracket> sumsToAdd = new List<Bracket>();
+            List<Bracket> sumsToAdd = new();
             Bracket sum;
             string k;
             char term1;
-            char term2; 
+            char term2;
             //search through the column of the values and make a pair if the same position of the 
             for (int i = 0; i < PIchart.Keys.Count; i++)
             {
@@ -1734,15 +1770,15 @@ namespace _2BNOR_2B
                 if (PIchart[k][positionWithinKey] == '1')
                 {
                     term1 = GetTermFromImplicant(termToImplicantMap, key);
-                    term2 = GetTermFromImplicant(termToImplicantMap, k); 
+                    term2 = GetTermFromImplicant(termToImplicantMap, k);
                     if (term1 != term2)
                     {
                         sum = new Bracket(term1, term2);
-                        sumsToAdd.Add(sum); 
+                        sumsToAdd.Add(sum);
                     }
                 }
             }
-            return sumsToAdd; 
+            return sumsToAdd;
         }
 
         private char GetTermFromImplicant(Dictionary<char, string> termToImplicantMap, string implicant)
@@ -1753,15 +1789,15 @@ namespace _2BNOR_2B
             {
                 if (values[i] == implicant)
                 {
-                    return keys[i]; 
+                    return keys[i];
                 }
             }
             throw new Exception("Could not map implicant to key");
         }
 
-        private string[] getSumOfProducts(List<Bracket> productOfSums)
+        private string[] GetSumOfProducts(List<Bracket> productOfSums)
         {
-            List<Bracket> mergedList = new List<Bracket>();
+            List<Bracket> mergedList = new();
             Bracket b1;
             Bracket b2;
             Bracket mergedTerm;
@@ -1775,9 +1811,9 @@ namespace _2BNOR_2B
                     {
                         b1 = productOfSums[i];
                         b2 = productOfSums[c];
-                        if ((b1.term1 == b2.term1) != (b1.term2 == b2.term2) != (b1.term1 == b2.term2) != (b1.term2 == b2.term1))
+                        if (b1.term1 == b2.term1 != (b1.term2 == b2.term2) != (b1.term1 == b2.term2) != (b1.term2 == b2.term1))
                         {
-                            mergedTerm = mergeBrackets(b1, b2);
+                            mergedTerm = MergeBrackets(b1, b2);
                             productOfSums.Add(mergedTerm);
                             productOfSums.Remove(b1);
                             productOfSums.Remove(b2);
@@ -1789,14 +1825,14 @@ namespace _2BNOR_2B
                 }
             }
 
-            List<List<string>> param = convertBracketsToString(productOfSums);
-            List<List<string>> sumOfProducts = recursiveDistributiveLaw(param);
+            List<List<string>> param = ConvertBracketsToString(productOfSums);
+            List<List<string>> sumOfProducts = RecursiveDistributiveLaw(param);
             return sumOfProducts[0].ToArray();
         }
 
-        private Bracket mergeBrackets(Bracket b1, Bracket b2)
+        private Bracket MergeBrackets(Bracket b1, Bracket b2)
         {
-            Bracket b = new Bracket();
+            Bracket b = new();
             if (b1.term1 == b2.term1)
             {
                 b.term1 = b1.term1;
@@ -1811,9 +1847,9 @@ namespace _2BNOR_2B
             }
         }
 
-        private List<List<string>> convertBracketsToString(List<Bracket> brackets)
+        private List<List<string>> ConvertBracketsToString(List<Bracket> brackets)
         {
-            List<List<string>> result = new List<List<string>>();
+            List<List<string>> result = new();
             List<string> tmp;
             foreach (Bracket b in brackets)
             {
@@ -1825,16 +1861,16 @@ namespace _2BNOR_2B
             return result;
         }
 
-        private List<List<string>> recursiveDistributiveLaw(List<List<string>> brackets)
+        private List<List<string>> RecursiveDistributiveLaw(List<List<string>> brackets)
         {
-            List<List<string>> lls = new List<List<string>>();
+            List<List<string>> lls = new();
             if (brackets.Count > 1)
             {
-                lls.Add(singleDistributiveLaw(brackets[0], brackets[1]));
+                lls.Add(SingleDistributiveLaw(brackets[0], brackets[1]));
                 brackets.RemoveAt(0);
                 brackets.RemoveAt(0);
                 lls.AddRange(brackets);
-                return recursiveDistributiveLaw(lls);
+                return RecursiveDistributiveLaw(lls);
             }
             else
             {
@@ -1842,20 +1878,20 @@ namespace _2BNOR_2B
             }
         }
 
-        private List<string> singleDistributiveLaw(List<string> b1, List<string> b2)
+        private List<string> SingleDistributiveLaw(List<string> b1, List<string> b2)
         {
-            List<string> lls = new List<string>();
+            List<string> lls = new();
             for (int i = 0; i < b1.Count; i++)
             {
                 for (int j = 0; j < b2.Count; j++)
                 {
-                    lls.Add(applyDistributiveLaw(b1[i], b2[j]));
+                    lls.Add(ApplyDistributiveLaw(b1[i], b2[j]));
                 }
             }
             return lls;
         }
 
-        private string applyDistributiveLaw(string a, string b)
+        private string ApplyDistributiveLaw(string a, string b)
         {
             string tempresult = a + b;
             string finalresult = "";
@@ -1869,7 +1905,7 @@ namespace _2BNOR_2B
             return finalresult;
         }
 
-        private string getMinProduct(string[] sumOfProducts)
+        private string GetMinProduct(string[] sumOfProducts)
         {
             string min = sumOfProducts[0];
             foreach (string p in sumOfProducts)
@@ -1882,7 +1918,7 @@ namespace _2BNOR_2B
             return min;
         }
 
-        private string getFinalExpression(Dictionary<char, string> termToImplicantMap, string minProduct)
+        private string GetFinalExpression(Dictionary<char, string> termToImplicantMap, string minProduct)
         {
             string subExpression;
             string implicant;
@@ -1898,7 +1934,7 @@ namespace _2BNOR_2B
                     result += " + ";
                 }
             }
-            return result; 
+            return result;
         }
 
     }

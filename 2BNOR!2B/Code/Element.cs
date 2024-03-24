@@ -4,20 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _2BNOR_2B
+namespace _2BNOR_2B.Code
 {
     public class Element
     {
-        private int elementID;
+        private readonly int elementID;
         public Element leftChild;
         public Element rightChild;
-        public Element parent; 
+        public Element parent;
         private LogicGate logicGate;
         private int state;
-        private char label;
-        private string elementName;
+        private readonly char label;
+        private readonly string elementName;
         //private bool uniqueness = false;
-        private int instances = 0; 
+        private int instances = 0;
 
         public Element()
         {
@@ -41,7 +41,7 @@ namespace _2BNOR_2B
             leftChild = null;
             rightChild = null;
             state = 0;
-            elementName = "input_pin"; 
+            elementName = "input_pin";
 
         }
 
@@ -52,7 +52,7 @@ namespace _2BNOR_2B
             this.leftChild = leftChild;
             this.rightChild = rightChild;
             this.elementName = elementName;
-            label = ' '; 
+            label = ' ';
         }
 
         public int GetElementID()
@@ -62,7 +62,7 @@ namespace _2BNOR_2B
 
         public char GetLabel()
         {
-            return label; 
+            return label;
         }
 
         public string GetElementName()
@@ -72,12 +72,12 @@ namespace _2BNOR_2B
 
         public void SetLogicGate(LogicGate logicGate)
         {
-            this.logicGate = logicGate; 
+            this.logicGate = logicGate;
         }
 
         public LogicGate GetLogicGate()
         {
-            return logicGate; 
+            return logicGate;
         }
 
         public int GetInstances()
@@ -97,12 +97,12 @@ namespace _2BNOR_2B
 
         public void SetState(int state)
         {
-            this.state = state; 
+            this.state = state;
         }
 
         public int GetState()
         {
-            return state; 
+            return state;
         }
 
     }

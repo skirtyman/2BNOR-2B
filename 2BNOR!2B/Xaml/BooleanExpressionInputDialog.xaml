@@ -1,0 +1,81 @@
+﻿<Window x:Class="_2BNOR_2B.BooleanExpressionInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:WpfMath.Controls;assembly=WpfMath"   
+        xmlns:local="clr-namespace:_2BNOR_2B" xmlns:local1="clr-namespace:_2BNOR_2B.Code"
+        mc:Ignorable="d"
+        Title="Input Expression" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
+        Topmost="True" ContentRendered="Window_ContentRendered" ResizeMode="NoResize">
+    <Window.Resources>
+        <local1:BooleanConverter x:Key="booleanConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!--The table of logic gates-->
+        <Border Grid.Column="2" BorderBrush="Silver" Background="WhiteSmoke" BorderThickness="1"  CornerRadius="5">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Margin="2.5">
+                    <TextBlock FontFamily="Consolas" FontSize="18">AND gate</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18">OR gate</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18">NOT gate</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18">XOR gate</TextBlock>
+                </StackPanel>
+                <Rectangle Width="2" Fill="LightGray"></Rectangle>
+                <StackPanel Margin="2.5">
+                    <TextBlock FontFamily="Consolas" FontSize="18"> .</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18"> +</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18"> !</TextBlock>
+                    <TextBlock FontFamily="Consolas" FontSize="18"> ^</TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="0">
+            <Border BorderBrush="Silver" Background="WhiteSmoke" BorderThickness="1" CornerRadius="5">
+                <StackPanel Margin="5">
+                    <Label FontFamily="Consolas" FontSize="18">
+                        <Label.Content>Enter a boolean expression:</Label.Content>
+                    </Label>
+                    <TextBox Margin="5,0" FontFamily="Consolas" Name="inputBox" FontSize="20"/>
+                    <Rectangle Height="10"/>
+                    <TextBlock FontFamily="Consolas" FontSize="18" Text="Rendered Expression: "/>
+                    <controls:FormulaControl x:Name="renderedExpression" Formula="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Margin="10" Orientation="Horizontal">
+                <Button IsDefault="True" Margin ="10,0" HorizontalAlignment="Center" Click="BtnDialogOk_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <Image Source="Resources/tick.png"/>
+                            <TextBlock Text=" Ok " FontFamily="Consolas" FontSize="20" FontWeight="DemiBold"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+                <Button IsCancel="True" Click="BtnDialogCancel_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <Image Source="Resources/cancel.png"/>
+                            <TextBlock Text=" Cancel " FontFamily="Consolas" FontSize="20" FontWeight="DemiBold"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

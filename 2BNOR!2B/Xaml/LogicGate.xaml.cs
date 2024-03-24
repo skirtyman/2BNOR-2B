@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using _2BNOR_2B.Code;
 
 namespace _2BNOR_2B
 {
@@ -21,8 +22,8 @@ namespace _2BNOR_2B
     /// </summary>
     public partial class LogicGate : UserControl
     {
-        private Element gate;
-        private double labelWidth;
+        private readonly Element gate;
+        private readonly double labelWidth;
         private int connectedWires = 0; 
 
         public LogicGate(Element gate)
@@ -54,16 +55,13 @@ namespace _2BNOR_2B
         {
             if (gate.GetElementName() == "input_pin")
             {
-                //MessageBox.Show(gate.GetState().ToString());
                 if (gate.GetState() == 1)
                 {
                     gate.SetState(0);
-                    //MessageBox.Show(gate.GetState().ToString());
                 }
                 else
                 {
                     gate.SetState(1);
-                    //MessageBox.Show(gate.GetState().ToString());
                 }
             }
 

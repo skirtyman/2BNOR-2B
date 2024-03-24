@@ -24,11 +24,11 @@ namespace _2BNOR_2B
             InitializeComponent();
         }
 
-        private void btnDialogOk_Click(object sender, RoutedEventArgs e)
+        private void BtnDialogOk_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
         }
-        private void btnDialogCancel_Click(object sender, RoutedEventArgs e)
+        private void BtnDialogCancel_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
         }
@@ -39,7 +39,7 @@ namespace _2BNOR_2B
             inputBox.Focus();
         }
 
-        public string result
+        public string Result
         {
             get { return inputBox.Text; }
         }

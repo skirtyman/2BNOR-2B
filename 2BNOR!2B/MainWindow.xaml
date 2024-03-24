@@ -6,12 +6,23 @@
         xmlns:local="clr-namespace:_2BNOR_2B"
         mc:Ignorable="d"
         Title="2B NOR !2B" MinHeight="600" MinWidth="1000" WindowState="Maximized">
-    <!--Original window size, height: 450, width: 800-->
-
     <Window.Resources>
-        <ResourceDictionary>
-
-        </ResourceDictionary>
+        <Style x:Key="PopUpButtons" TargetType="Button">
+            <Setter Property="Background" Value="GhostWhite"/>
+            <Setter Property="BorderBrush" Value="Silver"/>
+            <Setter Property="Margin" Value="5"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+        <Style x:Key="TextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -26,7 +37,6 @@
             <ColumnDefinition Width="1.25*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
 
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas">
             <MenuItem Header="_File">
@@ -48,25 +58,19 @@
                 <MenuItem Header="Minmise Diagram" Click="MenuItem_MinimiseDiagram"/>
                 <MenuItem Header="Minimise Expression" Click="MenuItem_MinimiseExpression"/>
             </MenuItem>
-            <MenuItem Header="_Help" Click="MenuItem_OpenHelpWindow"/>
         </Menu>
 
-
-        <Border Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <Canvas x:Name="MainWindowCanvas" Background="Bisque" MouseDown="MainWindowCanvas_MouseDown"/>
-            </ScrollViewer>
+        <Border Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" BorderThickness="1" BorderBrush="Silver" Margin="5">
+            <Canvas x:Name="MainWindowCanvas" Background="WhiteSmoke" MouseDown="MainWindowCanvas_MouseDown"/>
         </Border>
 
-        <Border Grid.Column="0" Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Margin="5">
-            <Canvas x:Name="TruthTableCanvas" Background="Bisque"/>
+        <Border Grid.Column="0" Grid.Row="1" BorderThickness="1" BorderBrush="Silver" Margin="5">
+            <Canvas x:Name="TruthTableCanvas" Background="WhiteSmoke"/>
         </Border>
 
-        <GroupBox Margin="10" Padding="10" Grid.Column="0" Grid.Row="2">
+        <GroupBox Margin="10" Padding="10" Grid.Column="0" Grid.Row="2" BorderBrush="Silver">
             <GroupBox.Header>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock FontWeight="Bold" FontFamily="Consolas" FontSize="22">Logic Gates</TextBlock>
-                </StackPanel>
+                <TextBlock FontWeight="Bold" FontFamily="Consolas" FontSize="22">Logic Gates</TextBlock>
             </GroupBox.Header>
 
             <Grid Grid.Column="0" Grid.Row="2">
@@ -82,90 +86,64 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="0" Grid.Row="0" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="0" Grid.Row="0"
+                        Click="ANDInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/and_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    AND gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="AND gate"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
-
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="1" Grid.Row="0" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="1" Grid.Row="0"
+                        Click="ORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/or_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    OR gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="OR gate"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="2" Grid.Row="0" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="2" Grid.Row="0"
+                        Click="NOTInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/not_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    NOT gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="NOT gate"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="0" Grid.Row="1" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="0" Grid.Row="1"
+                        Click="XORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/xor_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    XOR gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="XOR gate"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
-
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="1" Grid.Row="1" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="1" Grid.Row="1"
+                        Click="NANDInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/nand_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    NAND gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="NAND gate"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
-                <Border Background="GhostWhite" BorderBrush="Silver" BorderThickness="1" CornerRadius="8,8,8,8"
-                        Grid.Column="2" Grid.Row="1" Margin="10">
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="2" Grid.Row="1"
+                        Click="NORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/nor_gate.png"/>
-                        <TextBlock TextAlignment="Center" FontFamily="Consolas" FontSize="18">
-                    NOR gate
-                        </TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockStyle}" Text="NOR gate"/>
                     </StackPanel>
-                </Border>
-
-                <Button  Grid.Column="4" Grid.Row="0" Width="225" Height="95" Click="Button_Click_Diagram">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="5"/>
-                        </Style>
-                    </Button.Resources>
-                    <TextBlock FontFamily="Consolas" FontSize="18" Text="Clear Diagram" 
-                               TextWrapping="Wrap" TextAlignment="Center"/>
                 </Button>
 
-
-                <Button Grid.Column="4" Grid.Row="1" Width="225" Height="95" Click="Button_Click_TT"
-                        FontFamily="Consolas" FontSize="18">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="5"/>
-                        </Style>
-                    </Button.Resources>
-                    <TextBlock FontFamily="Consolas" FontSize="18" Text="Clear Truth table" 
-                               TextWrapping="Wrap" TextAlignment="Center"/>
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="4" Grid.Row="0"
+                        Click="Button_Click_Diagram">
+                    <TextBlock Style="{StaticResource TextBlockStyle}" Text="Clear Diagram"/>
                 </Button>
 
+                <Button Style="{StaticResource PopUpButtons}" Grid.Column="4" Grid.Row="1"
+                        Click="Button_Click_TT">
+                    <TextBlock Style="{StaticResource TextBlockStyle}" Text="Clear Truth Table"/>
+
+                </Button>
             </Grid>
         </GroupBox>
 

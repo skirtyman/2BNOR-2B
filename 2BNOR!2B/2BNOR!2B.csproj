@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>_2BNOR_2B</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <ApplicationIcon>Croppedicon.ico</ApplicationIcon>
+    <ApplicationIcon>ApplicationIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
@@ -29,7 +29,7 @@
     <Page Remove="AboutWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Croppedicon.ico" />
+    <Content Include="ApplicationIcon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\input_pin.png" />

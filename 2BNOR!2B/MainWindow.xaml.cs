@@ -1,4 +1,5 @@
-﻿using _2BNOR_2B.Properties;
+﻿using _2BNOR_2B.Code;
+using _2BNOR_2B.Properties;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace _2BNOR_2B
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Diagram d;
+        private readonly Diagram d;
         private string saveString = "";
 
         public MainWindow()
@@ -39,17 +40,11 @@ namespace _2BNOR_2B
 
         private void MenuItem_GenerateTableFromDiagram(object sender, RoutedEventArgs e)
         {
-            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
-            StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
-            bool isSteps = false;
-            if (d.getExpression() != "")
-            {
-                if (stepsDialog.ShowDialog() == true)
-                {
-                    isSteps = stepsDialog.result;
-                    d.DrawTruthTable(TruthTableCanvas, d.getExpression(), isSteps);
-                    statusBar_Text.Text = $"Generated truth table for the expression {d.getExpression()}."; 
-                }
+            BooleanExpressionInputDialog expressionInputDialog = new();
+            if (d.GetExpression() != "")
+            {          
+                d.DrawTruthTable(TruthTableCanvas, d.GetExpression());
+                statusBar_Text.Text = $"Generated truth table for the expression {d.GetExpression()}.";             
             }
             else
             {
@@ -82,49 +77,53 @@ namespace _2BNOR_2B
 
         #region menustrip commands 
 
-        private void MenuItem_OpenHelpWindow(object sender, RoutedEventArgs e)
-        {
-            HelpWindow helpWindow = new HelpWindow();
-            helpWindow.Show();
-            statusBar_Text.Text = "Opened help window.";
-        }
-
         private void MenuItem_GenerateTableFromExpression(object sender, RoutedEventArgs e)
         {
-            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
-            StepsForTablesDialog stepsDialog = new StepsForTablesDialog();
+            BooleanExpressionInputDialog expressionInputDialog = new();
             string expression = "";
-            bool isSteps = false;
             if (expressionInputDialog.ShowDialog() == true)
             {
-                expression = expressionInputDialog.result;
-                if (stepsDialog.ShowDialog() == true)
+                expression = expressionInputDialog.Result;
+                if (d.IsExpressionValid(expression, true))
                 {
-                    isSteps = stepsDialog.result;
-                    d.DrawTruthTable(TruthTableCanvas, expression, isSteps);
+                    d.DrawTruthTable(TruthTableCanvas, expression);
                     statusBar_Text.Text = "Generated Truth table from expression: " + expression; 
                 }
+                else
+                {
+                    MessageBox.Show("The diagram is invalid", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                
             }
         }
 
         private void MenuItem_GenerateExpressionFromDiagram(object sender, RoutedEventArgs e)
         {
-            
+            renderedExpression r; 
+            if (d.GetExpression() != "")
+            {
+                r = new renderedExpression(d.GetExpression(), "Rendered Expression: ");
+                r.Show(); 
+            }
+            else
+            {
+                MessageBox.Show("The diagram does not exist. ", "Expression Error", MessageBoxButton.OK, MessageBoxImage.Error); 
+            }
         }
 
 
         private void MenuItem_GenerateDiagramFromExpression(object sender, RoutedEventArgs e)
         {
-            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
+            BooleanExpressionInputDialog expressionInputDialog = new();
             string expression = "";
             if (expressionInputDialog.ShowDialog() == true)
             {
-                expression = expressionInputDialog.result;
-                if (d.isExpressionValid(expression))
+                expression = expressionInputDialog.Result;
+                if (d.IsExpressionValid(expression))
                 {
                     MainWindowCanvas.Children.Clear();
                     d.ClearDiagram(); 
-                    d.setExpression(expression);
+                    d.SetExpression(expression);
                     statusBar_Text.Text = "Generated diagram from expression: " + expression;
                     d.DrawDiagram();
                     saveString = expression;
@@ -138,15 +137,15 @@ namespace _2BNOR_2B
 
         private void MenuItem_MinimiseDiagram(object sender, RoutedEventArgs e)
         {
-            string expression = d.getExpression();
+            string expression = d.GetExpression();
             string minimisedExpression;
-            if (expression != "")
+            if (expression != "" && d.GetTree() != null)
             {
                 MainWindowCanvas.Children.Clear();
                 d.ClearDiagram();
                 d.MinimiseExpression(expression);
-                minimisedExpression = d.getMinimisedExpression();  
-                d.setExpression(minimisedExpression);
+                minimisedExpression = d.GetMinimisedExpression();  
+                d.SetExpression(minimisedExpression);
                 d.DrawDiagram(); 
             }
             else
@@ -158,74 +157,131 @@ namespace _2BNOR_2B
 
         private void MenuItem_MinimiseExpression(object sender, RoutedEventArgs e)
         {
-            BooleanExpressionInputDialog expressionInputDialog = new BooleanExpressionInputDialog();
+            BooleanExpressionInputDialog expressionInputDialog = new();
+            renderedExpression r; 
             string expression = "";
             if (expressionInputDialog.ShowDialog() == true)
             {
-                expression = expressionInputDialog.result;
-                d.setExpression(expression);
+                expression = expressionInputDialog.Result;
+                d.SetExpression(expression);
                 d.MinimiseExpression(expression);
-                MessageBox.Show(d.getMinimisedExpression());
+                r = new renderedExpression(d.GetExpression(), "Minimised Expression: ");
+                r.Show(); 
                 statusBar_Text.Text = "Minimised expression: " + expression; 
             }
         }
 
         private void MenuItem_SaveDiagram(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
-            saveFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            SaveFileDialog saveFileDialog = new()
+            {
+                Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B",
+                DefaultExt = "Expression file (*.2B)|*.2B"
+            };
             saveFileDialog.ShowDialog();
-            File.WriteAllText(saveFileDialog.FileName, saveString);
-            statusBar_Text.Text = "Saved diagram at the path " + saveFileDialog.FileName;
+            try
+            {
+                File.WriteAllText(saveFileDialog.FileName, saveString);
+                statusBar_Text.Text = "Saved diagram at the path " + saveFileDialog.FileName;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving diagram:\n{ex.Message}", "Load File Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                e.Handled = true;
+            }
         }
 
         private void MenuItem_LoadDiagram(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B";
-            openFileDialog.DefaultExt = "Expression file (*.2B)|*.2B";
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B",
+                DefaultExt = "Expression file (*.2B)|*.2B"
+            };
             openFileDialog.ShowDialog();
-            saveString = File.ReadAllText(openFileDialog.FileName);
-            if (d.isExpressionValid(saveString))
+            try
             {
-                d.setExpression(saveString);
-                d.DrawDiagram();
-                statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
+                saveString = File.ReadAllText(openFileDialog.FileName);
+                //validate expression and if valid draw. 
+                if (d.IsExpressionValid(saveString))
+                {
+                    d.SetExpression(saveString);
+                    d.DrawDiagram();
+                    statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
+                }
+                else
+                {
+                    MessageBox.Show("This expression is invalid. Please try again. ");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("This expression is invalid. Please try again. ");
-            }
-           
+                MessageBox.Show($"Error opening file:\n{ex.Message}", "Open File Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                e.Handled = true;
+            }    
         }
 
         private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "PNG (*.png)|*.png";
-            sfd.DefaultExt = ".png";
+            Rect bounds;
+            CroppedBitmap crop = new();
+            BitmapEncoder pngEncoder = new PngBitmapEncoder();
+            SaveFileDialog sfd = new()
+            {
+                Filter = "PNG (*.png)|*.png",
+                DefaultExt = ".png"
+            };
             if (sfd.ShowDialog() != true)
             {
                 return;
             }
 
-            Rect bounds = d.GetBoundsOfDiagram();
-
-            RenderTargetBitmap rtb = new RenderTargetBitmap((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
-            rtb.Render(MainWindowCanvas);
-
-            CroppedBitmap crop = new CroppedBitmap(rtb, new Int32Rect(0,0, (int)bounds.Width, (int)bounds.Height));
-
-            BitmapEncoder pngEncoder = new PngBitmapEncoder();
-            pngEncoder.Frames.Add(BitmapFrame.Create(crop));
-
-
-            using (Stream fs = File.OpenWrite(sfd.FileName))
+            if (d.GetExpression() != "")
             {
-                pngEncoder.Save(fs);
+                bounds = d.GetBoundsOfDiagram();
+                //If valid bounds can be calcuated then the window should be captured. 
+                RenderTargetBitmap rtb = new((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
+                rtb.Render(MainWindowCanvas);
+                try
+                {
+                    crop = new CroppedBitmap(rtb, new Int32Rect(0, 0, (int)bounds.Width, (int)bounds.Height));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Invalid bounds for exporting. Could not crop. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error); 
+                    e.Handled = true;
+                }
+
+                try
+                { 
+                    pngEncoder.Frames.Add(BitmapFrame.Create(crop));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Could not encode the diagram. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error); 
+                    e.Handled = true;
+                }
+
+                try
+                {
+                    using (Stream fs = File.OpenWrite(sfd.FileName))
+                    {
+                        pngEncoder.Save(fs); 
+                    }
+                    statusBar_Text.Text = "Exported diagram to " + sfd.FileName; 
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show($"Could not write Image to the file. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    e.Handled = true;
+                }
             }
-            statusBar_Text.Text = "Exported diagram to " + sfd.FileName;
+            else
+            {
+                MessageBox.Show("Could not calculate bounds: Diagram does not exist. \n", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                e.Handled = true;
+
+            }
         }
 
         private void MenuItem_CloseApp(object sender, RoutedEventArgs e)
@@ -261,5 +317,42 @@ namespace _2BNOR_2B
                 statusBar_Text.Text = "Cleared the current truth table. ";
             }
         }
+
+        private void ANDInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "AND gate");
+            g.Show(); 
+        }
+
+        private void ORInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "OR gate");
+            g.Show();
+        }
+
+        private void NOTInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "NOT gate");
+            g.Show();
+        }
+        
+        private void XORInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "XOR gate");
+            g.Show();
+        }
+
+        private void NANDInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "NAND gate");
+            g.Show();
+        }
+
+        private void NORInformation(object sender, EventArgs e)
+        {
+            GateInformation g = new(d, "NOR gate");
+            g.Show();
+        }
+
     }
 }
