@@ -354,5 +354,16 @@ namespace _2BNOR_2B
             g.Show();
         }
 
+        private void TruthTableCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            TruthTableCanvas.Width = e.NewSize.Width;
+            TruthTableCanvas.Height = e.NewSize.Height;
+        }
+
+        private void MainWindowCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            MainWindowCanvas.Width = e.NewSize.Width;
+            MainWindowCanvas.Height = e.NewSize.Height;
+        }
     }
 }

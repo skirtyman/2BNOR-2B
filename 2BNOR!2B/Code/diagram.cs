@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Numerics;
@@ -36,7 +37,7 @@ namespace _2BNOR_2B.Code
         private Element[] elements;
         private Element[] inputs;
         private Wire[] wires;
-        private readonly Canvas c;
+        private Canvas c;
         //The following attributes are the constants for the diagram drawing. These can be edited to change the look of diagrams. 
         //These values are ones that I have found to produce the nicest diagrams from testing. 
         readonly int elementWidth = 2;
@@ -827,6 +828,8 @@ namespace _2BNOR_2B.Code
                 currentNode.SetLogicGate(logicGate);
                 Canvas.SetLeft(logicGate, x);
                 Canvas.SetTop(logicGate, y);
+                c.Height = Math.Max(y, c.Height) + 30;
+                c.Width = Math.Max(x, c.Width) + 30;
                 //set the other position for saving and exporting. 
                 double p = logicGate.GetInputPoint2().Y + 50;
                 Canvas.SetBottom(logicGate, p);
@@ -1258,6 +1261,7 @@ namespace _2BNOR_2B.Code
                 c.Children.Add(cell);
                 x += cellWidth;
             }
+            
         }
 
         private void DrawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
@@ -1290,9 +1294,11 @@ namespace _2BNOR_2B.Code
                     c.Children.Add(cell);
                     x += cellWidth;
                 }
+                c.Width = Math.Max(x, c.Width) + 30;
                 x = 20;
                 y += 30;
             }
+            c.Height = Math.Max(y, c.Height) + 30;
         }
 
         private string[] TrimBrackets(string[] headers)
