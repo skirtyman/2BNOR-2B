@@ -315,10 +315,11 @@ namespace _2BNOR_2B
 
             if (d.GetExpression() != "")
             {
-                //bounds = d.GetBoundsOfDiagram();
-               
-                //MainWindowCanvas.Background = Brushes.Green;
-                var rtb = new RenderTargetBitmap((int)MainWindowCanvas.Width, (int)MainWindowCanvas.Height, 96d, 96d, PixelFormats.Default);
+                // May not need bounds on the diagram. Use if things go pear shaped. 
+                // No need to crop, directly export to png (canvas size as boudns for bitmap)
+                bounds = d.GetBoundsOfDiagram();
+                //If valid bounds can be calcuated then the window should be captured. 
+                RenderTargetBitmap rtb = new((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
                 rtb.Render(MainWindowCanvas);
                 PngBitmapEncoder png = new PngBitmapEncoder();
                 png.Frames.Add(BitmapFrame.Create(rtb));
