@@ -53,7 +53,6 @@ namespace _2BNOR_2B
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            MessageBox.Show(GetInputPoint1().X + "," + GetInputPoint2().Y); 
             if (gate.GetElementName() == "input_pin")
             {
                 if (gate.GetState() == 1)

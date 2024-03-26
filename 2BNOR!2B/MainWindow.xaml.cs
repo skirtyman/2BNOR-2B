@@ -213,7 +213,7 @@ namespace _2BNOR_2B
                 {
                     d.SetExpression(expression);
                     d.MinimiseExpression(expression);
-                    r = new renderedExpression(d.GetExpression(), "Minimised Expression: ");
+                    r = new renderedExpression(d.GetMinimisedExpression(), "Minimised Expression: ");
                     r.Show(); 
                     statusBar_Text.Text = "Minimised expression: " + expression; 
                 }
@@ -300,7 +300,6 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
         {
-            Rect bounds;
             var crop = new CroppedBitmap();
             var pngEncoder = new PngBitmapEncoder();
             var sfd = new SaveFileDialog()
@@ -315,52 +314,22 @@ namespace _2BNOR_2B
 
             if (d.GetExpression() != "")
             {
-                // May not need bounds on the diagram. Use if things go pear shaped. 
-                // No need to crop, directly export to png (canvas size as boudns for bitmap)
-                bounds = d.GetBoundsOfDiagram();
-                //If valid bounds can be calcuated then the window should be captured. 
-                RenderTargetBitmap rtb = new((int)MainWindowCanvas.RenderSize.Width, (int)MainWindowCanvas.RenderSize.Height, 96d, 96d, PixelFormats.Default);
-                rtb.Render(MainWindowCanvas);
+                Rect bounds = VisualTreeHelper.GetDescendantBounds(MainWindowCanvas);
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, 96, 96, PixelFormats.Pbgra32);
+                DrawingVisual dv = new DrawingVisual();
+                using (DrawingContext dc = dv.RenderOpen())
+                {
+                    VisualBrush vb = new VisualBrush(MainWindowCanvas);
+                    dc.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+                }
+
+                rtb.Render(dv);
                 PngBitmapEncoder png = new PngBitmapEncoder();
                 png.Frames.Add(BitmapFrame.Create(rtb));
                 using (Stream stm = File.Create(sfd.FileName))
                 {
                     png.Save(stm);
                 }
-                //MainWindowCanvas.Background = Brushes.WhiteSmoke;
-                ////try
-                ////{
-                ////    crop = new CroppedBitmap(rtb, new Int32Rect(0, 0, (int)bounds.Width, (int)bounds.Height));
-                ////}
-                ////catch (Exception ex)
-                ////{
-                ////    MessageBox.Show($"Invalid bounds for exporting. Could not crop. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                ////    e.Handled = true;
-                ////}
-
-                //try
-                //{
-                //    pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show($"Could not encode the diagram. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                //    e.Handled = true;
-                //}
-
-                //try
-                //{
-                //    using (Stream fs = File.OpenWrite(sfd.FileName))
-                //    {
-                //        pngEncoder.Save(fs);
-                //    }
-                //    statusBar_Text.Text = "Exported diagram to " + sfd.FileName;
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show($"Could not write Image to the file. \n{ex.Message}", "Diagram Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                //    e.Handled = true;
-                //}
             }
             else
             {

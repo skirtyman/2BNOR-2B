@@ -174,7 +174,7 @@ namespace _2BNOR_2B.Code
         public void UpdateWires()
         {
             inputStates = "";
-            Getinputstates(rootNode, infixExpression);
+            Getinputstates(rootNode);
             AssignGateStates(rootNode);
             ColourWires();
         }
@@ -425,27 +425,29 @@ namespace _2BNOR_2B.Code
 
         #region diagram drawing
         /// <summary>
-        /// Iterative postorder traverasl of the 
+        /// Iterative postorder traverasl of the binary tree representing the logic diagram.
+        /// The traversal does not consider whether or not an input is visible or not. 
+        /// It simply produces a string of the input states. 
         /// </summary>
-        /// <param name="root"></param>
-        /// <param name="expression"></param>
-        private void Getinputstates(Element root, string expression)
+        /// <param name="root"> The root of the tree. The last gate/input and also 
+        /// the point where the traversal starts. </param>
+        private void Getinputstates(Element root)
         {
             var s = new Stack<Element>();
-            int numberOfInputs = GetNumberOfInputs(expression, true);
-            int[] states = new int[numberOfInputs];
             string visited = "";
             while (true)
             {
                 while (root != null)
                 {
+                    // Push the root onto the stack and traverse to the left child. 
+                    // Repeat until this cannot be done anymore. Same as traversing to the
+                    // left-most gate in the tree. 
                     s.Push(root);
                     s.Push(root);
                     root = root.leftChild;
                 }
                 if (s.Count == 0)
                 {
-                    inputStates = string.Join("", states);
                     return;
                 }
                 root = s.Pop();
@@ -455,15 +457,17 @@ namespace _2BNOR_2B.Code
                 }
                 else
                 {
+                    // Pick up an input state only if the input of the same label has not 
+                    // been visited. This is because they will have the same input state.
                     if (root.GetElementName() == "input_pin" && visited.Contains(root.GetLabel()) == false)
                     {
                         inputStates += root.GetState();
-                        states[root.GetLabel() - 65] = root.GetState();
                         visited += root.GetLabel();
-                        root = null;
+                        root = null; 
                     }
                     else
                     {
+                        //Used to travese to the right child. 
                         root = null;
                     }
 
@@ -471,16 +475,23 @@ namespace _2BNOR_2B.Code
             }
         }
 
+
+        /// <param name="root">The root node (startpoint) of the tree.</param>
+        /// <returns>The maximum depth (height) of the supplied binary tree. </returns>
         private static int GetHeightOfTree(Element root)
         {
+            // If the root does not exist then the tree does not exist and therefore the 
+            // height of the tree is 0. 
             if (root == null)
             {
                 return 0;
             }
-
+            // Recurse to the next level of the tree. 
+            // Results in two sums of the deepest left/right child. 
             int leftChildHeight = GetHeightOfTree(root.leftChild);
             int rightChildHeight = GetHeightOfTree(root.rightChild);
-
+            // Need to add one so that the root is considered within the height. Otherwise 
+            // return the largest value. 
             if (leftChildHeight > rightChildHeight)
             {
                 return leftChildHeight + 1;
@@ -490,6 +501,7 @@ namespace _2BNOR_2B.Code
                 return rightChildHeight + 1;
             }
         }
+
         private Element GetInputWithSameLabel(char label)
         {
             foreach (Element e in elements)
@@ -502,15 +514,30 @@ namespace _2BNOR_2B.Code
             return null;
         }
 
+        /// <summary>
+        /// Finds the number of non-visual nodes that are within the binary tree. 
+        /// </summary>
+        /// <param name="root">The root of the tree storing the entire tree itself.</param>
+        /// <returns>The number of non-visual nodes within the supplied tree. </returns>
         private static int GetNumberOfNodes(Element root)
         {
+            // If the root does not exist then the tree must not exist and so the number of 
+            // nodes must be zero. 
             if (root == null)
             {
                 return 0;
             }
+            // Adding 1 because the root node exists and then traversing the entire tree. 
             return 1 + GetNumberOfNodes(root.leftChild) + GetNumberOfNodes(root.rightChild);
         }
 
+        /// <summary>
+        /// Converts the user-entered and validated infix boolean expression and represents
+        /// it as a binary tree. This is the same logic as the evaluated where in postfix
+        /// the first operands are the deepest within the tree. 
+        /// </summary>
+        /// <param name="inputExpression">A user-entered infix boolean expression that will
+        /// be represented as the binary tree. This is for drawing the logic diagram.</param>
         private void GenerateBinaryTreeFromExpression(string inputExpression)
         {
             string postfixExpression = ConvertInfixtoPostfix(inputExpression);
@@ -533,7 +560,7 @@ namespace _2BNOR_2B.Code
                     inputs[i] = nodeToAdd;
                     i++;
                     if (char.IsNumber(c))
-                    {
+                    { 
                         nodeToAdd.SetState(c - 48);
                     }
                     if (inputsAdded.Contains(c) == false)
@@ -556,6 +583,8 @@ namespace _2BNOR_2B.Code
                 }
                 else
                 {
+                    // Any logic gate is a binary operator, so pop two items and these are 
+                    // the operands for the current boolean operation. 
                     rightChild = nodeStack.Pop();
                     leftChild = nodeStack.Pop();
                     elementName = gateNames[Array.IndexOf(booleanOperators, c)];
@@ -941,9 +970,9 @@ namespace _2BNOR_2B.Code
             canvasWidth = c.ActualWidth;
             GenerateBinaryTreeFromExpression(infixExpression);
             inputMap = GenerateInputMap(infixExpression, true);
-            headers = GetHeaders(infixExpression, false);
-            outputMap = GenerateOutputMap(infixExpression, headers, false);
-            outputMap = outputMap.Distinct().ToArray();
+            headers = GetHeaders(infixExpression, true);
+            outputMap = GenerateOutputMap(infixExpression, headers, true);
+            //outputMap = outputMap.Distinct().ToArray();
             int heightOfTree = GetHeightOfTree(rootNode);
             DrawNodes(rootNode, heightOfTree);
             DrawWires(rootNode);
@@ -1547,6 +1576,12 @@ namespace _2BNOR_2B.Code
             return newKeys;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="epis"></param>
+        /// <param name="PIchart"></param>
+        /// <returns></returns>
         private static string GetCoveredString(List<string> epis, Dictionary<string, string> PIchart)
         {
             int result = 0;
@@ -1806,6 +1841,13 @@ namespace _2BNOR_2B.Code
             return finalresult;
         }
 
+        /// <summary>
+        /// Finds the product within the sum of products from the distributive law that has
+        /// the fewest terms within it. This allows the most minimal expression to be the 
+        /// result. 
+        /// </summary>
+        /// <returns>The shortest product within the array representing the sum of 
+        /// products. </returns>
         private static string GetMinProduct(string[] sumOfProducts)
         {
             string min = sumOfProducts[0];
@@ -1819,17 +1861,30 @@ namespace _2BNOR_2B.Code
             return min;
         }
 
+        /// <summary>
+        /// Iterates through the smallest product from the sum of products. Each term within
+        /// the product is then replaced with its respective prime implicant which can then 
+        /// be converted into the completely minimised expression. 
+        /// </summary>
+        /// <param name="termToImplicantMap">The mapping between prime implicants and letters.
+        /// This simplifies boolean algebra with the prime implicants.</param>
+        /// <param name="minProduct">The smallest product found in the sum of products. 
+        /// This product will produced the most minimal result. </param>
+        /// <returns></returns>
         private string GetFinalExpression(Dictionary<char, string> termToImplicantMap, string minProduct)
         {
             string subExpression;
             string implicant;
             string result = "";
-
             for (var i = 0; i < minProduct.Length; i++)
             {
+                // Convert the letter into an implicant which then produces the minimal 
+                // expression. ie. K => -011 => !B.C.D
                 implicant = termToImplicantMap[minProduct[i]];
                 subExpression = ConvertImplicantToExpression(implicant);
                 result += subExpression;
+                // If we are not converting the last term then the implicants must be 
+                // separated by OR gates. 
                 if (i < minProduct.Length - 1)
                 {
                     result += " + ";
