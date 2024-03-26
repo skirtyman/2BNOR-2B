@@ -35,7 +35,7 @@ namespace _2BNOR_2B
             gateName.Text = $"Name: {gate}";
             int i = Array.IndexOf(names, gate);
             gateDescription.Text = $"Description: {descriptions[i]}";
-            BooleanConverter bc = new();
+            var bc = new BooleanConverter();
             string converted = bc.ConvertString(exampleExpressions[i]);
             renderedExpressionBox.Formula = converted;
             d.DrawTruthTable(TruthTableCanvas, exampleExpressions[i]);

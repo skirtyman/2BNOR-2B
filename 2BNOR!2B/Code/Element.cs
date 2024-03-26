@@ -16,15 +16,12 @@ namespace _2BNOR_2B.Code
         private int state;
         private readonly char label;
         private readonly string elementName;
-        //private bool uniqueness = false;
         private int instances = 0;
 
         public Element()
         {
 
         }
-
-        //constructor for creating output pins 
         public Element(int elementID)
         {
             this.elementID = elementID;
@@ -32,8 +29,6 @@ namespace _2BNOR_2B.Code
             label = 'Q';
             elementName = "output_pin";
         }
-
-        //constructor for creating input pins 
         public Element(int elementID, char label)
         {
             this.elementID = elementID;
@@ -44,8 +39,6 @@ namespace _2BNOR_2B.Code
             elementName = "input_pin";
 
         }
-
-        //constructor for logic gates
         public Element(string elementName, int elementID, Element leftChild, Element rightChild)
         {
             this.elementID = elementID;

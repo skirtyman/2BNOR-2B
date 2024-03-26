@@ -21,14 +21,12 @@ namespace _2BNOR_2B.Code
             return r.Replace(input, replacement);
         }
 
-        //implementation of the 'Shunting Yard' algorithm for boolean expressions. This produces the postfix boolean expression of an infix expression. 
         private string ConvertInfixtoPostfix(string infixExpression)
         {
             infixExpression = RemoveWhitespace(infixExpression, "");
-            Stack<char> operatorStack = new();
+            var operatorStack = new Stack<char>();
             string postfixExpression = "";
             int operatorPrecedence;
-            //tokenising infix ready for the conversion
             foreach (char token in infixExpression)
             {
                 if (char.IsLetter(token) || char.IsNumber(token))
@@ -37,7 +35,6 @@ namespace _2BNOR_2B.Code
                 }
                 else if (booleanOperators.Contains(token))
                 {
-                    //precedence value of the token
                     operatorPrecedence = Array.IndexOf(booleanOperators, token);
                     while (operatorStack.Count > 0 && operatorStack.Peek() != '(' && Array.IndexOf(booleanOperators, operatorStack.Peek()) > operatorPrecedence)
                     {
@@ -65,7 +62,7 @@ namespace _2BNOR_2B.Code
             return postfixExpression;
         }
 
-        private string GetLATEXFromChar(char c)
+        private static string GetLATEXFromChar(char c)
         {
             switch (c)
             {
@@ -82,7 +79,7 @@ namespace _2BNOR_2B.Code
 
         public string ConvertString(string inputString)
         {
-            Stack<string> subExpressionStack = new();
+            var subExpressionStack = new Stack<string>();
             string subexpression;
             string postfix = ConvertInfixtoPostfix(inputString);
             string operand1;

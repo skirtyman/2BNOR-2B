@@ -53,6 +53,7 @@
                     <TextBox Margin="5,0" FontFamily="Consolas" Name="inputBox" FontSize="20"/>
                     <Rectangle Height="10"/>
                     <TextBlock FontFamily="Consolas" FontSize="18" Text="Rendered Expression: "/>
+                    <Rectangle Height="10"/>
                     <controls:FormulaControl x:Name="renderedExpression" Formula="{Binding Path=Text, ElementName=inputBox, Converter={StaticResource booleanConverter}}"/>
                 </StackPanel>
             </Border>

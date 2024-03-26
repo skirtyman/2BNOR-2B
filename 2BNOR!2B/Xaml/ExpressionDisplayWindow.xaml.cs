@@ -23,7 +23,7 @@ namespace _2BNOR_2B
         public renderedExpression(string expression, string HeaderText)
         {
             InitializeComponent();
-            BooleanConverter bc = new();
+            var bc = new BooleanConverter();
             string converted = bc.ConvertString(expression); 
             renderedExpressionBox.Formula = converted;
             HeadingText.Text = HeaderText; 

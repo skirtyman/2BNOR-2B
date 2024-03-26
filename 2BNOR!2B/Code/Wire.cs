@@ -77,8 +77,6 @@ namespace _2BNOR_2B.Code
         {
             return inputGate;
         }
-
-        //Returns list of lines depending on orientation. Or all lines if not specificed.
         public List<Point> GetPoints(bool? isHorizontal)
         {
             if (isHorizontal == true)
@@ -97,8 +95,8 @@ namespace _2BNOR_2B.Code
 
         private List<Point> GetHorizontalPoints()
         {
-            List<Point> p = new();
-            for (int i = 0; i < points.Count - 1; i++)
+            var p = new List<Point>();
+            for (var i = 0; i < points.Count - 1; i++)
             {
                 if (points[i].Y == points[i + 1].Y)
                 {
@@ -111,8 +109,8 @@ namespace _2BNOR_2B.Code
 
         private List<Point> GetVerticalPoints()
         {
-            List<Point> p = new();
-            for (int i = 0; i < points.Count - 1; i++)
+            var p = new List<Point>();
+            for (var i = 0; i < points.Count - 1; i++)
             {
                 if (points[i].X == points[i + 1].X)
                 {
@@ -138,26 +136,19 @@ namespace _2BNOR_2B.Code
         public void SetPoints()
         {
             points.Add(inputPoint);
-            //creating the first horizontal line. 
             double midpointX = (inputPoint.X + outputPoint.X) / 2 - shift * 10;
-            Point midpoint = new(midpointX, inputPoint.Y);
+            var midpoint = new Point(midpointX, inputPoint.Y);
             points.Add(midpoint);
             midpoint.Y = outputPoint.Y;
             points.Add(midpoint);
             points.Add(outputPoint);
         }
-
-
-        //Splits the line segment, adds a curved bridge for the wire intersection. 
         public void AddBridge(Point? bridgeLocation)
         {
             points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y - radiusOfArc / 2));
             points.Insert(2, new Point(bridgeLocation.Value.X, bridgeLocation.Value.Y + radiusOfArc / 2));
             wireString = wireString.Insert(wireString.Length - 1, "bl");
         }
-
-        //renders the points list so that the wire is displayed to the canvas.
-        //Takes the list of points and adds the relative shapes to the geometry group
         public void RenderLine()
         {
             PathFigure pf;
@@ -167,7 +158,7 @@ namespace _2BNOR_2B.Code
             c.Children.Remove(p);
             pg.Clear();
             pfc.Clear();
-            for (int i = 0; i < wireString.Length; i++)
+            for (var i = 0; i < wireString.Length; i++)
             {
                 pf = new PathFigure
                 {
@@ -175,7 +166,6 @@ namespace _2BNOR_2B.Code
                 };
                 if (wireString[i] == 'l')
                 {
-                    //draw a line
                     l = new LineSegment
                     {
                         Point = points[i + 1],
@@ -184,8 +174,7 @@ namespace _2BNOR_2B.Code
                     pf.Segments.Add(l);
                 }
                 else
-                {
-
+                { 
                     s = new Size(radiusOfArc / 4, radiusOfArc / 4);
                     arc = new ArcSegment(points[i + 1], s, 180, true, SweepDirection.Clockwise, true);
                     pf.Segments.Add(arc);

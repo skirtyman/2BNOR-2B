@@ -10,8 +10,6 @@ namespace _2BNOR_2B.Code
     {
         public Bracket(char term1, char term2)
         {
-            //Sorting so the terms are in alphabetical order. 
-            //This is for the distributive law. 
             if (term1 < term2)
             {
                 this.term1 = term1.ToString();

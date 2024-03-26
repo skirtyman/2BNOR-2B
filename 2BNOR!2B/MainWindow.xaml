@@ -65,8 +65,8 @@
             <ScrollViewer CanContentScroll="True"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto">
-                <Canvas x:Name="MainWindowCanvas" MouseDown="MainWindowCanvas_MouseDown"
-                    SizeChanged="MainWindowCanvas_SizeChanged" Height="1" Width="1"/>
+                <Canvas x:Name="MainWindowCanvas" 
+                        MouseDown="MainWindowCanvas_MouseDown" Height="1" Width="1"/>
             </ScrollViewer>
         </Border>
 
@@ -76,8 +76,8 @@
             <ScrollViewer CanContentScroll="True"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto">
-                <Canvas x:Name="TruthTableCanvas" SizeChanged="TruthTableCanvas_SizeChanged"
-                            Height="1" Width="1"/>
+                <Canvas x:Name="TruthTableCanvas" 
+                        Height="1" Width="1"/>
             </ScrollViewer>
         </Border>
 
@@ -155,7 +155,6 @@
                 <Button Style="{StaticResource PopUpButtons}" Grid.Column="4" Grid.Row="1"
                         Click="Button_Click_TT">
                     <TextBlock Style="{StaticResource TextBlockStyle}" Text="Clear Truth Table"/>
-
                 </Button>
             </Grid>
         </GroupBox>

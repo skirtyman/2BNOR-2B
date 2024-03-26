@@ -53,6 +53,7 @@ namespace _2BNOR_2B
 
         private void LogicGate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            MessageBox.Show(GetInputPoint1().X + "," + GetInputPoint2().Y); 
             if (gate.GetElementName() == "input_pin")
             {
                 if (gate.GetState() == 1)
@@ -83,8 +84,6 @@ namespace _2BNOR_2B
                 return new Point(Canvas.GetLeft(this), Canvas.GetTop(this)+30); 
             }
         }
-
-        //Returns the point that is drawn too, for connecting the input and root node together. 
         public Point GetInputForOutput()
         {
             return new Point(Canvas.GetLeft(this), Canvas.GetTop(this) + elementImage.Height / 2 - 1);
