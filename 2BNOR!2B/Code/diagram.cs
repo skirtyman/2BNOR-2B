@@ -1729,6 +1729,14 @@ namespace _2BNOR_2B.Code
             throw new Exception("Could not map implicant to key");
         }
 
+        /// <summary>
+        /// Converts the product of sums (A+B)(C+D)... into the sum of products of the boolean
+        /// expression. sum of products = AB + CD + etc. This allows the program to find the
+        /// minimal term(solution) which can ultimately give the minimised expression. 
+        /// </summary>
+        /// <param name="productOfSums">The product of sums found in the prime implicant 
+        /// chart. </param>
+        /// <returns> The sum of products of the expression which is used to minimise the input</returns>
         private static string[] GetSumOfProducts(List<Bracket> productOfSums)
         {
             _ = new List<Bracket>();
@@ -1736,17 +1744,27 @@ namespace _2BNOR_2B.Code
             Bracket b2;
             Bracket mergedTerm;
             bool merged = true;
+            // Keep trying to merge the brackets together until no more merges can be made. 
+            // This means that the distributive law can be applied to the brackets at that point.
             while (merged)
             {
                 merged = false;
+                // Checking each sum to ensure the most merges take place. 
                 for (var i = 0; i < productOfSums.Count - 1; i++)
                 {
+                    // Start c at i + 1 because the order of brackets doe not matter, so
+                    // simply search through the remaining brackets. 
                     for (var c = i + 1; c < productOfSums.Count; c++)
                     {
                         b1 = productOfSums[i];
                         b2 = productOfSums[c];
+                        // Ensuring that the brackets are not the same. Must also consider if
+                        // the terms are the same but in the opposite order.
                         if (b1.term1 == b2.term1 != (b1.term2 == b2.term2) != (b1.term1 == b2.term2) != (b1.term2 == b2.term1))
                         {
+                            // A make the merge as it is a valid one and remove the brackets
+                            // that result in the merge. This is to stop the same merges 
+                            // occurring again and again. 
                             mergedTerm = MergeBrackets(b1, b2);
                             productOfSums.Add(mergedTerm);
                             productOfSums.Remove(b1);
@@ -1758,21 +1776,38 @@ namespace _2BNOR_2B.Code
                     }
                 }
             }
-
+            // Convert the merged product of sums into a string, this allows each bracket
+            // to have more than two products within it. 
             List<List<string>> param = ConvertBracketsToString(productOfSums);
+            // Recursively apply the distributive law which does the rest of the work. 
             List<List<string>> sumOfProducts = RecursiveDistributiveLaw(param);
+            // The first term within the 2D list is the only bracket that remains and hence
+            // can no longer be merged. It also contains all of the solutions to the minimsation.
             return sumOfProducts[0].ToArray();
         }
 
+        /// <summary>
+        /// Carries out the first merge when creating the sum of products. This converts
+        /// the product of sums found previously into the correct form for the 
+        /// recursive application of the distributive law to find the sum of products.
+        /// </summary>
+        /// <param name="b1">One set of terms being merged</param>
+        /// <param name="b2">The other set of terms being merged</param>
+        /// <returns></returns>
         private static Bracket MergeBrackets(Bracket b1, Bracket b2)
         {
+            // Create new bracket which stores the merged terms. 
             var b = new Bracket();
+            // When using the distributive law the term that is the same always remains
+            // the first term of the result. The second is the AND of the remaining terms.
             if (b1.term1 == b2.term1)
             {
                 b.term1 = b1.term1;
                 b.term2 = b1.term2 + b2.term2;
                 return b;
             }
+            // The second term of the first bracket must match b2.term1 as they are in 
+            // alphabetical order. 
             else
             {
                 b.term1 = b1.term2;
@@ -1781,12 +1816,22 @@ namespace _2BNOR_2B.Code
             }
         }
 
+        /// <summary>
+        /// Converts the bracket representation into a string representation. This is because
+        /// at this stage of the working, it is possible to have a bracket with more than two
+        /// terms such as (AB + CD + EF). The first dimension is the bracket and the second
+        /// dimension are the terms themselves. 
+        /// </summary>
+        /// <param name="brackets"></param>
+        /// <returns></returns>
         private static List<List<string>> ConvertBracketsToString(List<Bracket> brackets)
         {
             var result = new List<List<string>>();
             List<string> tmp;
             foreach (Bracket b in brackets)
             {
+                // For now the each bracket(list) will only store the two terms in the 
+                // struct as the distributive has not been applied yet. 
                 tmp = new List<string>
                 {
                     b.term1,
@@ -1800,39 +1845,68 @@ namespace _2BNOR_2B.Code
         private static List<List<string>> RecursiveDistributiveLaw(List<List<string>> brackets)
         {
             var lls = new List<List<string>>();
+            // The distributive law can be applied as long as there are at least 2 brackets
+            // remaining in the expression. 
             if (brackets.Count > 1)
             {
+                // Applies the distributive law on two brackets that contain n and m terms
+                // each and adds the result to the list of remaining brackets. 
                 lls.Add(SingleDistributiveLaw(brackets[0], brackets[1]));
+                // The brackets used within the distributive law do not persist.
+                // This means that they should be removed.
                 brackets.RemoveAt(0);
                 brackets.RemoveAt(0);
                 lls.AddRange(brackets);
+                // More than 2 brackets remain and so repeat the process. 
                 return RecursiveDistributiveLaw(lls);
             }
             else
             {
+                // Distributive law can no longer be applied and so return the complete
+                // sum of products. 
                 return brackets;
             }
         }
 
+        /// <summary>
+        /// Applies the distributive law on two brackets that store m and n terms
+        /// respectively. This is because (KN+KLQ+LMN+LMQ)(P+MQ) can be further
+        /// distributed. 
+        /// </summary>
+        /// <param name="b1">A bracket storing m number of terms. </param>
+        /// <param name="b2">A bracket storign n number of temrs that merges into b1.</param>
+        /// <returns></returns>
         private static List<string> SingleDistributiveLaw(List<string> b1, List<string> b2)
         {
             var lls = new List<string>();
+            // Apply the law to every term within both of the brackets to find the complete
+            // expansion of the two brackets. 
             for (var i = 0; i < b1.Count; i++)
             {
                 for (var j = 0; j < b2.Count; j++)
                 {
+                    // Applying the distributive law to two products. e.g. KLQ and P
                     lls.Add(ApplyDistributiveLaw(b1[i], b2[j]));
                 }
             }
             return lls;
         }
 
+        /// <summary>
+        /// Apply the distributive on two individual terms in the supplied brackets. 
+        /// This simply filters out the duplicate inputs as all unique inputs must remain
+        /// when the law is applied. 
+        /// </summary>
+        /// <param name="a">A product with a number of terms. </param>
+        /// <param name="b">A product that is being distributed with A</param>
+        /// <returns></returns>
         private static string ApplyDistributiveLaw(string a, string b)
         {
             string tempresult = a + b;
             string finalresult = "";
             foreach (char c in tempresult)
             {
+                // Simply find the unique inputs to gain the result of the law. 
                 if (!finalresult.Contains(c))
                 {
                     finalresult += c;
