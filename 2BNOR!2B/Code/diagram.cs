@@ -1633,6 +1633,17 @@ namespace _2BNOR_2B.Code
             }
             return -1;
         }
+
+        /// <summary>
+        /// Method that carries out the stepwise process of Petricks's method. The process 
+        /// the algorithm is defined on the methods' Wikipedia page.
+        /// </summary>
+        /// <param name="PIchart">The prime implicant chart found during QM. </param>
+        /// <param name="epis">The essential prime implicants found in the PIchart.</param>
+        /// <param name="primeImplicants">All of the prime implicants found during 
+        /// the inital merging process of QM.</param>
+        /// <param name="minterms">The minterm of </param>
+        /// <returns></returns>
         private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants, List<string> minterms)
         {
             PIchart = RemoveEPIs(PIchart, epis, minterms);
@@ -1645,31 +1656,61 @@ namespace _2BNOR_2B.Code
             return minimisedExpression;
         }
 
+        /// <summary>
+        /// Creates the relationship between terms and prime implicants. This makes 
+        /// the creation of product of sums and sum of products much clearer as the 
+        /// prime implicants are abstracted to a single letter. It also allows for 
+        /// multiple string of prime implicants to represented in a concise manner.
+        /// </summary>
+        /// <param name="primeImplicants">The prime implicants found by the intial
+        /// merge of the minterms of the boolean expression.</param>
+        /// <returns>The relationship between terms and prime implicants as a
+        /// dictionary. </returns>
         private static Dictionary<char, string> MapTermsToImplicants(List<string> primeImplicants)
         {
             var mapping = new Dictionary<char, string>();
+            // To ensure that unique characters are used as the terms. Take the largest
+            // ascii value (highest inputs) and convert it to the next character and
+            // this is the first character in the map. 
             char minChar = (char)(primeImplicants[0].Length + 65);
             for (var i = 0; i < primeImplicants.Count; i++)
             {
                 mapping.Add(minChar, primeImplicants[i]);
+                // Incrementing so that the inputs within the map are sequential. 
                 minChar++;
             }
             return mapping;
 
         }
 
+        /// <summary>
+        /// Produces the product of sums of the prime implicant chart. This stage prepares
+        /// the data so that the boolean algebra can be done on the expression. 
+        /// </summary>
+        /// <param name="termToImplicantMap">The relationship between terms and 
+        /// prime implicants. </param>
+        /// <param name="primeImplicantChart">The relationship between minterm coverage
+        /// and the prime implicants found in the intial process of QM. </param>
+        /// <returns> The product of sums of the PI chart, in the form [('K', 'L'), etc.]</returns>
         private static List<Bracket> GetProductOfSums(Dictionary<char, string> termToImplicantMap, Dictionary<string, string> primeImplicantChart)
         {
             var productOfSums = new List<Bracket>();
             List<Bracket> sumsToAdd;
             string primeImplicant;
+            // A sum can be made if the minterm is covered by two implicants. 
+            // So loop through each key to find its coverage of the minterms
             foreach (string key in primeImplicantChart.Keys)
             {
                 primeImplicant = primeImplicantChart[key];
+                // Iterate through each minterm.
                 for (var i = 0; i < primeImplicant.Length; i++)
                 {
+                    // If the prime implicant covers the minterm then a possible sum 
+                    // could be found so search through the chart vertically.
                     if (primeImplicant[i] == '1')
                     {
+                        // Get all of the possible sums within the column of the covered
+                        // minterm and add them to the found sums. 
                         sumsToAdd = GetSumsToAdd(primeImplicantChart, termToImplicantMap, key, i);
                         AddSumsToList(productOfSums, sumsToAdd);
                     }
@@ -1678,6 +1719,14 @@ namespace _2BNOR_2B.Code
             return productOfSums;
         }
 
+        /// <summary>
+        /// Ensures that duplicate sums are not added the list as X.X = X and so they cancel
+        /// off.
+        /// </summary>
+        /// <param name="productOfSums">The sums that have currently been found during
+        /// the iteration through the prime implicant chart. </param>
+        /// <param name="sumsToAdd">The sums that have found by searching through the 
+        /// column of the covered minterm. </param>
         private static void AddSumsToList(List<Bracket> productOfSums, List<Bracket> sumsToAdd)
         {
             Bracket reverse;
@@ -1691,6 +1740,19 @@ namespace _2BNOR_2B.Code
             }
         }
 
+        /// <summary>
+        /// Gets all of the possible sums that are within a column of the prime implicant
+        /// chart. This is done by searching through and if another implicant covers the 
+        /// same minterm then a sum can be made. 
+        /// </summary>
+        /// <param name="PIchart">The relationship between the prime implicants and 
+        /// the minterms that they cover. </param>
+        /// <param name="termToImplicantMap">The relationship between terms in the boolean
+        /// algebra and the prime implicants that they represent.</param>
+        /// <param name="key">The prime implicant that caused the column search</param>
+        /// <param name="positionWithinKey">The minterm that the prime implicant must
+        /// cover in order for a sum to be created. It must not be the same implicant. </param>
+        /// <returns>All of the possible sums for a prime implicant that covers a minterm. </returns>
         private static List<Bracket> GetSumsToAdd(Dictionary<string, string> PIchart, Dictionary<char, string> termToImplicantMap, string key, int positionWithinKey)
         {
             var sumsToAdd = new List<Bracket>();
@@ -1698,15 +1760,22 @@ namespace _2BNOR_2B.Code
             string k;
             char term1;
             char term2;
+            // Iterate through each prime implicant to try and find as many sums as possible.
             for (var i = 0; i < PIchart.Keys.Count; i++)
             {
+                // The prime implicant that could make a sum. 
                 k = PIchart.Keys.ToArray()[i];
+                // If the implicant covers the same minterm then a sum has been found and a
+                // bracket can be created. 
                 if (PIchart[k][positionWithinKey] == '1')
                 {
+                    // Getting the letters that represent a certain prime implicant. 
                     term1 = GetTermFromImplicant(termToImplicantMap, key);
                     term2 = GetTermFromImplicant(termToImplicantMap, k);
+                    // Ensuring brackets are not made with duplicate term. 
                     if (term1 != term2)
                     {
+                        // A new sum is created and added to the list. 
                         sum = new Bracket(term1, term2);
                         sumsToAdd.Add(sum);
                     }
@@ -1715,9 +1784,21 @@ namespace _2BNOR_2B.Code
             return sumsToAdd;
         }
 
+        /// <summary>
+        /// Searches and return the given term for a prime implicant, based off of the map
+        /// created by the program. 
+        /// </summary>
+        /// <param name="termToImplicantMap">Assignment of terms(letters) that represent
+        /// prime implicants. This simplification easier to deal with. </param>
+        /// <param name="implicant">The prime implicant being searched for. </param>
+        /// <returns>The term that is the key to the respective prime implicant.</returns>
+        /// <exception cref="Exception">The implicant that is being searched for could not
+        /// be found within the termToImplicantMap </exception>
         private static char GetTermFromImplicant(Dictionary<char, string> termToImplicantMap, string implicant)
         {
+            // All of the prime implicants that are within the prime implicant. 
             string[] values = termToImplicantMap.Values.ToArray();
+            // The letter that represents the prime implicant within the simplififcation. 
             char[] keys = termToImplicantMap.Keys.ToArray();
             for (var i = 0; i < termToImplicantMap.Values.Count; i++)
             {
