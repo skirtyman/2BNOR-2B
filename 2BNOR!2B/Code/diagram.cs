@@ -457,9 +457,8 @@ namespace _2BNOR_2B.Code
                 }
                 else
                 {
-                    // Pick up an input state only if the input of the same label has not 
-                    // been visited. This is because they will have the same input state.
-                    if (root.GetElementName() == "input_pin" && visited.Contains(root.GetLabel()) == false)
+                    // Get the state if the node the current traversal is on, is an input. 
+                    if (root.GetElementName() == "input_pin")
                     {
                         inputStates += root.GetState();
                         visited += root.GetLabel();
@@ -636,37 +635,6 @@ namespace _2BNOR_2B.Code
                 x = CalculateXposition(depthWithinTree) - 50;
             }
             return TranslateNode(x, heightOfTree);
-        }
-        private static LogicGate GetWidestGate(Element root)
-        {
-
-            var tmp = new Element();
-            var q = new Queue<Element>();
-            q.Enqueue(root);
-            while (q.Count > 0)
-            {
-                tmp = q.Dequeue();
-                if (tmp.rightChild != null && tmp.rightChild.GetLogicGate() != null)
-                {
-                    q.Enqueue(tmp.rightChild);
-                }
-            }
-            return tmp.GetLogicGate();
-        }
-
-        public Rect GetBoundsOfDiagram()
-        {
-            try
-            {
-                LogicGate l = GetWidestGate(rootNode);
-                double maxX = Canvas.GetRight(outputNode.GetLogicGate()) + 75;
-                double maxY = Canvas.GetBottom(l) + 25;
-                return new Rect(new Size(maxX, maxY));
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Could not get bounds for diagram as it doesnt exist. ", ex);
-            }
         }
 
         private Wire DrawWiresForLeftChildren(Element root)
@@ -969,9 +937,9 @@ namespace _2BNOR_2B.Code
         {
             canvasWidth = c.ActualWidth;
             GenerateBinaryTreeFromExpression(infixExpression);
-            inputMap = GenerateInputMap(infixExpression, true);
-            headers = GetHeaders(infixExpression, true);
-            outputMap = GenerateOutputMap(infixExpression, headers, true);
+            inputMap = GenerateInputMap(infixExpression, false);
+            headers = GetHeaders(infixExpression, false);
+            outputMap = GenerateOutputMap(infixExpression, headers, false);
             //outputMap = outputMap.Distinct().ToArray();
             int heightOfTree = GetHeightOfTree(rootNode);
             DrawNodes(rootNode, heightOfTree);
@@ -1307,12 +1275,29 @@ namespace _2BNOR_2B.Code
         #endregion
 
         #region Minimisation
+        /// <summary>
+        /// Produces the final minimised expression is Petrick's method is not used. 
+        /// </summary>
+        /// <param name="essentialPrimeImplicants">The essential prime implicants found by the program.</param>
+        /// <returns>The final minimised expression. </returns>
         private string ConvertEPIsToExpression(List<string> essentialPrimeImplicants)
         {
+            // Connverting all of the essential prime implicants that have been found and 
+            // producing a final expression. Each implicant is separated by an OR gate in 
+            // the final expression. 
             essentialPrimeImplicants = essentialPrimeImplicants.ConvertAll(new Converter<string, string>(ConvertImplicantToExpression));
             string expression = string.Join("+", essentialPrimeImplicants);
             return expression;
         }
+
+        /// <summary>
+        /// Converts the binary form (such as -100) into terms of an expression such as 
+        /// (B!C!D) in this example. This is used for outputting minimised expressions when 
+        /// they need to be converted into their final form. 
+        /// </summary>
+        /// <param name="epi">The prime implicant being converted. This is usually and essential 
+        /// one. </param>
+        /// <returns>The expression form of the prime implicant. </returns>
         private string ConvertImplicantToExpression(string epi)
         {
             string tmp = "";
@@ -1320,15 +1305,19 @@ namespace _2BNOR_2B.Code
             for (var i = 0; i < epi.Length; i++)
             {
                 input = (char)(i + 65);
+                // If the bit is a one then the output must be in the expression. 
                 if (epi[i] == '1')
                 {
                     tmp += input;
                 }
+                // If the bit is azero then the complement is added to the expression => !A. 
                 else if (epi[i] == '0')
                 {
                     tmp += $"!{input}";
                 }
-
+                // Each bit within the implicant is separated by an AND gate within the
+                // expression. AND gates should not be added at the end or the start of the 
+                // implicant. 
                 if (epi.Length == 2)
                 {
                     if (i == 0 && epi[i] != '-')
@@ -1344,8 +1333,17 @@ namespace _2BNOR_2B.Code
                     }
                 }
             }
+            // Add brackets to preserve pretty formatting. 
             return $"({tmp})";
         }
+
+        /// <summary>
+        /// Creates the minterm coverage strings for the prime implicants. These string show
+        /// which prime implicants cover which minterms. This is used in finding the essential 
+        /// prime implicants and also they are used in petricks method for finding the product of sums. 
+        /// </summary>
+        /// <param name="regex">The prime implicant chart being filled.</param>
+        /// <param name="minterms">The minterms for the user entered boolean expression.</param>
         private static void SetRegexPatterns(Dictionary<string, string> regex, List<string> minterms)
         {
             Match res;
@@ -1353,11 +1351,15 @@ namespace _2BNOR_2B.Code
             {
                 foreach (string minterm in minterms)
                 {
+                    // If minterm matches the form of the prime implicants, shown by Regex, 
+                    // then a one can be written to the coverage string showing that the
+                    // implicant covers this minterm. 
                     res = Regex.Match(minterm, regexPattern);
                     if (res.Success)
                     {
                         regex[regexPattern] += "1";
                     }
+                    //The implicant does not cover this minterm. 
                     else
                     {
                         regex[regexPattern] += "0";
@@ -1365,12 +1367,22 @@ namespace _2BNOR_2B.Code
                 }
             }
         }
+
+        /// <summary>
+        /// Prepares the prime implicant so that the minterm coverage strings can be created
+        /// from the regex. This is also the point in which the keys are added to the dictionary. 
+        /// </summary>
+        /// <param name="regex">The empty prime implicant chart. </param>
+        /// <param name="primeImplicants">The prime implicants that have been found from merging 
+        /// minterms. </param>
         private static void ConvertImplicantsIntoRegex(Dictionary<string, string> regex, List<string> primeImplicants)
         {
             string tmp = "";
             string value = "";
             foreach (string primeImplicant in primeImplicants)
             {
+                // Replacing any dashes with \d as to indicate that the character in that 
+                // position does not matter. Otherwise the bit must remain.  
                 foreach (char c in primeImplicant)
                 {
                     if (c == '-')
@@ -1382,10 +1394,22 @@ namespace _2BNOR_2B.Code
                         tmp += c;
                     }
                 }
+                // Adding the key and empty value to the dictionary. The value will be 
+                // populated when the regex is carried out on the minterms. 
                 regex.Add(tmp, value);
                 tmp = "";
             }
         }
+
+        /// <summary>
+        /// Merges two minterms when finding the prime implicants. This is because a dash is 
+        /// added in place of the differing bit when the merge has been made. 
+        /// </summary>
+        /// <param name="m1">One of the minterms being merged.</param>
+        /// <param name="m2">One of the minterms being merged.</param>
+        /// <returns>The merged minterm with the dashes present.</returns>
+        /// <exception cref="Exception">The minterms are not of the same length and so cannot 
+        /// be merged to produce a valid result. </exception>
         private static string MergeMinterms(string m1, string m2)
         {
             string mergedMinterm = "";
@@ -1397,6 +1421,8 @@ namespace _2BNOR_2B.Code
             {
                 for (var i = 0; i < m1.Length; i++)
                 {
+                    // If the bit differs then replace it with a dash.
+                    // Otherwise just add the bit from one of the mitnerms as it is the same.. 
                     if (m1[i] != m2[i])
                     {
                         mergedMinterm += '-';
@@ -1409,6 +1435,16 @@ namespace _2BNOR_2B.Code
                 return mergedMinterm;
             }
         }
+
+        /// <summary>
+        /// For a merge to take place when finding the prime implicants, the dashes in both 
+        /// of the minterms must align.
+        /// </summary>
+        /// <param name="m1">A minterm. </param>
+        /// <param name="m2">The other minterm being checked with. </param>
+        /// <returns>Whether or not the dashes within two mintemrs are in the same position.</returns>
+        /// <exception cref="Exception">If the minterms are of different lengths then the dashes
+        /// cannot be checked as you cannot iterate through one of strings and check both minterms. </exception>
         private static bool CheckDashesAlign(string m1, string m2)
         {
             if (m1.Length != m2.Length)
@@ -1419,33 +1455,56 @@ namespace _2BNOR_2B.Code
             {
                 for (var i = 0; i < m1.Length; i++)
                 {
+                    // If one of the minterms is a dash and the other is then the dashes
+                    // do not align and so the minterms cannot be merged together. 
                     if (m1[i] != '-' && m2[i] == '-')
                     {
                         return false;
                     }
                 }
+                // Dashes must align and so this condition has been met. 
                 return true;
             }
         }
+
+        /// <summary>
+        /// A merge can only take place if only one bit differs between the two minterms. 
+        /// </summary>
         private static bool CheckMintermDifference(string m1, string m2)
         {
+            // Removing the dashes so that bitwise operators can be used. 
             int minterm1 = RemoveDashes(m1);
             int minterm2 = RemoveDashes(m2);
+            // XOR identifies any bits that differ between the two minterms. 
             int res = minterm1 ^ minterm2;
+            // If res != 0, then one bit could differ. This checked with the AND.
             return res != 0 && (res & res - 1) == 0;
         }
+
+        /// <summary>
+        /// Converts the minterms' dashes into zeros so that the bit difference can 
+        /// be easily checked. 
+        /// </summary>
         private static int RemoveDashes(string minterm)
         {
             return Convert.ToInt32(minterm.Replace('-', '0'), 2);
         }
 
+        /// <summary>
+        /// Finds all of the minterms of the user-entered boolean expression. A minterm is 
+        /// any binary input combination that results in the expression evalutating to 1. 
+        /// </summary>
+        /// <param name="expression">The user-entered boolean expression being minimised.</param>
+        /// <returns>The list of minterms of the boolean expression.</returns>
         private List<string> GetMinterms(string expression)
         {
             var minterms = new List<string>();
+            int result; 
             inputMap = GenerateInputMap(expression, true);
             foreach (string input in inputMap)
             {
-                int result = EvaluateBooleanExpression(input, expression) - 48;
+                // Trying the evaluation and seeing if the result is a minterm. 
+                result = EvaluateBooleanExpression(input, expression) - 48;
                 if (result == 1)
                 {
                     minterms.Add(input);
@@ -1453,6 +1512,15 @@ namespace _2BNOR_2B.Code
             }
             return minterms;
         }
+
+        /// <summary>
+        /// The number prime implicants that cover a particular minterm within the prime 
+        /// implicant chart. This can be used to find the essential prime implicants. 
+        /// </summary>
+        /// <param name="regex">The prime implicant chart of the boolean expression</param>
+        /// <param name="minterms">The binary combinations that result in the expression
+        /// evaluating to true. </param>
+        /// <returns>The number of prime implicants that cover each minterm. </returns>
         private static int[] GetFrequencyTable(Dictionary<string, string> regex, List<string> minterms)
         {
             int[] sums = new int[minterms.Count];
@@ -1468,14 +1536,27 @@ namespace _2BNOR_2B.Code
             }
             return sums;
         }
+
+        /// <summary>
+        /// Performs the column search within the prime implicant chart, this is to 
+        /// search for an essential prime implicant. 
+        /// </summary>
+        /// <param name="regex">The prime implicant chart. </param>
+        /// <param name="pos">The column (minterm) that we are checking within the chart.</param>
+        /// <returns>The only prime implicant that covers that minterm within the chart.</returns>
+        /// <exception cref="Exception">No prime implicant covers that minterm and so the frequency 
+        /// table has been incorrectly calculated. </exception>
         private static string GetEssentialPrimeImplicant(Dictionary<string, string> regex, int pos)
         {
             string[] essentialPrimes = regex.Values.ToArray();
             string[] keys = regex.Keys.ToArray();
             string prime;
+            // Iterating through each of the prime implicants. 
             for (var i = 0; i < essentialPrimes.Length; i++)
             {
+                // Getting the minterm coverage for the prime implicant. 
                 prime = essentialPrimes[i];
+                // If the specified column is a 1 then the essential prime implicant has been found.
                 if (prime[pos] == '1')
                 {
                     return keys[i];
@@ -1484,15 +1565,31 @@ namespace _2BNOR_2B.Code
             throw new Exception("Item could be found");
         }
 
+        /// <summary>
+        /// Filters through the coverages of each of the prime implicants searching for the 
+        /// essential prime implicants. These are the prime implicants that are the only 
+        /// implicant to cover a minterm. 
+        /// </summary>
+        /// <param name="regex">The prime implicant chart produced from the regex and 
+        /// the prime implicants. </param>
+        /// <param name="minterms">The binary combinations that result in the expression 
+        /// evaluating to 1. </param>
+        /// <returns>Every prime implicant within the prime implicant chart that is essential/ </returns>
         private static List<string> GetEssentialPrimeImplicants(Dictionary<string, string> regex, List<string> minterms)
         {
+            // Find the number of ones within each column of the prime implicant chart. 
             int[] bitFrequencyTable = GetFrequencyTable(regex, minterms);
             var essentialPrimeImplicants = new List<string>();
             string epi;
             for (var i = 0; i < bitFrequencyTable.Length; i++)
             {
+                // This means that there is only one implicant in this column that covers it 
+                // and so an essential prime implicant has been found. Iterate through the 
+                // column to find the implicant with the 1 within that column. 
                 if (bitFrequencyTable[i] == 1)
-                {
+                { 
+                    // Do the column search to find the prime implicant, which must 
+                    // be essential. 
                     epi = GetEssentialPrimeImplicant(regex, i);
                     if (!essentialPrimeImplicants.Contains(epi))
                     {
@@ -1502,6 +1599,16 @@ namespace _2BNOR_2B.Code
             }
             return essentialPrimeImplicants;
         }
+
+        /// <summary>
+        /// Finds the prime implicants of the boolean expression. This comes from the minterms
+        /// of the boolean expression. This is done using a recursive merging process where 
+        /// merges take place. Once no merges have taken place on the prim implicants then they 
+        /// all have been found and the method ends. 
+        /// </summary>
+        /// <param name="mintermList">The binary input combinations that result in the 
+        /// boolean expression evaluating to one. </param>
+        /// <returns>The list of prime implicants of the expression. </returns>
         private static List<string> GetPrimeImplicants(List<string> mintermList)
         {
             var primeImplicants = new List<string>();
@@ -1516,16 +1623,22 @@ namespace _2BNOR_2B.Code
                 {
                     m1 = mintermList[i];
                     m2 = mintermList[c];
+                    // A merge can be made only if the dashes of the minterms align and 
+                    // there is only one bit of difference between the two minterms. 
                     if (CheckDashesAlign(m1, m2) && CheckMintermDifference(m1, m2))
                     {
                         mergedMinterm = MergeMinterms(m1, m2);
                         primeImplicants.Add(mergedMinterm);
                         numberOfMerges++;
+                        // Mark the terms that have been merged so that they do not persist
+                        // to the next stage of the mergin process. 
                         merges[i] = true;
                         merges[c] = true;
                     }
                 }
             }
+            // Filtering out the terms that have been merged so that the minterms do not
+            // remain when the next stage occurs. 
             for (var j = 0; j < mintermList.Count; j++)
             {
                 if (!merges[j] && !primeImplicants.Contains(mintermList[j]))
@@ -1533,6 +1646,9 @@ namespace _2BNOR_2B.Code
                     primeImplicants.Add(mintermList[j]);
                 }
             }
+            // If no more merges can be made on the list of implicants then all of the prime
+            // implicants for the expression must have been found. Otherwise, recurse and try
+            // merging again. 
             if (numberOfMerges == 0)
             {
                 return primeImplicants;
@@ -1542,16 +1658,26 @@ namespace _2BNOR_2B.Code
                 return GetPrimeImplicants(primeImplicants);
             }
         }
+
+        /// <summary>
+        /// Minimises a user entered boolean expression using the Quine-Mcluskey algorithm and 
+        /// Petrick's method. Details of the algorithms can be found on Wikipedia. 
+        /// </summary>
+        /// <param name="expression">A user entered boolean expression.</param>
         public void MinimiseExpression(string expression)
         {
+            // The input combinations that result in the expression evaluating to one. 
             List<string> minterms = GetMinterms(expression);
             List<string> primeImplicants = GetPrimeImplicants(minterms);
             var PIchart = new Dictionary<string, string>();
             ConvertImplicantsIntoRegex(PIchart, primeImplicants);
+            // Creating the coverages for each of the prime implicants using regex. 
             SetRegexPatterns(PIchart, minterms);
             PIchart = ReplaceDashesFromRegex(PIchart);
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms);
             string covered = GetCoveredString(PIs, PIchart);
+            // If a 0 remains in the covered string then the essential prime implicants 
+            // do not cover all of the minterms and so petrick's method must be used. 
             if (covered.Contains('0'))
             {
                 minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants, minterms);
@@ -1563,6 +1689,12 @@ namespace _2BNOR_2B.Code
         }
         #endregion
 
+        /// <summary>
+        /// Replaces the regex characters in the prime implicants with dashes. This will
+        /// make processing, and outputting the prime implicants easier. 
+        /// </summary>
+        /// <param name="PIChart">The prime implicant chart produced by QM.</param>
+        /// <returns>The PIChart with \d replaced for each of the keys. </returns>
         private static Dictionary<string, string> ReplaceDashesFromRegex(Dictionary<string, string> PIChart)
         {
             var newKeys = new Dictionary<string, string>();
@@ -1577,32 +1709,50 @@ namespace _2BNOR_2B.Code
         }
 
         /// <summary>
-        /// 
+        /// Checks to make sure that the essential prime implicants cover the original boolean 
+        /// expression. Otherwise, Petrick's method should be used to make sure that all of the 
+        /// minterms are covered by the implicants. 
         /// </summary>
-        /// <param name="epis"></param>
-        /// <param name="PIchart"></param>
+        /// <param name="epis">The essential prime implicants currently found. </param>
+        /// <param name="PIchart">The prime implicant produced from the prime implicants.</param>
         /// <returns></returns>
         private static string GetCoveredString(List<string> epis, Dictionary<string, string> PIchart)
         {
             int result = 0;
             foreach (string s in epis)
             {
+                // Apply logical OR to each of the coverages of the essential prime implicants. 
+                // This is to ensure at least one 1 covers a minterm. 
                 result |= Convert.ToInt32(PIchart[s], 2);
             }
             return result.ToString();
         }
 
+        /// <summary>
+        /// Carries out the process to prepare the PI chart for Petricks' method. The first
+        /// step is to remove any rows of prime implicants. The minterm that makes the 
+        /// implicant essential should also be removed. 
+        /// </summary>
+        /// <param name="PIchart">The prime implicant chart being reduced.</param>
+        /// <param name="epis">The essential prime implicants of the expression. </param>
+        /// <param name="minterms">The minterms covered by the expression. </param>
+        /// <returns>The updated prime implicant chart with essential prime implicants removed.</returns>
         private static Dictionary<string, string> RemoveEPIs(Dictionary<string, string> PIchart, List<string> epis, List<string> minterms)
         {
             string value;
             int pos;
+            // The number of ones that cover each minterm. 
             int[] freq = GetFrequencyTable(PIchart, minterms);
             foreach (string k in PIchart.Keys)
             {
+                // A prime implicant has been found. 
                 if (epis.Contains(k))
                 {
                     value = PIchart[k];
+                    // Finding the position of the bit that makes the implicant essential. 
+                    // This is the column that being removed. 
                     pos = GetSignificantBit(k, freq);
+                    // Removing the column of the prime implicant chart. 
                     TrimMinterm(PIchart, pos);
                     PIchart.Remove(k);
                 }
@@ -1610,6 +1760,13 @@ namespace _2BNOR_2B.Code
             return PIchart;
         }
 
+        /// <summary>
+        /// Removes the bit of a specified column when an essential prime implicant has been
+        /// found. This is for chart reduction in Petrick's method. 
+        /// </summary>
+        /// <param name="PIchart">The prime implicant chart produced by QM.</param>
+        /// <param name="pos">The column of the prime implicant chart being removed.</param>
+        /// <returns>The updated dictionary with the column removed. </returns>
         private static Dictionary<string, string> TrimMinterm(Dictionary<string, string> PIchart, int pos)
         {
             string value;
@@ -1622,6 +1779,12 @@ namespace _2BNOR_2B.Code
             return PIchart;
         }
 
+        /// <summary>
+        /// Returns the position of the bit that makes the prime implicant essential. 
+        /// </summary>
+        /// <param name="epi">The prime implicant being check for. </param>
+        /// <param name="freq">The number of times a minterm is covered by the implicant.</param>
+        /// <returns>The position within the coverage that makes the implicant essential. </returns>
         private static int GetSignificantBit(string epi, int[] freq)
         {
             for (var i = 0; i < freq.Length; i++)
@@ -1643,7 +1806,7 @@ namespace _2BNOR_2B.Code
         /// <param name="primeImplicants">All of the prime implicants found during 
         /// the inital merging process of QM.</param>
         /// <param name="minterms">The minterm of </param>
-        /// <returns></returns>
+        /// <returns>The minimised expression produced by Petrick's method.</returns>
         private string DoPetriksMethod(Dictionary<string, string> PIchart, List<string> epis, List<string> primeImplicants, List<string> minterms)
         {
             PIchart = RemoveEPIs(PIchart, epis, minterms);
