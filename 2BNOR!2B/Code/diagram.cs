@@ -47,6 +47,7 @@ namespace _2BNOR_2B.Code
         private Element[] elements;
         private Element[] inputs;
         private Wire[] wires;
+        // The main window canvas. This is the one where logic diagrams are drawn. 
         private readonly Canvas c;
         // Constants used for the diagram drawing formulae. 
         // Square allocation for elements. 
@@ -952,6 +953,15 @@ namespace _2BNOR_2B.Code
         #endregion
 
         #region Truth table generation
+        /// <summary>
+        /// Evaluates a user-inputted infix boolean expression. This is done by first 
+        /// converting the expression into postfix and then using a stack.
+        /// </summary>
+        /// <param name="binaryCombination">A string storing the input combination to be
+        /// substituted into the postfix boolean expression. </param>
+        /// <param name="inputExpression">The infix expression being evaluated. </param>
+        /// <returns>The result of evaluating an infix boolean expression with a particular
+        /// string of inputs. </returns>
         private int EvaluateBooleanExpression(string binaryCombination, string inputExpression)
         {
             string postfix = ConvertInfixtoPostfix(inputExpression);
@@ -962,30 +972,39 @@ namespace _2BNOR_2B.Code
             var evaluatedStack = new Stack<int>();
             foreach (char c in sub)
             {
+                // An operand has been found. 
                 if (char.IsNumber(c))
                 {
                     evaluatedStack.Push(c);
                 }
                 else if (c == '!')
                 {
+                    // NOT is an unary operator so only pop one item off of the stack
                     operand1 = evaluatedStack.Pop();
+                    // Applying logical is the same as applying an XOR of 1 as the 
+                    // operand is only every one bit in length. 
                     evaluatedStack.Push(operand1 ^ 1);
                 }
                 else if (c == '^')
                 {
+                    // Pop two items for the XOR as it is a binary operator. 
                     operand1 = evaluatedStack.Pop();
                     operand2 = evaluatedStack.Pop();
+                    // Carry out the operation and push the result to the stack. 
                     tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp + 48);
                 }
                 else
                 {
+                    // Pop two items for the gate as it is a binary operator. 
                     operand1 = evaluatedStack.Pop();
                     operand2 = evaluatedStack.Pop();
+                    // Carry out the operation and push the result to the stack. 
                     tmp = EvaluateSingleOperator(operand1, operand2, c);
                     evaluatedStack.Push(tmp);
                 }
             }
+            // The final item on the stack is the result of the evaluation. 
             return evaluatedStack.Pop();
         }
         private static int EvaluateSingleOperator(int o1, int o2, char operation)
@@ -1134,6 +1153,7 @@ namespace _2BNOR_2B.Code
             return postorderHeaders;
         }
 
+
         private static string[] GeneratePostOrderHeaders(string postfix, int numberOfInputs, int numberOfOperators)
         {
             var subExpressionStack = new Stack<string>();
@@ -1171,11 +1191,19 @@ namespace _2BNOR_2B.Code
             return headers;
         }
 
+        /// <summary>
+        /// Small method that simplfy calculates the width of cell in the truth table 
+        /// based of the header. 
+        /// </summary>
+        /// <param name="header">The header the cell is in the column of. </param>
+        /// <returns></returns>
         private static double CalculateCellWidth(string header)
         {
             double cellWidth = 30;
+            // If the header is not an input. 
             if (header.Length != 1)
             {
+                // If the header is an expression larger than (A.B).
                 if (header.Length > 5)
                 {
                     cellWidth = header.Length * 11 + 15;
@@ -1188,6 +1216,12 @@ namespace _2BNOR_2B.Code
             return cellWidth;
         }
 
+        /// <summary>
+        /// Draws the headers for the truth table. 
+        /// </summary>
+        /// <param name="c">The canvas being drawn to. </param>
+        /// <param name="headers">The headers of the truth table. These represent the stages 
+        /// of the post order traversal of the logic gate diagram. </param>
         private static void DrawTruthTableHeaders(Canvas c, string[] headers)
         {
             Label cell;
@@ -1200,6 +1234,7 @@ namespace _2BNOR_2B.Code
                 cellWidth = CalculateCellWidth(header);
                 cell = new Label
                 {
+                    // Defining the style of the cell. 
                     HorizontalContentAlignment = HorizontalAlignment.Center,
                     Width = cellWidth,
                     BorderBrush = Brushes.LightGray,
@@ -1214,9 +1249,17 @@ namespace _2BNOR_2B.Code
                 c.Children.Add(cell);
                 x += cellWidth;
             }
+            // Readjusting the x size of the canvas so that the scroll viewer works. 
             c.Width = Math.Max(x, c.Width) + 30;
         }
 
+        /// <summary>
+        /// Draws the body of the truth table. This is the inputs and outputs at each stage 
+        /// of the table. 
+        /// </summary>
+        /// <param name="c">The canvas being drawn to. </param>
+        /// <param name="headers">The headers of the table. Used to calculate the cell widths. </param>
+        /// <param name="outputMap">The data used to fill the cells of the table. </param>
         private static void DrawTruthTableBody(Canvas c, string[] headers, string[] outputMap)
         {
             Label cell;
@@ -1232,6 +1275,7 @@ namespace _2BNOR_2B.Code
                     cellWidth = CalculateCellWidth(headers[i]);
                     cell = new Label
                     {
+                        // Defining the style of the cell in the truth table. 
                         HorizontalContentAlignment = HorizontalAlignment.Center,
                         Width = cellWidth,
                         BorderBrush = Brushes.LightGray,
@@ -1249,20 +1293,40 @@ namespace _2BNOR_2B.Code
                 x = 20;
                 y += 30;
             }
+            // Readjusting the size of the canvas so that the scrollviewer works with 
+            // large tables. This makes extremely large tables very easy to view.
             c.Height = Math.Max(y, c.Height) + 30;
         }
 
+        /// <summary>
+        /// Removes the outer most set of brackets from the headers. This reduces the total 
+        /// width of each header making the table more manageable to look through. It also 
+        /// makes the headings cleaer as there is less going on. 
+        /// </summary>
+        /// <param name="headers"></param>
+        /// <returns></returns>
         private static string[] TrimBrackets(string[] headers)
         {
             for (var i = 0; i < headers.Length; i++)
             {
+                // Ensuring that the header does not represent an input which does not have a
+                // set of brackets. 
                 if (headers[i].Length != 1)
                 {
+                    // Slicing off the first and last characters which are the brackets. 
                     headers[i] = headers[i][1..^1];
                 }
             }
             return headers;
         }
+
+        /// <summary>
+        /// Simple public method that allows the diagram class to draw to a canvas on the
+        /// user interface. 
+        /// </summary>
+        /// <param name="c">The canvas that the truth table will be drawn on. </param>
+        /// <param name="inputExpression">The boolean expression for which the truth table 
+        /// represents. </param>
         public void DrawTruthTable(Canvas c, string inputExpression)
         {
             c.Children.Clear();
