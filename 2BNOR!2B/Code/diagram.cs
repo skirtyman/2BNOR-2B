@@ -599,10 +599,29 @@ namespace _2BNOR_2B.Code
             }
             rootNode = nodeStack.Pop();
         }
+
+        /// <summary>
+        /// Calculates the y-position of the logic gate on the canvas given the logic 
+        /// gate diagram being drawn. 
+        /// </summary>
+        /// <param name="heightOfTree">The height of the tree. This is the deepest node in
+        /// the tree. </param>
+        /// <param name="depthWithinTree">Integer which stores the current layer that the 
+        /// node is on. This is also the layer that the BST is on. </param>
+        /// <param name="positionWithinLayer">The x-position within the tree at the 
+        /// depth given by depthWithinTree</param>
+        /// <returns>The Y-position of the node on the canvas given its position 
+        /// within the tree. </returns>
         private double CalculateNodeYposition(int heightOfTree, int depthWithinTree, int positionWithinLayer)
         {
+            // Formula to calculate the spacing for a node in this position within tree
+            // in relation to the size of the tree. 
             double initialY = Math.Pow(2, heightOfTree) / Math.Pow(2, depthWithinTree) * pixelsPerSquare;
+            // Multiply by the position within the layer to get the Y position of the node.
+            // This is the same idea as the X position calculation. 
             initialY += initialY * positionWithinLayer * 2;
+            // Apply a squish to the Y position so the size of the diagram is reduced.
+            // This makes odd shaped diagrams more easily viewable. 
             if (heightOfTree > 5 && depthWithinTree < 4)
             {
                 return initialY / 2;
@@ -613,30 +632,57 @@ namespace _2BNOR_2B.Code
             }
         }
 
+        /// <summary>
+        /// Calculates the X position of a logic gate on the canvas. This is simply 
+        /// applying a shift factor across the canvas based off of the depth within the tree. 
+        /// </summary>
+        /// <param name="depthWithinTree">The depth within the tree, the current node is. </param>
+        /// <returns>The X position on the canvas which is the location of logic gate.</returns>
         private double CalculateXposition(int depthWithinTree)
         {
             return canvasWidth - ((pixelsPerSquare - 7) * elementWidth + (pixelsPerSquare - 7) * xOffset) * depthWithinTree;
         }
 
+        /// <summary>
+        /// Translates the node across the canvas that ensures the logic gates do not
+        /// spill over the left side of the canvas. 
+        /// </summary>
+        /// <param name="startX">The start position of the node on the canvas.</param>
+        /// <param name="heightOfTree">The height of the binary tree being drawn.</param>
+        /// <returns>The translated position of the node on the canvas. This is the
+        /// final position of the node on the canvas. </returns>
         private double TranslateNode(double startX, int heightOfTree)
         {
             double maxX = CalculateXposition(heightOfTree);
             return startX - maxX + 50;
         }
 
+        /// <summary>
+        /// Linking method which calculates the final position of the node on the canvas. 
+        /// </summary>
+        /// <param name="node">The node being drawn to the canvas. </param>
+        /// <param name="heightOfTree">The height of the binary tree being drawn.</param>
+        /// <param name="depthWithinTree">The current depth of the node within the tree.</param>
+        /// <returns></returns>
         private double CalculateNodeXposition(Element node, int heightOfTree, int depthWithinTree)
         {
             double x;
+            // If the node is an input(leaf node) then it should be drawn at the 
+            // left-most position of the tree. This is the height of the binary tree.
             if (node.leftChild == null && node.rightChild == null)
             {
                 x = CalculateXposition(heightOfTree);
             }
             else
             {
+                // Calculating at that particular depth. 
+                // Subtracting 50 pixels to remain within the bounds of the canvas. 
                 x = CalculateXposition(depthWithinTree) - 50;
             }
+            // Translating the node to stay within the bounds of the canvas. 
             return TranslateNode(x, heightOfTree);
         }
+
         private static LogicGate GetWidestGate(Element root)
         {
 
@@ -669,6 +715,13 @@ namespace _2BNOR_2B.Code
             }
         }
 
+        /// <summary>
+        /// Utility method which is responsible for drawing the left child of the node. 
+        /// The method simply sets the points for the wires. It is important to note that
+        /// intersections between the wires are not considered. 
+        /// </summary>
+        /// <param name="root">The node being that the wire connectes to. </param>
+        /// <returns>A wire with its points set. Ready to be drawn to the canvas. </returns>
         private Wire DrawWiresForLeftChildren(Element root)
         {
             var w = new Wire(c);
@@ -676,6 +729,8 @@ namespace _2BNOR_2B.Code
             LogicGate leftchildLogicGate = root.leftChild.GetLogicGate();
             Element input;
             w.SetStart(rootLogicGate.GetInputPoint1());
+            // If the left child does not have a logic gate then it must be a repeated 
+            // node and so the input with the same label needs to be found. 
             if (leftchildLogicGate != null)
             {
                 w.SetRepeated(false);
