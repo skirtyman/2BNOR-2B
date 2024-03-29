@@ -13,7 +13,7 @@ namespace _2BNOR_2B.Code
 {
     public class BooleanConverter : IValueConverter
     {
-        private readonly char[] booleanOperators = { '.', '^', '+', '!' };
+        private readonly char[] booleanOperators = { '+', '^', '.', '!' };
         private static readonly Regex r = new(@"\s+");
 
         private static string RemoveWhitespace(string input, string replacement)
@@ -21,6 +21,13 @@ namespace _2BNOR_2B.Code
             return r.Replace(input, replacement);
         }
 
+        /// <summary>
+        /// Converts a user entered infix boolean expression to the postfix representation
+        /// of the boolean expression. This is a modified version of the 'Shunting yard' as 
+        /// given by the pseudo-code on Wikipedia. 
+        /// </summary>
+        /// <param name="infixExpression">An infix boolean expression. </param>
+        /// <returns>The postfix boolean expression of the supplied infix expression.</returns>
         private string ConvertInfixtoPostfix(string infixExpression)
         {
             infixExpression = RemoveWhitespace(infixExpression, "");
@@ -50,13 +57,16 @@ namespace _2BNOR_2B.Code
                 {
                     while (operatorStack.Peek() != '(')
                     {
+                        //Debug.Assert(operatorStack.Count > 0, "The stack is empty.");
                         postfixExpression += operatorStack.Pop();
                     }
+                    //Debug.Assert(operatorStack.Peek() == '(', "The top item is a (");
                     operatorStack.Pop();
                 }
             }
             while (operatorStack.Count > 0)
             {
+                //Debug.Assert(operatorStack.Peek() != '(', "The top item is a (");
                 postfixExpression += operatorStack.Pop();
             }
             return postfixExpression;
@@ -113,6 +123,7 @@ namespace _2BNOR_2B.Code
         {
             try
             {
+                string v = value as string; 
                 return ConvertString(value as string);
             }
             catch
