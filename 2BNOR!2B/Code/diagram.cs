@@ -1695,7 +1695,7 @@ namespace _2BNOR_2B.Code
                         primeImplicants.Add(mergedMinterm);
                         numberOfMerges++;
                         // Mark the terms that have been merged so that they do not persist
-                        // to the next stage of the mergin process. 
+                        // to the next stage of the merging process. 
                         merges[i] = true;
                         merges[c] = true;
                     }
@@ -2274,6 +2274,5 @@ namespace _2BNOR_2B.Code
             }
             return result;
         }
-
     }
 }
