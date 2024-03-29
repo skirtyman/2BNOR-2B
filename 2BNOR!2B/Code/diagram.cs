@@ -96,6 +96,7 @@ namespace _2BNOR_2B.Code
 
         public string GetMinimisedExpression()
         {
+            //asdflksdlgkj
             return minimisedExpression;
         }
 
