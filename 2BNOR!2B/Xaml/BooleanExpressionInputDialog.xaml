@@ -8,6 +8,8 @@
         mc:Ignorable="d"
         Title="Input Expression" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         Topmost="True" ContentRendered="Window_ContentRendered" ResizeMode="NoResize">
+    <!-- Using the boolean renderer to show the user how the expression would look if it was 
+    written by hand. --> 
     <Window.Resources>
         <local1:BooleanConverter x:Key="booleanConverter"/>
     </Window.Resources>
@@ -25,7 +27,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!--The table of logic gates-->
+        <!--The table of logic gates. This is to remind the user of which gate means which symbol. -->
         <Border Grid.Column="2" BorderBrush="Silver" Background="WhiteSmoke" BorderThickness="1"  CornerRadius="5">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Margin="2.5">
@@ -43,7 +45,9 @@
                 </StackPanel>
             </StackPanel>
         </Border>
-
+        
+        <!-- The user inputs their expression into the following textbox and it is rendered. 
+        A curved border has been used to maintain the same style throughout the program. --> 
         <StackPanel Grid.Row="0">
             <Border BorderBrush="Silver" Background="WhiteSmoke" BorderThickness="1" CornerRadius="5">
                 <StackPanel Margin="5">
@@ -58,11 +62,13 @@
                 </StackPanel>
             </Border>
 
+            <!-- Okay and Cancel buttons so the user can stop if they wish and also confirm when 
+            they have entered their desired expression. --> 
             <StackPanel Margin="10" Orientation="Horizontal">
                 <Button IsDefault="True" Margin ="10,0" HorizontalAlignment="Center" Click="BtnDialogOk_Click">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Margin="5">
-                            <Image Source="Resources/tick.png"/>
+                            <Image Source="/Resources/tick.png"/>
                             <TextBlock Text=" Ok " FontFamily="Consolas" FontSize="20" FontWeight="DemiBold"/>
                         </StackPanel>
                     </Button.Content>
@@ -71,7 +77,7 @@
                 <Button IsCancel="True" Click="BtnDialogCancel_Click">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Margin="5">
-                            <Image Source="Resources/cancel.png"/>
+                            <Image Source="/Resources/cancel.png"/>
                             <TextBlock Text=" Cancel " FontFamily="Consolas" FontSize="20" FontWeight="DemiBold"/>
                         </StackPanel>
                     </Button.Content>

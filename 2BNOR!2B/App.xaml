@@ -4,6 +4,10 @@
              xmlns:local="clr-namespace:_2BNOR_2B" xmlns:local1="clr-namespace:_2BNOR_2B.Code"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <local1:BooleanConverter x:Key="BooleanConverter"></local1:BooleanConverter>
+        <!--The following converter renders boolean expression that are entered by the user.
+        This is application wide as the converter is used in multiple windows at different
+        points within the program, such as the expression input dialog and the rendered
+        expression window.-->
+        <local1:BooleanConverter x:Key="booleanConverter"></local1:BooleanConverter>
     </Application.Resources>
 </Application>

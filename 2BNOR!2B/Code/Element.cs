@@ -137,6 +137,5 @@ namespace _2BNOR_2B.Code
         {
             return state;
         }
-
     }
 }

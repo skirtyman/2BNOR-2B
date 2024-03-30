@@ -38,7 +38,7 @@ namespace _2BNOR_2B
         public MainWindow()
         {
             InitializeComponent();
-            d = new Diagram(MainWindowCanvas);
+            d = new Diagram(DiagramCanvas);
         }
 
         /// <summary>
@@ -52,10 +52,10 @@ namespace _2BNOR_2B
             // If the expression stored within the diagram doesn't exist then the diagram
             // must not exist and so error is flagged. 
             if (d.GetExpression() != "")
-            {          
+            {
                 d.DrawTruthTable(TruthTableCanvas, d.GetExpression());
                 // Updatign status bar to reflect changes. 
-                statusBar_Text.Text = $"Generated truth table for the expression {d.GetExpression()}.";             
+                statusBar.Text = $"Generated truth table for the expression {d.GetExpression()}.";             
             }
             else
             {
@@ -72,17 +72,17 @@ namespace _2BNOR_2B
         {
             // If the canvas has no elements (children) in it, then the diagram must not
             // exist. 
-            if (MainWindowCanvas.Children.Count == 0)
+            if (DiagramCanvas.Children.Count == 0)
             {
-                statusBar_Text.Text = "Please draw a diagram first. ";
+                statusBar.Text = "Please draw a diagram first. ";
             }
             else
             {
                 // Clearing the diagram, canvas and notifying the user through the status 
                 // bar. 
                 d.ClearDiagram();
-                MainWindowCanvas.Children.Clear();
-                statusBar_Text.Text = "Cleared the current diagram. ";
+                DiagramCanvas.Children.Clear();
+                statusBar.Text = "Cleared the current diagram. ";
             }
 
         }
@@ -102,10 +102,10 @@ namespace _2BNOR_2B
                 expression = expressionInputDialog.Result;
                 // If the entered expression is valid then the truth table can be drawn and 
                 // reflecting that change within the status bar. 
-                if (d.IsExpressionValid(expression, true))
+                if (d.IsExpressionValid(expression))
                 {
                     d.DrawTruthTable(TruthTableCanvas, expression);
-                    statusBar_Text.Text = "Generated Truth table from expression: " + expression; 
+                    statusBar.Text = "Generated Truth table from expression: " + expression; 
                 }
                 else
                 {
@@ -122,12 +122,13 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void MenuItem_GenerateExpressionFromDiagram(object sender, RoutedEventArgs e)
         {
-            renderedExpression r; 
+            renderedExpressionDisplay renderedExpression; 
             // The expression must exist otherwise an error has occurred. 
             if (d.GetExpression() != "")
             {
-                r = new renderedExpression(d.GetExpression(), "Rendered Expression: ");
-                r.Show(); 
+                // Rendering the expression because it is more appealing
+                renderedExpression = new renderedExpressionDisplay(d.GetExpression(), "Rendered Expression: ");
+                renderedExpression.Show(); 
             }
             else
             {
@@ -153,10 +154,11 @@ namespace _2BNOR_2B
                 // Validating the entered expression and drawing it if it is. 
                 if (d.IsExpressionValid(expression))
                 {
-                    MainWindowCanvas.Children.Clear();
+                    // Clearing the diagram to avoid interference. 
+                    DiagramCanvas.Children.Clear();
                     d.ClearDiagram(); 
                     d.SetExpression(expression);
-                    statusBar_Text.Text = "Generated diagram from expression: " + expression;
+                    statusBar.Text = "Generated diagram from expression: " + expression;
                     d.DrawDiagram();
                     saveString = expression;
                 }
@@ -180,7 +182,9 @@ namespace _2BNOR_2B
             // that minimisation can take place. Otherwise an error has occurred. 
             if (expression != "" && d.GetTree() != null)
             {
-                MainWindowCanvas.Children.Clear();
+                // Clearing the canvas so that the new diagram does not interfere with the 
+                // old one. Resetting the diagram for the same reason. 
+                DiagramCanvas.Children.Clear();
                 d.ClearDiagram();
                 d.MinimiseExpression(expression);
                 minimisedExpression = d.GetMinimisedExpression();  
@@ -202,8 +206,8 @@ namespace _2BNOR_2B
         private void MenuItem_MinimiseExpression(object sender, RoutedEventArgs e)
         {
             var expressionInputDialog = new BooleanExpressionInputDialog();
-            renderedExpression r; 
-            string expression = "";
+            renderedExpressionDisplay renderedExpression; 
+            string expression;
             // Asking the user to enter a boolean expression. 
             if (expressionInputDialog.ShowDialog() == true)
             {
@@ -213,12 +217,16 @@ namespace _2BNOR_2B
                 {
                     d.SetExpression(expression);
                     d.MinimiseExpression(expression);
-                    r = new renderedExpression(d.GetMinimisedExpression(), "Minimised Expression: ");
-                    r.Show(); 
-                    statusBar_Text.Text = "Minimised expression: " + expression; 
+                    // Showing the rendered minimised expression because it is more 
+                    // appealing. 
+                    renderedExpression = new renderedExpressionDisplay(d.GetMinimisedExpression(), "Minimised Expression: ");
+                    renderedExpression.Show(); 
+                    statusBar.Text = "Minimised expression: " + expression; 
                 }
                 else
                 {
+                    // The program has found that the entered expression is invalid. The 
+                    // should be notified of this. 
                     MessageBox.Show("You have entered an invalid expression.", "Expression input error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 
@@ -235,6 +243,8 @@ namespace _2BNOR_2B
         {
             var saveFileDialog = new SaveFileDialog()
             {
+                // The only extensions the program will accept. This is to stop any 
+                // problems of the user giving the program erroneous file formats. 
                 Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B",
                 DefaultExt = "Expression file (*.2B)|*.2B"
             };
@@ -245,10 +255,11 @@ namespace _2BNOR_2B
                 // Simply try writing all of the text to a file or an error has occurred and 
                 // the user will be given an error message. 
                 File.WriteAllText(saveFileDialog.FileName, saveString);
-                statusBar_Text.Text = "Saved diagram at the path " + saveFileDialog.FileName;
+                statusBar.Text = "Saved diagram at the path " + saveFileDialog.FileName;
             }
             catch (Exception ex)
             {
+                // The file could not be loaded by the program. 
                 MessageBox.Show($"Error saving diagram:\n{ex.Message}", "Load File Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 e.Handled = true;
             }
@@ -278,7 +289,7 @@ namespace _2BNOR_2B
                 {
                     d.SetExpression(saveString);
                     d.DrawDiagram();
-                    statusBar_Text.Text = "Loaded diagram from " + openFileDialog.FileName;
+                    statusBar.Text = "Loaded diagram from " + openFileDialog.FileName;
                 }
                 else
                 {
@@ -287,6 +298,7 @@ namespace _2BNOR_2B
             }
             catch (Exception ex)
             {
+                // The file could not be opened by the program. 
                 MessageBox.Show($"Error opening file:\n{ex.Message}", "Open File Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 e.Handled = true;
             }    
@@ -300,35 +312,35 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void MenuItem_ExportDiagram(object sender, RoutedEventArgs e)
         {
-            var crop = new CroppedBitmap();
-            var pngEncoder = new PngBitmapEncoder();
-            var sfd = new SaveFileDialog()
+            var saveFileDialog = new SaveFileDialog()
             {
                 Filter = "PNG (*.png)|*.png",
                 DefaultExt = ".png"
             };
-            if (sfd.ShowDialog() != true)
+            if (saveFileDialog.ShowDialog() != true)
             {
                 return;
             }
 
             if (d.GetExpression() != "")
             {
-                Rect bounds = VisualTreeHelper.GetDescendantBounds(MainWindowCanvas);
-                RenderTargetBitmap rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, 96, 96, PixelFormats.Pbgra32);
-                DrawingVisual dv = new DrawingVisual();
-                using (DrawingContext dc = dv.RenderOpen())
+                var bounds = VisualTreeHelper.GetDescendantBounds(DiagramCanvas);
+                var bitmap = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, 96, 96, PixelFormats.Pbgra32);
+                var drawingVisual = new DrawingVisual();
+                using (DrawingContext dc = drawingVisual.RenderOpen())
                 {
-                    VisualBrush vb = new VisualBrush(MainWindowCanvas);
-                    dc.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+                    var visualBrush = new VisualBrush(DiagramCanvas);
+                    var tmp = new Point();
+                    var rect = new Rect(tmp, bounds.Size); 
+                    dc.DrawRectangle(visualBrush, null, rect);
                 }
 
-                rtb.Render(dv);
-                PngBitmapEncoder png = new PngBitmapEncoder();
-                png.Frames.Add(BitmapFrame.Create(rtb));
-                using (Stream stm = File.Create(sfd.FileName))
+                bitmap.Render(drawingVisual);
+                var png = new PngBitmapEncoder();
+                png.Frames.Add(BitmapFrame.Create(bitmap));
+                using (Stream stream = File.Create(saveFileDialog.FileName))
                 {
-                    png.Save(stm);
+                    png.Save(stream);
                 }
             }
             else
@@ -355,18 +367,18 @@ namespace _2BNOR_2B
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MainWindowCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        private void DiagramCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             // If the tree does not exist then the user should be prompted to draw a
             // diagram first. Otherwise update the state of the diagram. 
             if (d.GetTree() != null)
             {
                 d.UpdateWires();
-                statusBar_Text.Text = "Updated the state of the diagram.";
+                statusBar.Text = "Updated the state of the diagram.";
             }
             else
             {
-                statusBar_Text.Text = "Please draw a diagram first. ";
+                statusBar.Text = "Please draw a diagram first. ";
             }
         }
 
@@ -380,12 +392,12 @@ namespace _2BNOR_2B
             //Checking if there is a truth table currently on the canvas. 
             if (TruthTableCanvas.Children.Count == 0)
             {
-                statusBar_Text.Text = "Please draw a truth table first. "; 
+                statusBar.Text = "Please draw a truth table first. "; 
             }
             else
             {
                 TruthTableCanvas.Children.Clear();
-                statusBar_Text.Text = "Cleared the current truth table. ";
+                statusBar.Text = "Cleared the current truth table. ";
             }
         }
 
@@ -396,8 +408,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void ANDInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "AND gate");
-            g.Show(); 
+            var info = new GateInformation(d, "AND gate");
+            info.Show(); 
         }
 
         /// <summary>
@@ -407,8 +419,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void ORInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "OR gate");
-            g.Show();
+            var info = new GateInformation(d, "OR gate");
+            info.Show();
         }
 
         /// <summary>
@@ -418,8 +430,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void NOTInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "NOT gate");
-            g.Show();
+            var info = new GateInformation(d, "NOT gate");
+            info.Show();
         }
         
         /// <summary>
@@ -429,8 +441,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void XORInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "XOR gate");
-            g.Show();
+            var info = new GateInformation(d, "XOR gate");
+            info.Show();
         }
 
         /// <summary>
@@ -440,8 +452,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void NANDInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "NAND gate");
-            g.Show();
+            var info = new GateInformation(d, "NAND gate");
+            info.Show();
         }
 
         /// <summary>
@@ -451,8 +463,8 @@ namespace _2BNOR_2B
         /// <param name="e"></param>
         private void NORInformation(object sender, EventArgs e)
         {
-            var g = new GateInformation(d, "NOR gate");
-            g.Show();
+            var info = new GateInformation(d, "NOR gate");
+            info.Show();
         }
     }
 }

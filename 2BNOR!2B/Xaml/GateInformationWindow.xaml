@@ -7,11 +7,14 @@
         mc:Ignorable="d"
         Title="Gate Information" Height="Auto" Width="310" SizeToContent="Height" WindowStartupLocation="CenterScreen"
         Topmost="True" ResizeMode="NoResize">
+    <!-- Using the boolean converter to render expressions for the user. -->
     <Window.Resources>
         <local1:BooleanConverter x:Key="booleanConverter"/>
     </Window.Resources>
 
     <StackPanel Margin="5">
+        <!-- Group box for the general information about the gate. This information is filled 
+        in the class constructor. -->
         <GroupBox Margin="10">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontFamily="Consolas" FontSize="22">General</TextBlock>
@@ -32,10 +35,8 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-            
-            
         </GroupBox>
-
+        <!-- Location of the truth table, which is rendered by the diagram class. --> 
         <GroupBox Margin="10">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontFamily="Consolas" FontSize="22">Truth table</TextBlock>
@@ -46,11 +47,11 @@
             </Border>
 
         </GroupBox>
-
+        <!-- Quick close button so the user knows how to leave the window. -->
         <Button Click="Button_Click" Width="100" HorizontalAlignment="Center">
             <Button.Content>
                 <StackPanel Orientation="Horizontal" Margin="5">
-                    <Image Source="Resources/cancel.png"/>
+                    <Image Source="\Resources\cancel.png"/>
                     <TextBlock Text=" Close " FontFamily="Consolas" FontSize="18" FontWeight="DemiBold"/>
                 </StackPanel>
             </Button.Content>

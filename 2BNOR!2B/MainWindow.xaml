@@ -7,7 +7,9 @@
         mc:Ignorable="d"
         Title="2B NOR !2B" MinHeight="600" MinWidth="1000" WindowState="Maximized">
     <Window.Resources>
-        <Style x:Key="PopUpButtons" TargetType="Button">
+        <!-- Style for the buttons on the main window. Only used here so there is no 
+        need to put it in the application wide resources. -->
+        <Style x:Key="PopUpButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="GhostWhite"/>
             <Setter Property="BorderBrush" Value="Silver"/>
             <Setter Property="Margin" Value="5"/>
@@ -17,6 +19,8 @@
                 </Style>
             </Style.Resources>
         </Style>
+        <!-- Style for the textblock in the buttons for the pop-ups. This is used 
+        to ensure the styling of the program is kept consistent throughout. -->
         <Style x:Key="TextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontSize" Value="18"/>
@@ -60,32 +64,41 @@
             </MenuItem>
         </Menu>
 
-        <Border Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" BorderThickness="1" BorderBrush="Silver" Margin="5"
-                Background="WhiteSmoke">
+        <Border Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" BorderThickness="1" BorderBrush="Silver" 
+                Margin="5" Background="WhiteSmoke">
+            <!-- Scrollviewer so that diagrams of any size are able to be viewed by the user. This 
+            removes the need for any restrictions for the size of the diagrams being drawn. -->
             <ScrollViewer CanContentScroll="True"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto">
-                <Canvas x:Name="MainWindowCanvas" 
-                        MouseDown="MainWindowCanvas_MouseDown" Height="1" Width="1"/>
+                <!-- Using a width and height of 1, to ensure that the scrollviewer is only enabled 
+                when necessary. The click event is for when the user interacts with the diagram. -->
+                <Canvas x:Name="DiagramCanvas" 
+                        MouseDown="DiagramCanvas_MouseDown" Height="1" Width="1"/>
             </ScrollViewer>
         </Border>
 
         <Border Grid.Column="0" Grid.Row="1" 
                       BorderThickness="1" BorderBrush="Silver" 
                       Margin="5" Background="WhiteSmoke">
+            <!-- Scrollviewer so that truth tables of any size can be displayed to the user. This 
+            creates as much flexibility within the program as possible. -->
             <ScrollViewer CanContentScroll="True"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto">
+                <!--Setting the width and height of the canvas to 1 so that the scroll viewers are 
+                visible when necessary.-->
                 <Canvas x:Name="TruthTableCanvas" 
                         Height="1" Width="1"/>
             </ScrollViewer>
         </Border>
-
+        
         <GroupBox Margin="10" Padding="10" Grid.Column="0" Grid.Row="2" BorderBrush="Silver">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontFamily="Consolas" FontSize="22">Logic Gates</TextBlock>
             </GroupBox.Header>
-
+            <!-- Grid for the array of buttons that open up pop-menus that contain the gate 
+            information. -->
             <Grid Grid.Column="0" Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
@@ -98,8 +111,9 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="0" Grid.Row="0"
+                <!-- Buttons that open up the pop-up menus which provide useful information to the user
+                about specific logic gates. --> 
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="0" Grid.Row="0"
                         Click="ANDInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/and_gate.png"/>
@@ -107,7 +121,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="1" Grid.Row="0"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="1" Grid.Row="0"
                         Click="ORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/or_gate.png"/>
@@ -115,7 +129,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="2" Grid.Row="0"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="2" Grid.Row="0"
                         Click="NOTInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/not_gate.png"/>
@@ -123,7 +137,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="0" Grid.Row="1"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="0" Grid.Row="1"
                         Click="XORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/xor_gate.png"/>
@@ -131,7 +145,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="1" Grid.Row="1"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="1" Grid.Row="1"
                         Click="NANDInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/nand_gate.png"/>
@@ -139,7 +153,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="2" Grid.Row="1"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="2" Grid.Row="1"
                         Click="NORInformation">
                     <StackPanel Margin="10" Width="100">
                         <Image Source="Resources/nor_gate.png"/>
@@ -147,21 +161,22 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="4" Grid.Row="0"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="4" Grid.Row="0"
                         Click="Button_Click_Diagram">
                     <TextBlock Style="{StaticResource TextBlockStyle}" Text="Clear Diagram"/>
                 </Button>
 
-                <Button Style="{StaticResource PopUpButtons}" Grid.Column="4" Grid.Row="1"
+                <Button Style="{StaticResource PopUpButtonStyle}" Grid.Column="4" Grid.Row="1"
                         Click="Button_Click_TT">
                     <TextBlock Style="{StaticResource TextBlockStyle}" Text="Clear Truth Table"/>
                 </Button>
             </Grid>
         </GroupBox>
-
+        <!-- status bar which indicates the most recent interaction between the computer and the 
+        user. -->
         <StatusBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
             <StatusBarItem>
-                <TextBlock x:Name="statusBar_Text" FontFamily="Consolas" FontSize="14"/>
+                <TextBlock x:Name="statusBar" FontFamily="Consolas" FontSize="14"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

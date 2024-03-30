@@ -6,9 +6,15 @@
              xmlns:local="clr-namespace:_2BNOR_2B"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="450">
+    <!-- Container for both the label and the image being displayed on the canvas. 
+    Uses a transparent background to not interfere with the main window canvas. --> 
     <Canvas Background="Transparent">
+        <!-- Default to using an input pin for the image. --> 
         <Image Width="450" Height="450" x:Name="elementImage" Source="images\input_pin.png" 
                Panel.ZIndex="0"/>
+        <!-- Added a label for the input pins. This has a default width of 0 as there is 
+        no charcter within the label. A ZIndex of 1 is used so that the label can be 
+        seen over the image of the input pin. --> 
         <Label Canvas.Top="3" Canvas.Left="7" HorizontalAlignment="Center" 
                VerticalAlignment="Center" FontFamily="Consolas" FontSize="24" Panel.ZIndex="1"
                x:Name="elementLabel"/>

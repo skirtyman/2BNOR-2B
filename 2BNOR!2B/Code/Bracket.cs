@@ -26,7 +26,8 @@ namespace _2BNOR_2B.Code
                 this.term2 = term1.ToString();
             }
         }
-
+        // The two terms that make up the brackets. These are assigned to when the
+        // product of sums is created in Petrick's method. 
         public string term1;
         public string term2;
     }

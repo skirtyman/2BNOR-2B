@@ -1,4 +1,4 @@
-﻿<Window x:Class="_2BNOR_2B.renderedExpression"
+﻿<Window x:Class="_2BNOR_2B.renderedExpressionDisplay"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,10 +7,13 @@
         mc:Ignorable="d"
         Title="Rendered Expression" Height="Auto" Width="Auto" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         Topmost="True" ResizeMode="NoResize">
+    <!-- Using the boolean converter. --> 
     <Window.Resources>
         <local1:BooleanConverter x:Key="BooleanConverter"/>
     </Window.Resources>
 
+    <!-- The rendered expression is displayed here. It is in a curved border to maintain the style 
+    of the program. --> 
     <StackPanel Margin="10">
         <Border CornerRadius="5" Background="WhiteSmoke" BorderBrush="Silver"
                 BorderThickness="1">
@@ -24,14 +27,14 @@
 
         <Rectangle Height="10"/>
 
+        <!-- Cancel button so that the user can quickly close down the window. -->
         <Button Click="Button_Click" Width="100" HorizontalAlignment="Center">
             <Button.Content>
                 <StackPanel Orientation="Horizontal" Margin="5">
-                    <Image Source="Resources/cancel.png"/>
+                    <Image Source="\Resources/cancel.png"/>
                     <TextBlock Text=" Close " FontFamily="Consolas" FontSize="18" FontWeight="DemiBold"/>
                 </StackPanel>
             </Button.Content>
         </Button>
-        
     </StackPanel>
 </Window>
