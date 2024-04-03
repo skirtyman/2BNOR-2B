@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace _2BNOR_2B.Code
 { 
@@ -49,7 +50,7 @@ namespace _2BNOR_2B.Code
         private Element[] inputs;
         private Wire[] wires;
         // The main window canvas. This is the one where logic diagrams are drawn. 
-        private readonly Canvas c;
+        private Canvas c;
         // Constants used for the diagram drawing formulae. 
         // Square allocation for elements. 
         readonly int elementWidth = 2;
@@ -314,19 +315,19 @@ namespace _2BNOR_2B.Code
             var match = bracketCheck.Match(expression);
             if (match.Success)
             {
-                return true; 
+                return true;
             }
             else
             {
-                var gateCheck = new Regex(@"\([A-Z0-1]*[!.+^][A-Z0-1]\)"); 
+                var gateCheck = new Regex(@"\([!]?[A-Z0-1]*[.+^][!]?[A-Z0-1]\)");
                 match = gateCheck.Match(expression);
                 if (match.Success)
                 {
-                    var operandCheck = new Regex(@"\([A-Z0-1][.+^][A-Z0-1]\)");
+                    var operandCheck = new Regex(@"\([!]?[A-Z0-1][.+^][!]?[A-Z0-1]\)");
                     match = operandCheck.Match(match.Value);
                     if (match.Success)
                     {
-                        return false; 
+                        return false;
                     }
                     else
                     {
@@ -335,7 +336,7 @@ namespace _2BNOR_2B.Code
                 }
                 else
                 {
-                    return true; 
+                    return true;
                 }
             }
         }
@@ -453,14 +454,15 @@ namespace _2BNOR_2B.Code
                     // Ensuring that the postfix is valid postfix. Covers expressions 
                     // such as "(A.)" which pass the other checks. 
                     bool postfixCheck = PostfixCheck(postfix);
-                    if (CheckBracketPosition(removedWhitespace))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return postfixCheck; 
-                    }
+                    return postfixCheck;
+                    //if (CheckBracketPosition(removedWhitespace))
+                    //{
+                    //    return false;
+                    //}
+                    //else
+                    //{
+                    //    return postfixCheck; 
+                    //}
                 }                
             }
             // If the expression is of the incorrect form then discard immediately as valid
@@ -748,7 +750,7 @@ namespace _2BNOR_2B.Code
             // node and so the input with the same label needs to be found. 
             if (leftchildLogicGate != null)
             {
-                wire.SetRepeated(false);
+                wire.SetRepeated(false); 
                 wire.SetEnd(leftchildLogicGate.GetOutputPoint());
                 wire.SetGate(leftchildLogicGate);
                 wire.SetShift(leftchildLogicGate.GetConnectedWires());
@@ -756,8 +758,7 @@ namespace _2BNOR_2B.Code
             }
             else
             {
-                // The wire goes to a node that is a repeated input. 
-                wire.SetRepeated(true);
+                wire.SetRepeated(true); 
                 // Searching for the input with the same label as this is the visual 
                 // node that the wire needs to be drawn to. 
                 input = GetInputWithSameLabel(root.leftChild.GetLabel());
@@ -793,7 +794,7 @@ namespace _2BNOR_2B.Code
             // node and so the input with the same label needs to be found. 
             if (rightchildLogicGate != null)
             {
-                wire.SetRepeated(false);
+                wire.SetRepeated(false); 
                 wire.SetEnd(rightchildLogicGate.GetOutputPoint());
                 wire.SetGate(rightchildLogicGate);
                 wire.SetShift(rightchildLogicGate.GetConnectedWires());
@@ -801,8 +802,7 @@ namespace _2BNOR_2B.Code
             }
             else
             {
-                // The wire goes to a node that is a repeated input. 
-                wire.SetRepeated(true);
+                wire.SetRepeated(true); 
                 // Searching for the input with tha same label as this is the visual 
                 // node that the wire needs to be drawn to. 
                 input = GetInputWithSameLabel(root.rightChild.GetLabel());
@@ -892,7 +892,10 @@ namespace _2BNOR_2B.Code
             // List that stores all of the vertical line segments of the wires. 
             var verticalLines = new List<Point>();
             Point? intersection;
-            Wire tmp;
+            Wire verticalWire;
+            Wire horizontalWire;
+            LogicGate gate;
+            LogicGate gate1;
             // Add all of the horizontal and vertical points to the respective lists.
             for (var j = 0; j < wires.Length - 1; j++)
             {
@@ -910,10 +913,20 @@ namespace _2BNOR_2B.Code
                     // Ensuring the intersection exists and the intersection is not formed
                     // a horizontal and vertical line of the same wire before the intersection
                     // is added. 
-                    if (intersection != null && FindWire(verticalLines[i]) != FindWire(horizontalLines[c]))
+                    verticalWire = FindWire(verticalLines[i]);
+                    horizontalWire = FindWire(horizontalLines[c]);
+                    gate = verticalWire.GetGate();
+                    gate1 = horizontalWire.GetGate();
+                    if (intersection != null && verticalWire != horizontalWire)
                     {
-                        tmp = FindWire(verticalLines[i]);
-                        tmp.AddBridge(intersection);
+                        if (gate.GetGate().GetLabel() != gate1.GetGate().GetLabel())
+                        {
+                            verticalWire.AddBridge(intersection);
+                        }
+                        else
+                        {
+                            verticalWire.AddJunction(intersection); 
+                        }
                     }
                 }
             }

@@ -218,6 +218,26 @@ namespace _2BNOR_2B.Code
             wireString = wireString.Insert(wireString.Length - 1, "bl");
         }
 
+        public void AddJunction(Point? intersection)
+        {
+            // Create the junction. 
+            junction = new Ellipse
+            {
+                Width = radiusOfJunction,
+                Height = radiusOfJunction,
+                Fill = Brushes.Black,
+                Stroke = Brushes.Black
+            };
+            // Setting its position, which is always the joint between 
+            // the horizontal input wire and the vertical wire. 
+            Canvas.SetTop(junction, intersection.Value.Y - radiusOfJunction / 2);
+            Canvas.SetLeft(junction, intersection.Value.X - radiusOfJunction / 2);
+            // Setting the low ZIndex to stop overlapping and adding 
+            // the junction to the canvas. 
+            Panel.SetZIndex(junction, 1);
+            c.Children.Add(junction);
+        }
+
         /// <summary>
         /// Draws the wire onto the canvas, taking into account any bridges or junctions
         /// where necessary. This is from the list of points which have been calculated 
@@ -278,24 +298,9 @@ namespace _2BNOR_2B.Code
 
             // If a wire is a repeated one, then a junction must be added 
             // to show this. 
-            if (repeated)
-            {
-                // Create the junction. 
-                junction = new Ellipse
-                {
-                    Width = radiusOfJunction,
-                    Height = radiusOfJunction,
-                    Fill = Brushes.Black,
-                    Stroke = Brushes.Black
-                };
-                // Setting its position, which is always the joint between 
-                // the horizontal input wire and the vertical wire. 
-                Canvas.SetTop(junction, points[points.Count - 2].Y - radiusOfJunction / 2);
-                Canvas.SetLeft(junction, points[points.Count - 2].X - radiusOfJunction / 2);
-                // Setting the low ZIndex to stop overlapping and adding 
-                // the junction to the canvas. 
-                Panel.SetZIndex(junction, 1);
-                c.Children.Add(junction);
+            if (repeated && junction == null)
+            {            
+                AddJunction(points[points.Count - 2]);
             }
         }
     }
