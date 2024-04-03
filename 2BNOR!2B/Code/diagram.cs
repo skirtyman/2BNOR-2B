@@ -56,7 +56,7 @@ namespace _2BNOR_2B.Code
         readonly int xOffset = 12;
         // Number of pixels on the canvas each square takes up. 
         readonly int pixelsPerSquare = 15;
-        readonly int maxNumberOfInputs = 13;
+        readonly int maxNumberOfInputs = 12;
         readonly int minCellWidth = 30;
         readonly double initialXofTable = 20;
         readonly double initialYofTable = 20; 
@@ -303,6 +303,44 @@ namespace _2BNOR_2B.Code
         }
 
         /// <summary>
+        /// Method to check the position of brackets within boolean expression.
+        /// </summary>
+        /// <param name="expression">The boolean expression being checked.</param>
+        /// <returns>Whether or not there are erroneous brackets within the expression</returns>
+        private static bool CheckBracketPosition(string expression)
+        {
+            // Regular expression to check for empty brackets within the expression.
+            var bracketCheck = new Regex(@"\(\)");
+            var match = bracketCheck.Match(expression);
+            if (match.Success)
+            {
+                return true; 
+            }
+            else
+            {
+                var gateCheck = new Regex(@"\([A-Z0-1]*[!.+^][A-Z0-1]\)"); 
+                match = gateCheck.Match(expression);
+                if (match.Success)
+                {
+                    var operandCheck = new Regex(@"\([A-Z0-1][.+^][A-Z0-1]\)");
+                    match = operandCheck.Match(match.Value);
+                    if (match.Success)
+                    {
+                        return false; 
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true; 
+                }
+            }
+        }
+
+        /// <summary>
         /// Produces a boolean value showing whether or not the ASCII codes of the entered 
         /// boolean expression is sequential. ie, "A+B" => valid and "A+C" => invalid. 
         /// </summary>
@@ -335,20 +373,17 @@ namespace _2BNOR_2B.Code
         /// the user entered boolean expression. </returns>
         private static char[] GetOnlyInputs(string expression)
         {
-            // Ensures that constants (0 or 1) are not considered so subtract from the 
-            // number of unique inputs. 
-            char[] inputs = new char[GetNumberOfInputs(expression, true) - GetNumberOfConstants(expression)];
-            int i = 0;
+            var input = new List<char>();
             foreach (char c in expression)
             {
                 // Ensuring only unique inputs are added to the array. 
-                if (char.IsLetter(c) && inputs.Contains(c) == false)
+                if (char.IsLetter(c))
                 {
-                    inputs[i] = c;
-                    i++;
+                    input.Add(c);
                 }
             }
-            return inputs;
+            // Returning the unique inputs of expression. 
+            return input.Distinct().ToArray();
         }
 
 
@@ -397,22 +432,36 @@ namespace _2BNOR_2B.Code
         /// boolean expression is a valid one. (true => valid) </returns>
         public bool IsExpressionValid(string expression)
         {
-            string postfix = ConvertInfixtoPostfix(expression);
-            if (IsSequential(expression) && InvalidCharacters(expression) && ValidateBrackets(expression))
+            string removedWhitespace = RemoveWhitespace(expression, ""); 
+            if (removedWhitespace == "")
+            {
+                return false; 
+            }
+            if (IsSequential(removedWhitespace) && InvalidCharacters(removedWhitespace) && ValidateBrackets(removedWhitespace))
             {
                 // Imposing an input limit for Petrick's method. This is a choice because 
                 // it means that the term to implicant map has a unique character as the
                 // key. 
-                if (GetNumberOfInputs(expression, true) > maxNumberOfInputs)
+                int numberOfInputs = GetNumberOfInputs(removedWhitespace, false) - GetNumberOfConstants(removedWhitespace);
+                if (numberOfInputs > maxNumberOfInputs)
                 {
                     return false;
                 }
                 else
                 {
+                    string postfix = ConvertInfixtoPostfix(removedWhitespace);
                     // Ensuring that the postfix is valid postfix. Covers expressions 
                     // such as "(A.)" which pass the other checks. 
-                    return PostfixCheck(postfix);
-                }
+                    bool postfixCheck = PostfixCheck(postfix);
+                    if (CheckBracketPosition(removedWhitespace))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return postfixCheck; 
+                    }
+                }                
             }
             // If the expression is of the incorrect form then discard immediately as valid
             // postfix cannot be produced from the expression. 
@@ -509,7 +558,7 @@ namespace _2BNOR_2B.Code
                     return e;
                 }
             }
-            return null;
+            throw new Exception("Could not find element. ");
         }
 
         /// <summary>
@@ -568,7 +617,7 @@ namespace _2BNOR_2B.Code
                     }
                     else
                     {
-                        tmp = inputs[c - 65];
+                        tmp = GetInputWithSameLabel(c); 
                         tmp.AddInstance();
                     }
                 }
