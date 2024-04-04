@@ -4,8 +4,4 @@ Total time spent: [![wakatime](https://wakatime.com/badge/user/8eec35f3-fd84-49c
 ---
 Online xaml interpreter:  [interpreter](https://s3.amazonaws.com/praeclarum.org/wasm/index.html)
 ### Todo 
-- [ ] Fix expression A+A+A+(A.B)
-- [ ] minimising expressions with 1. 
 - [ ] Shifting diagram with the minimisation button. Just reset canvas size to 1,1 before minimising. 
-- [ ] Wierd spacing. 
-- [ ] Fix documentation to cover all of the changes.
