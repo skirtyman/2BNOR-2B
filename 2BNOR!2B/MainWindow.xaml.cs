@@ -109,7 +109,7 @@ namespace _2BNOR_2B
                 }
                 else
                 {
-                    MessageBox.Show("The diagram is invalid", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("The expression is invalid", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 
             }
@@ -193,7 +193,7 @@ namespace _2BNOR_2B
             }
             else
             {
-                MessageBox.Show("Error generating truth table: Diagram does not exist. ", "Truth table error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error Minimising diagram: Diagram does not exist. ", "Minimisation error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -248,6 +248,7 @@ namespace _2BNOR_2B
                 Filter = "Text file (*.txt)|*.txt|XML (*.xml)|*.xml|Expression file (*.2B)|*.2B",
                 DefaultExt = "Expression file (*.2B)|*.2B"
             };
+
             // Showing the savefile dialog to find the desired file path. 
             saveFileDialog.ShowDialog();
             try
@@ -285,15 +286,22 @@ namespace _2BNOR_2B
                 // Reading all text from from the file and this the expression to be drawn
                 // to the main window. Only if it is valid otherwise an error has happened.
                 saveString = File.ReadAllText(openFileDialog.FileName);
-                if (d.IsExpressionValid(saveString))
+                if (saveString.Length < 1)
                 {
-                    d.SetExpression(saveString);
-                    d.DrawDiagram();
-                    statusBar.Text = "Loaded diagram from " + openFileDialog.FileName;
+                    MessageBox.Show("This expression does not exist.", "Open File Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {
-                    MessageBox.Show("This expression is invalid. Please try again. ");
+                    if (d.IsExpressionValid(saveString))
+                    {
+                        d.SetExpression(saveString);
+                        d.DrawDiagram();
+                        statusBar.Text = "Loaded diagram from " + openFileDialog.FileName;
+                    }
+                    else
+                    {
+                        MessageBox.Show("This expression is invalid. Please try again. ");
+                    }
                 }
             }
             catch (Exception ex)

@@ -461,7 +461,7 @@ namespace _2BNOR_2B.Code
                     //}
                     //else
                     //{
-                    //    return postfixCheck; 
+                    //    return postfixCheck;
                     //}
                 }                
             }
@@ -1673,11 +1673,11 @@ namespace _2BNOR_2B.Code
                 // If the header is an expression larger than (A.B).
                 if (header.Length > 5)
                 {
-                    cellWidth = header.Length * 11 + 15;
+                    cellWidth = header.Length * 14 + 15;
                 }
                 else
                 {
-                    cellWidth = header.Length * 10 + 15;
+                    cellWidth = header.Length * 13 + 15;
                 }
             }
             return cellWidth;
@@ -1710,7 +1710,7 @@ namespace _2BNOR_2B.Code
                     BorderThickness = border,
                     Background = Brushes.White,
                     FontFamily = font,
-                    FontSize = 18,
+                    FontSize = 24,
                     Content = header
                 };
                 // Adding the cell to the canvas and incrementing to get the position
@@ -1739,7 +1739,7 @@ namespace _2BNOR_2B.Code
             double cellWidth;
             // Initial position of the body of the truth table. 
             double xPosition = initialXofTable;
-            double yPosition = 50;
+            double yPosition = 60;
             foreach (string row in outputMap)
             {
                 for (var i = 0; i < headers.Length; i++)
@@ -1756,7 +1756,7 @@ namespace _2BNOR_2B.Code
                         BorderThickness = border,
                         Background = Brushes.White,
                         FontFamily = font,
-                        FontSize = 18,
+                        FontSize = 24,
                         Content = row[i]
                     };
                     // Adding the cell to the canvas and incrementing the position of the x
@@ -1771,7 +1771,7 @@ namespace _2BNOR_2B.Code
                 xPosition = 20;
                 // Incrementing the y-position on the canvas and so, go to the next row of 
                 // the table. 
-                yPosition += 30;
+                yPosition += 35;
             }
             // Readjusting the size of the canvas so that the scrollviewer works with 
             // large tables. This makes extremely large tables very easy to view.
@@ -1844,37 +1844,28 @@ namespace _2BNOR_2B.Code
         /// <returns>The expression form of the prime implicant. </returns>
         private string ConvertImplicantToExpression(string epi)
         {
-            string tmp = "";
+            string tmp;
+            // Removing the dashes as they are not apart of the output. 
+            var removeDashes = new Regex("-"); 
+            epi = removeDashes.Replace(epi, "");
+            List<char> terms = epi.ToList();
+            // Each term must be separated by an AND gate as the epi is a product. 
+            tmp = string.Join(".", terms); 
             char input;
-            for (var i = 0; i < epi.Length; i++)
+            for(var i = 0; i < tmp.Length; i += 2)
             {
                 input = (char)(i + 65);
                 // If the bit is a one then the output must be in the expression. 
-                if (epi[i] == '1')
+                if (tmp[i] == '1')
                 {
-                    tmp += input;
+                    tmp = tmp.Remove(i, 1);
+                    tmp = tmp.Insert(i, input.ToString());
                 }
-                // If the bit is azero then the complement is added to the expression => !A. 
-                else if (epi[i] == '0')
+                // If the bit is a zero then the complement is added to the expression => !A. 
+                else if (tmp[i] == '0')
                 {
-                    tmp += $"!{input}";
-                }
-                // Each bit within the implicant is separated by an AND gate within the
-                // expression. AND gates should not be added at the end or the start of the 
-                // implicant. 
-                if (epi.Length == 2)
-                {
-                    if (i == 0 && epi[i] != '-')
-                    {
-                        tmp += ".";
-                    }
-                }
-                else
-                {
-                    if (i != 0 && i < epi.Length - 1 && epi[i] != '-')
-                    {
-                        tmp += ".";
-                    }
+                    tmp = tmp.Remove(i, 1);
+                    tmp = tmp.Insert(i, $"!{input}"); 
                 }
             }
             // Add brackets to preserve pretty formatting. 
@@ -2221,16 +2212,35 @@ namespace _2BNOR_2B.Code
             PIchart = ReplaceDashesFromRegex(PIchart);
             List<string> PIs = GetEssentialPrimeImplicants(PIchart, minterms);
             string coveredString = GetCoveredString(PIs, PIchart);
-            // If a 0 remains in the covered string then the essential prime implicants 
-            // do not cover all of the minterms and so petrick's method must be used. 
-            if (coveredString.Contains('0'))
+            // Filtering out any expression that evaluate to 0 or 1. 
+            if (PIs.Count == 0)
             {
-                minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants, minterms);
+                minimisedExpression = "0";
+            }
+            else if (PIs[0] == "--" || PIs[0] == "0")
+            {
+                if (PIs[0] == "--")
+                {
+                    minimisedExpression = "1";
+                }
+                else
+                {
+                    minimisedExpression = "0";
+                }
             }
             else
             {
-                minimisedExpression = ConvertEPIsToExpression(PIs);
-            }
+                // If a 0 remains in the covered string then the essential prime implicants 
+                // do not cover all of the minterms and so petrick's method must be used. 
+                if (coveredString.Contains('0'))
+                {
+                    minimisedExpression = DoPetriksMethod(PIchart, PIs, primeImplicants, minterms);
+                }
+                else
+                {
+                    minimisedExpression = ConvertEPIsToExpression(PIs);
+                }
+            }   
         }
 
         /// <summary>
