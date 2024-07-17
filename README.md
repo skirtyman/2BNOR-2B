@@ -4,7 +4,7 @@ Total time spent on the project: [![wakatime](https://wakatime.com/badge/user/8e
 
 The total time spent is not very accurate as the first ~4 months of this project, no timer was set. The total time spent spent is closer to 300 hours spent. 
 ## What this Repository contains
-This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it. This README contains the report below and the source code can be found above.
+This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it (in the pdf). 
 The mark breakdown of the project is below: 
 - Analysis: 8/9
 - Desgin: 12/12
@@ -26,6 +26,3 @@ The following project `2B NOR !2B` is an application to aid students in their st
 - Pop-up menus enabling the students to quickly find information about each logic gate within the diagram.
 - LATEX rendering using the [xaml-math](https://github.com/ForNeVeR/xaml-math) repository to display expressions as they should be written in exam situations.
 - File-handling to enable users to save, load and export diagrams produced by the application.
-
-
-# Report 
