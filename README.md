@@ -4,7 +4,8 @@ Total time spent on the project: [![wakatime](https://wakatime.com/badge/user/8e
 
 The total time spent is not very accurate as the first ~4 months of this project, no timer was set. The total time spent spent is closer to 300 hours spent. 
 ## What this Repository contains
-This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it (in the pdf). 
+This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it, which can be found [here](https://github.com/skirtyman/2BNOR-2B/blob/master/2BNOR!2B%20-%20Report.pdf).
+
 The mark breakdown of the project is below: 
 - Analysis: 8/9
 - Desgin: 12/12
