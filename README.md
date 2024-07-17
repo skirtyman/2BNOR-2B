@@ -4,9 +4,18 @@ Total time spent on the project: [![wakatime](https://wakatime.com/badge/user/8e
 
 The total time spent is not very accurate as the first ~4 months of this project, no timer was set. The total time spent spent is closer to 300 hours spent. 
 ## What this Repository contains
-This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it. This README contains the report and the source code can be found above. 
+This repository contains my A-level Computer Science coursework. It includes the complete source code for the application and the suplementary report that accompanies it. This README contains the report below and the source code can be found above.
+The mark breakdown of the project is below: 
+- Analysis: 8/9
+- Desgin: 12/12
+- Technical Solution:
+  - Completeness of Solution: 13/15
+  - Techniques used within solution: 27/27
+- Testing: 8/8
+- Evalution: 4/4
+- Total: 72/75
 
-**It should be noted that the report in the README does contain the original source code for the application. This is because submission requires the source-code to be present.**
+**It should be noted that the report in the file DOES contain the original source code for the application. This is because submission requires the source-code to be present.**
 
 ## Summary 
 The following project `2B NOR !2B` is an application to aid students in their studies of GCSE and A-Level computer science. The application specifically covers the units of logic gates and boolean expressions within the course specifications. The program features: 
@@ -20,6 +29,3 @@ The following project `2B NOR !2B` is an application to aid students in their st
 
 
 # Report 
-Below is the report written for this project, it details along the entire process of developing, testing and evaluation of the application. The source code is also included in the report as mentioned previously. 
-
-
